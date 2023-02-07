@@ -11,22 +11,27 @@
 </head>
 <body>
     <div class="sign-up-form-container"> 
-        <form>
+        <form method="POST">
             <h1 id="sign-up-text">Sign up</h1>
             <div class="form-internal">
-                <label for="display-name">Display Name</label>
-                <input id="display-name" placeholder='Enter your display name'></input>
-                <label for="profile-pic-url">Profile Picture URL</label>
-                <input id="profile-pic-url" placeholder='Enter URL for profile picture'></input>
-                <label for="github-url">Github URL</label>
-                <input id="github-url" placeholder='Enter your URL for github'></input>
-                <label for="password">Password</label>
-                <input type="password" id="password" placeholder='Enter your password'></input>
-                <label for="confirm_pass">Confirm Password</label>
-                <input type="password" id="confirm_pass" placeholder='Confirm your password'></input>
+                
+                {% csrf_token %}
+                {{ form }}
                 <a class='small-signup-btn'>Sign up</a>
             </div>
         </form>
     </div>
 </body>
 </html>
+
+
+<!-- <label for="display-name">Display Name</label>
+<input id="display-name" placeholder='Enter your display name'></input>
+<label for="profile-pic-url">Profile Picture URL</label>
+<input id="profile-pic-url" placeholder='Enter URL for profile picture'></input>
+<label for="github-url">Github URL</label>
+<input id="github-url" placeholder='Enter your URL for github'></input>
+<label for="password">Password</label>
+<input type="password" id="password" placeholder='Enter your password'></input>
+<label for="confirm_pass">Confirm Password</label>
+<input type="password" id="confirm_pass" placeholder='Confirm your password'></input> -->
