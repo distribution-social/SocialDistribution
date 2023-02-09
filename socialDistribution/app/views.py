@@ -4,6 +4,7 @@ from .forms import SignupForm, SigninForm
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from .models import Author
 
 def signup(request):
     if request.method == "POST":
@@ -19,7 +20,12 @@ def signup(request):
                 username, email, password)
             
             u.save()
+
+            Author.objects.create(host="127.0.0.1:8000", displayName=display_name, github=github_url, profileImage="www.google.com", email=email, username=username)
+
             user = authenticate(username=username, password=password)
+
+
             
             login(request, user)
         return redirect("/home")
