@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from .forms import SignupForm, SigninForm
 from django.contrib.auth.models import User
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 
 def signup(request):
@@ -44,3 +44,10 @@ def signin(request):
     elif request.method == "GET":
         context = {"title": "signin", "form": SigninForm()}
         return render(request, 'signin.html', context)
+
+@login_required
+def signout(request):
+    if request.method == "GET":
+        logout(request)
+        return redirect('/home')
+
