@@ -11,14 +11,14 @@
 </head>
 <body>
     <div class="sign-up-form-container"> 
-        <form method="POST" action="signin">
+        <form method="POST" action="login">
             <h1 id="sign-up-text">Sign in</h1>
             <div class="form-internal">
                 
                 {% csrf_token %}
                 {{ form }}
                 <!-- <a class='small-signup-btn'>Sign up</a> -->
-                <input type="submit" value="OK">
+                <input type="submit" value="Submit">
             </div>
         </form>
     </div>

@@ -22,3 +22,6 @@ class Author(models.Model):
     email = models.EmailField(max_length=320, unique=True)
 
     username = models.CharField(max_length=30, unique=True)
+
+    def __str__(self):
+        return f"{self.displayName} ({self.id})"
