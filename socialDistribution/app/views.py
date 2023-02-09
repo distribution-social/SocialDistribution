@@ -64,8 +64,8 @@ def signup(request):
 @login_required(login_url="/login")
 def home(request):
     user = request.user
-    return HttpResponse(f"Hello {user.first_name} {user.last_name}")
-
+    context = {"user": user}
+    return render(request, 'home.html', context)
 
 @require_http_methods(["GET", "POST"])
 def signin(request):
