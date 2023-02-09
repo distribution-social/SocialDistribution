@@ -8,6 +8,7 @@ from .models import Author
 from django.views.decorators.http import require_http_methods
 from django.urls import reverse
 from django.http import HttpResponseRedirect
+from django.contrib import messages
 
 
 @require_http_methods(["GET", "POST"])
@@ -16,7 +17,12 @@ def signup(request):
         form = SignupForm(request.POST)
         if form.is_valid():
             display_name = form.cleaned_data.get('display_name')
-            first_name, last_name = display_name.split()
+            try:
+                first_name, last_name = display_name.split()
+            except ValueError:
+                first_name = display_name
+                last_name = ""
+
             username = form.cleaned_data.get('username')
             email = form.cleaned_data.get('email')
             github = form.cleaned_data.get('github_username')
@@ -33,7 +39,7 @@ def signup(request):
 
             try:
                 Author.objects.create(host="127.0.0.1:8000", displayName=display_name, github=f"https://github.com/{github}",
-                                      profileImage="photos123.google.com", email=email, username=username)
+                                      profileImage="photos12345.google.com", email=email, username=username)
             except Exception as e:
                 return HttpResponse(e)
 
@@ -47,8 +53,11 @@ def signup(request):
             return redirect(reverse('signup'))
 
     elif request.method == "GET":
-        context = {"title": "signup", "form": SignupForm()}
-        return render(request, 'signup.html', context)
+        if request.user.is_authenticated:
+            return redirect(reverse('home'))
+        else:
+            context = {"title": "signup", "form": SignupForm()}
+            return render(request, 'signup.html', context)
 
 
 @require_http_methods(["GET"])
@@ -70,10 +79,15 @@ def signin(request):
                 login(request, user)
                 return redirect(reverse('home'))
             else:
+                messages.warning(request, "Invalid username or password")
                 return redirect(reverse('login'))
     elif request.method == "GET":
-        context = {"title": "signin", "form": SigninForm()}
-        return render(request, 'signin.html', context)
+        # No need to sign in again
+        if request.user.is_authenticated:
+            return redirect(reverse('home'))
+        else:
+            context = {"title": "signin", "form": SigninForm()}
+            return render(request, 'signin.html', context)
 
 
 @login_required(login_url="/login")
