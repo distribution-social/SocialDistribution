@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
-from .forms import SignupForm
+from .forms import SignupForm, SigninForm
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
@@ -22,15 +22,25 @@ def signup(request):
             user = authenticate(username=username, password=password)
             
             login(request, user)
-            return redirect("/home")
+        return redirect("/home")
 
     elif request.method == "GET":
         context = {"title": "signup", "form": SignupForm()}
         return render(request, 'signup.html', context)
 
-@login_required
+@login_required(login_url="/signin")
 def home(request):
     return HttpResponse("Homepage")
 
 def signin(request):
-    return HttpResponse("LoginPage")
+    if request.method == "POST":
+        form = SigninForm(request.POST)
+        if form.is_valid():
+            username = form.cleaned_data.get('username')
+            password = form.cleaned_data.get('password')
+            user = authenticate(username=username, password=password)
+            login(request, user)
+        return redirect("/home")
+    elif request.method == "GET":
+        context = {"title": "signin", "form": SigninForm()}
+        return render(request, 'signin.html', context)
