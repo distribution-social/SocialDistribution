@@ -9,38 +9,10 @@ from django.views.decorators.http import require_http_methods
 from django.urls import reverse
 from django.http import HttpResponseRedirect
 from django.contrib import messages
-from django.views.decorators.csrf import csrf_exempt
 
 from django.contrib.auth.models import User
+from .helpers import is_valid_info
 
-def username_exists(username):
-    return User.objects.filter(username=username).exists()
-
-def email_address_exists(email):
-    return User.objects.filter(email=email).exists()
-
-def github_exists(github):
-    return Author.objects.filter(github=f"https://github.com/{github}").exists()
-
-def is_valid(request, username, email, github, password, confirm_password):
-    if username_exists(username):
-        messages.warning(request, "Username is not available.")
-        return False
-
-    elif email_address_exists(email):
-        messages.warning(request, "Email address is already in use.")
-        return False
-    
-    elif github_exists(github):
-        messages.warning(request, "Github username is already in use.")
-        return False
-
-    elif password != confirm_password:
-        messages.warning(request, "Passwords do not match.")
-        return False
-
-    else:
-        return True
 
 @require_http_methods(["GET", "POST"])
 def signup(request):
@@ -60,7 +32,7 @@ def signup(request):
             password = form.cleaned_data.get('password')
             confirm_password = form.cleaned_data.get('confirm_password')
 
-            if not is_valid(request, username, email, github, password, confirm_password):
+            if not is_valid_info(request, username, email, github, password, confirm_password):
                 return redirect(reverse('signup'))
 
             try:
@@ -73,8 +45,7 @@ def signup(request):
                 u.save()
 
             try:
-                Author.objects.create(host="127.0.0.1:8000", displayName=display_name, github=f"https://github.com/{github}",
-                                      profileImage=None, email=email, username=username)
+                Author.objects.create(host="127.0.0.1:8000", displayName=display_name, github=f"https://github.com/{github}", profileImage=None, email=email, username=username)
             except Exception as e:
                 messages.warning(request, e)
                 return redirect(reverse('signup'))
@@ -103,6 +74,7 @@ def home(request):
     author = Author.objects.get(username=user.username)
     context = {"user": user, "author": author}
     return render(request, 'home.html', context)
+
 
 @require_http_methods(["GET", "POST"])
 def signin(request):
@@ -133,4 +105,3 @@ def signout(request):
     if request.method == "GET":
         logout(request)
         return redirect(reverse('home'))
-
