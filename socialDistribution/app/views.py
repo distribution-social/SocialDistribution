@@ -105,3 +105,21 @@ def signout(request):
     if request.method == "GET":
         logout(request)
         return redirect(reverse('home'))
+
+
+@login_required(login_url="/login")
+@require_http_methods(["GET"])
+def following(request):
+    user = request.user
+    author = Author.objects.get(username=user.username)
+    string = ""
+
+    for following in author.following.all():
+        string += following.displayName + "<br>"
+
+    if request.method == 'GET':
+        # return HttpResponse(string)
+        return render(request, 'following.html')
+
+
+
