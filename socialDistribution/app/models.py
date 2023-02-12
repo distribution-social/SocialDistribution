@@ -23,5 +23,16 @@ class Author(models.Model):
 
     username = models.CharField(max_length=30, unique=True)
 
+    # Used for rapid lookup, will improve database performance
+    class Meta:
+        indexes = [
+            models.Index(fields=['host'], name='host_idx'),
+            models.Index(fields=['displayName'], name='displayName_idx'),
+            models.Index(fields=['github'], name='github_idx'),
+            models.Index(fields=['profileImage'], name='profileImage_idx'),
+            models.Index(fields=['email'], name='email_idx'),
+            models.Index(fields=['username'], name='username_idx')
+        ]
+
     def __str__(self):
         return f"{self.displayName} ({self.id})"
