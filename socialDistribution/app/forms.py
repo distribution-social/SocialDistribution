@@ -5,7 +5,7 @@ class SignupForm(forms.Form):
     username = forms.CharField(
         label='Username', max_length=50, required=True)
     email = forms.EmailField(label='Email', required=True)
-    github_username = forms.CharField(label='GitHub', required=False)
+    github = forms.CharField(label='GitHub Username', required=False)
     password = forms.CharField(
         label='Password', widget=forms.PasswordInput, required=True)
     confirm_password = forms.CharField(
