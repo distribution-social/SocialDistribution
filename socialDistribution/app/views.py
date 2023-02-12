@@ -100,7 +100,8 @@ def signup(request):
 @login_required(login_url="/login")
 def home(request):
     user = request.user
-    context = {"user": user}
+    author = Author.objects.get(username=user.username)
+    context = {"user": user, "author": author}
     return render(request, 'home.html', context)
 
 @require_http_methods(["GET", "POST"])
