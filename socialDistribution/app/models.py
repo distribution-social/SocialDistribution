@@ -28,7 +28,7 @@ class Author(models.Model):
     updated = models.DateTimeField(auto_now=True)
 
     following = models.ManyToManyField(
-        'self', related_name='followers', symmetrical=False)
+        'self', related_name='followers', symmetrical=False, blank=True)
 
     # Used for rapid lookup, will improve database performance
     class Meta:
