@@ -205,3 +205,19 @@ def profile(request, username):
         #     return HttpResponse(f"Profile of {author.displayName}")
         #     # return render(request, 'follow.html', context)
         return HttpResponse("Hell1o World!")
+    
+
+@login_required(login_url="/login")
+@require_http_methods(["GET"])
+def true_friends(request, username):
+    if request.method == 'GET':
+        followings = set(Author.objects.get(
+            username=username).following.all())
+        
+        followers = set(Author.objects.get(username=request.user.username).followers.all())
+
+        true_friends = list(followings & followers)
+
+        context = {"friends": true_friends}
+
+        return render(request, 'true-friends.html', context)
