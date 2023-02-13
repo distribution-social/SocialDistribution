@@ -133,4 +133,12 @@ def followers(request, username):
         return render(request, 'follow.html', context)
 
 
+@login_required(login_url="/login")
+@require_http_methods(["GET"])
+def profile(request, username):
+    # user = request.user
+    author = Author.objects.get(username=username)
 
+    if request.method == 'GET':
+        return HttpResponse(f"Profile of {author.displayName}")
+        # return render(request, 'follow.html', context)
