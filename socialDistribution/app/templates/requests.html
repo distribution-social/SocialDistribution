@@ -1,7 +1,12 @@
 {% extends "base_generic.html" %}
 
 {% block title %}
+{% if mode == "received" %}
 <title>Follow Requests</title>
+{% else %}
+<title>Sent Requests</title>
+{% endif %}
+
 
 {% endblock %}
 
@@ -12,8 +17,11 @@
 {% block content %}
 
     <div class="container-fluid d-flex align-items-center flex-column p-3">
+        {% if mode == "received" %}
       <h1>{{requests|length}} Follow Request{{requests|pluralize}}</h1>
-   
+        {% else %}
+        <h1>{{requests|length}} Sent Request{{requests|pluralize}}</h1>
+        {% endif %}
 
 {% for request in requests %}
 
@@ -35,7 +43,7 @@
 
            
 </div>
-
+{% if mode == "received" %}
  <form class="mt-3" action="{% url 'requests' username=request.username %}" method="post">
                 {% csrf_token %}
                 
@@ -44,7 +52,18 @@
                           <button type="submit" name="action" value="decline_{{request.username}}" data-username="{{request.username}}" class="btn btn-danger"><i class="bi bi-x">&nbsp;Decline</i></button>
 
             </form>
+{% else %}
 
+
+ <form class="mt-3" action="{% url 'sent_requests' username=request.username %}" method="post">
+                {% csrf_token %}
+                
+                   <button type="submit" name="action" value="cancel_{{request.username}}" data-username="{{request.username}}" class="btn btn-warning"><i class="bi bi-arrow-counterclockwise">&nbsp;Cancel Request</i></button>
+            </form>
+
+
+
+{% endif %}
 
 
       </div>

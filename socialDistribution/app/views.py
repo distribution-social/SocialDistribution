@@ -171,8 +171,12 @@ def authors(request):
             username=request.user.username).order_by('displayName'))
         current_user_followings = Author.objects.get(
             username=request.user.username).following.all()
+        current_user_sent_requests = Author.objects.get(
+            username=request.user.username).sent_requests.all()
 
-        context = {"authors": authors, "followings": current_user_followings}
+        ineligible_users = current_user_followings | current_user_sent_requests
+
+        context = {"authors": authors, "ineligible_users": ineligible_users}
         return render(request, 'authors.html', context)
 
     elif request.method == "POST":
@@ -235,7 +239,7 @@ def received_requests(request, username):
     
         follow_requests = Author.objects.get(username=request.user.username).follow_requests.all()
 
-        context = {"requests": follow_requests}
+        context = {"requests": follow_requests, "mode": "received"}
 
         return render(request, 'requests.html', context)
 
@@ -267,3 +271,35 @@ def received_requests(request, username):
 
         return redirect(reverse("requests", kwargs={'username': user.username}))
      
+
+@login_required(login_url="/login")
+@require_http_methods(["GET", "POST"])
+def sent_requests(request, username):
+    user = request.user
+
+    if request.method == 'GET':
+
+        sent_requests = Author.objects.get(
+            username=request.user.username).sent_requests.all()
+
+        context = {"requests": sent_requests, "mode": "sent"}
+
+        return render(request, 'requests.html', context)
+
+    elif request.method == "POST":
+        action, receiver_username = request.POST.get("action").split("_")
+        
+        receiver_author = Author.objects.get(username=receiver_username)
+
+        # Get our author object
+        current_user_author = Author.objects.get(
+            username=request.user.username)
+        
+        if action == "cancel":
+            # Remove it from our sent requests
+            current_user_author.sent_requests.remove(receiver_author)
+
+            # Remove it from the receiver side
+            receiver_author.follow_requests.remove(current_user_author)
+
+        return redirect(reverse("requests", kwargs={'username': user.username}))

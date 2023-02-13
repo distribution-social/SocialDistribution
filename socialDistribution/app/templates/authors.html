@@ -36,7 +36,7 @@
            
 </div>
 
-{% if author not in followings %}
+{% if author not in ineligible_users %}
 
  <form class="mt-3" action="{% url 'authors' %}" method="post">
                 {% csrf_token %}
