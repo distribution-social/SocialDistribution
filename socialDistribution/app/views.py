@@ -199,18 +199,9 @@ def authors(request):
 @login_required(login_url="/login")
 @require_http_methods(["GET"])
 def profile(request, username):
-    # user = request.user
-    # print('************', username)
-    # try:
-    #     author = Author.objects.get(username=username)
-    # except:
-    #     pass
-
     if request.method == 'GET':
-        #     return HttpResponse(f"Profile of {author.displayName}")
-        #     # return render(request, 'follow.html', context)
-        return HttpResponse("Hell1o World!")
-    
+        return HttpResponse("Profile")
+
 
 @login_required(login_url="/login")
 @require_http_methods(["GET"])
@@ -220,7 +211,7 @@ def true_friends(request, username):
         author = Author.objects.get(username=username)
 
         followings = set(author.following.all())
-        
+
         followers = set(author.followers.all())
 
         true_friends = list(followings & followers)
@@ -228,16 +219,17 @@ def true_friends(request, username):
         context = {"friends": true_friends, "author": author}
 
         return render(request, 'true-friends.html', context)
-    
+
 
 @login_required(login_url="/login")
 @require_http_methods(["GET", "POST"])
 def received_requests(request, username):
     user = request.user
-    
+
     if request.method == 'GET':
-    
-        follow_requests = Author.objects.get(username=request.user.username).follow_requests.all()
+
+        follow_requests = Author.objects.get(
+            username=request.user.username).follow_requests.all()
 
         context = {"requests": follow_requests, "mode": "received"}
 
@@ -245,11 +237,12 @@ def received_requests(request, username):
 
     elif request.method == "POST":
         action, sender_username = request.POST.get("action").split("_")
-       
+
         sender_author = Author.objects.get(username=sender_username)
 
         # Get our author object
-        current_user_author = Author.objects.get(username=request.user.username)
+        current_user_author = Author.objects.get(
+            username=request.user.username)
 
         if action == "accept":
             # Add ourself to the sender author's following
@@ -270,7 +263,7 @@ def received_requests(request, username):
             current_user_author.follow_requests.remove(sender_author)
 
         return redirect(reverse("requests", kwargs={'username': user.username}))
-     
+
 
 @login_required(login_url="/login")
 @require_http_methods(["GET", "POST"])
@@ -288,13 +281,13 @@ def sent_requests(request, username):
 
     elif request.method == "POST":
         action, receiver_username = request.POST.get("action").split("_")
-        
+
         receiver_author = Author.objects.get(username=receiver_username)
 
         # Get our author object
         current_user_author = Author.objects.get(
             username=request.user.username)
-        
+
         if action == "cancel":
             # Remove it from our sent requests
             current_user_author.sent_requests.remove(receiver_author)
