@@ -167,7 +167,8 @@ def followers(request, username):
 @require_http_methods(["GET", "POST"])
 def authors(request):
     if request.method == "GET":
-        authors = list(Author.objects.exclude(username=request.user.username))
+        authors = list(Author.objects.exclude(
+            username=request.user.username).order_by('displayName'))
         current_user_followings = Author.objects.get(
             username=request.user.username).following.all()
 
