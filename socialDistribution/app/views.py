@@ -211,13 +211,15 @@ def profile(request, username):
 @require_http_methods(["GET"])
 def true_friends(request, username):
     if request.method == 'GET':
-        followings = set(Author.objects.get(
-            username=username).following.all())
+
+        author = Author.objects.get(username=username)
+
+        followings = set(author.following.all())
         
-        followers = set(Author.objects.get(username=request.user.username).followers.all())
+        followers = set(author.followers.all())
 
         true_friends = list(followings & followers)
 
-        context = {"friends": true_friends}
+        context = {"friends": true_friends, "author": author}
 
         return render(request, 'true-friends.html', context)
