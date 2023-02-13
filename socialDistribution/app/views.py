@@ -45,7 +45,7 @@ def signup(request):
                 u.save()
 
             try:
-                Author.objects.create(host="127.0.0.1:8000", displayName=display_name, github=f"https://github.com/{github}", profileImage=None, email=email, username=username)
+                Author.objects.create(host="http://127.0.0.1:8000", displayName=display_name, github=f"https://github.com/{github}", profileImage=None, email=email, username=username)
             except Exception as e:
                 messages.warning(request, e)
                 return redirect(reverse('signup'))
@@ -113,7 +113,7 @@ def following(request, username):
     # user = request.user
     author = Author.objects.get(username=username)
     
-    context = {"following": author.following.all(), "mode": "following"}
+    context = {"following": author.following.all(), "mode": "following", "author": author}
 
     if request.method == 'GET':
         # return HttpResponse(string)
@@ -126,7 +126,7 @@ def followers(request, username):
     # user = request.user
     author = Author.objects.get(username=username)
 
-    context = {"following": author.followers.all(), "mode": "followers"}
+    context = {"following": author.followers.all(), "mode": "followers", "author": author}
 
     if request.method == 'GET':
         # return HttpResponse(string)
