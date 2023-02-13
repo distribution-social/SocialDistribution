@@ -110,7 +110,7 @@ def signout(request):
 @login_required(login_url="/login")
 @require_http_methods(["GET"])
 def following(request, username):
-    # user = request.user
+    user = request.user
     author = Author.objects.get(username=username)
     
     context = {"follow": author.following.all(), "mode": "following", "author": author}
@@ -123,10 +123,14 @@ def following(request, username):
 @login_required(login_url="/login")
 @require_http_methods(["GET"])
 def followers(request, username):
-    # user = request.user
+    user = request.user
     author = Author.objects.get(username=username)
 
-    context = {"follow": author.followers.all(), "mode": "followers", "author": author}
+    # print("**********", current_user.username)
+    # print("*************", author.username)
+    # own = current_user.username == author.username
+        
+    context = {"follow": author.followers.all(), "mode": "followers", "user": user, "author": author}
 
     if request.method == 'GET':
         # return HttpResponse(string)
