@@ -186,8 +186,8 @@ def authors(request):
         current_user_author = Author.objects.get(
             username=request.user.username)
 
-        # Add the author object to our following list (Need to send this to inbox in the future to get approval on the other end)
-        current_user_author.following.add(author_to_follow)
+        # Add the author object to our sent_request list (Need to send this to inbox in the future to get approval on the other end)
+        current_user_author.sent_requests.add(author_to_follow)
 
         return redirect(reverse("authors"))
 
