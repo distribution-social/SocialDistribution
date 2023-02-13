@@ -116,8 +116,7 @@ def following(request, username):
     if request.method == 'GET':
         author = Author.objects.get(username=username)
 
-        context = {"follow": author.following.all(), "mode": "following",
-               "author": author}
+        context = {"follow": author.following.all(), "mode": "following", "user": user, "author": author}
         return render(request, 'follow.html', context)
     
     elif request.method == 'POST':
@@ -137,21 +136,28 @@ def following(request, username):
 
 
 @login_required(login_url="/login")
-@require_http_methods(["GET"])
+@require_http_methods(["GET", "POST"])
 def followers(request, username):
     user = request.user
-    author = Author.objects.get(username=username)
-
-    # print("**********", current_user.username)
-    # print("*************", author.username)
-    # own = current_user.username == author.username
-        
-    context = {"follow": author.followers.all(), "mode": "followers", "user": user, "author": author}
-
     if request.method == 'GET':
-        # return HttpResponse(string)
+        author = Author.objects.get(username=username)
+        context = {"follow": author.followers.all(), "mode": "followers", "user": user, "author": author}
         return render(request, 'follow.html', context)
 
+    elif request.method == 'POST':
+        # Extract the username of the author to remove from our followers
+        username_to_remove = request.POST.get("remove")
+
+        # Get the author object
+        author_to_remove = Author.objects.get(username=username_to_remove)
+
+        # Get our author object
+        current_user_author = Author.objects.get(username=user.username)
+
+        # We remove ourself to the author's followings list
+        author_to_remove.following.remove(current_user_author)
+
+        return redirect(reverse("followers", kwargs={'username': user.username}))
 
 @login_required(login_url="/login")
 @require_http_methods(["GET"])
