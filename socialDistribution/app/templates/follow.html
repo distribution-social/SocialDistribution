@@ -51,12 +51,12 @@
           {% if mode == "following" %}
        
      
-           <button type="submit" name="unfollow" value="{{person.username}}" class="btn btn-danger"><i class="bi bi-x-lg">&nbsp;Unfollow</i></button>
+           <button type="submit" name="unfollow" value="{{person.username}}" class="btn btn-danger"><i class="bi bi-person-x">&nbsp;Unfollow</i></button>
         
 
 
           {% else %}
-            <button type="submit" name="remove" value="{{person.username}}" class="btn btn-danger"><i class="bi bi-x-lg">&nbsp;Remove</i></button>
+            <button type="submit" name="remove" value="{{person.username}}" class="btn btn-danger"><i class="bi bi-x-circle-fill">&nbsp;Remove</i></button>
           {% endif %}
 
            </form>
@@ -65,6 +65,9 @@
         {% endif %}
 
       </div>
+
+        <div class="card-footer"><a href="{{person.host}}" class="text-decoration-none">{{person.host|cut:'http://'}}</a></div>
+
     </div>
   </div>
 </div>

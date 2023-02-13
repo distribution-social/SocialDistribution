@@ -45,7 +45,8 @@ def signup(request):
                 u.save()
 
             try:
-                Author.objects.create(host="http://127.0.0.1:8000", displayName=display_name, github=f"https://github.com/{github}", profileImage=None, email=email, username=username)
+                Author.objects.create(host="http://127.0.0.1:8000", displayName=display_name,
+                                      github=f"https://github.com/{github}", profileImage=None, email=email, username=username)
             except Exception as e:
                 messages.warning(request, e)
                 return redirect(reverse('signup'))
@@ -110,15 +111,16 @@ def signout(request):
 @login_required(login_url="/login")
 @require_http_methods(["GET", "POST"])
 def following(request, username):
-    
+
     user = request.user
 
     if request.method == 'GET':
         author = Author.objects.get(username=username)
 
-        context = {"follow": author.following.all(), "mode": "following", "user": user, "author": author}
+        context = {"follow": author.following.all(), "mode": "following",
+                   "user": user, "author": author}
         return render(request, 'follow.html', context)
-    
+
     elif request.method == 'POST':
         # Extract the username of the author to unfollow
         username_to_unfollow = request.POST.get("unfollow")
@@ -130,9 +132,9 @@ def following(request, username):
         author = Author.objects.get(username=user)
 
         # Remove the author from the following of the current user
-        author.following.remove(author_to_unfollow) 
-        
-        return redirect(reverse("following", kwargs={'username':user.username}))
+        author.following.remove(author_to_unfollow)
+
+        return redirect(reverse("following", kwargs={'username': user.username}))
 
 
 @login_required(login_url="/login")
@@ -141,7 +143,8 @@ def followers(request, username):
     user = request.user
     if request.method == 'GET':
         author = Author.objects.get(username=username)
-        context = {"follow": author.followers.all(), "mode": "followers", "user": user, "author": author}
+        context = {"follow": author.followers.all(), "mode": "followers",
+                   "user": user, "author": author}
         return render(request, 'follow.html', context)
 
     elif request.method == 'POST':
@@ -159,6 +162,35 @@ def followers(request, username):
 
         return redirect(reverse("followers", kwargs={'username': user.username}))
 
+
+@login_required(login_url="/login")
+@require_http_methods(["GET", "POST"])
+def authors(request):
+    if request.method == "GET":
+        authors = list(Author.objects.exclude(username=request.user.username))
+        current_user_followings = Author.objects.get(
+            username=request.user.username).following.all()
+
+        context = {"authors": authors, "followings": current_user_followings}
+        return render(request, 'authors.html', context)
+
+    elif request.method == "POST":
+        # Get the username to follow
+        username_to_follow = request.POST.get("follow")
+
+        # Get the author object
+        author_to_follow = Author.objects.get(username=username_to_follow)
+
+        # Get our author object
+        current_user_author = Author.objects.get(
+            username=request.user.username)
+
+        # Add the author object to our following list (Need to send this to inbox in the future to get approval on the other end)
+        current_user_author.following.add(author_to_follow)
+
+        return redirect(reverse("authors"))
+
+
 @login_required(login_url="/login")
 @require_http_methods(["GET"])
 def profile(request, username):
@@ -169,7 +201,7 @@ def profile(request, username):
     # except:
     #     pass
 
-    # if request.method == 'GET':
-    #     return HttpResponse(f"Profile of {author.displayName}")
-    #     # return render(request, 'follow.html', context)
-    return HttpResponse("Hello World!")
+    if request.method == 'GET':
+        #     return HttpResponse(f"Profile of {author.displayName}")
+        #     # return render(request, 'follow.html', context)
+        return HttpResponse("Hell1o World!")
