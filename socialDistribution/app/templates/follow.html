@@ -17,12 +17,12 @@
 
     <div class="container-fluid d-flex align-items-center flex-column p-3">
         {% if mode == "following" %}
-      <h1>Following</h1>
+      <h1>{{follow|length}} Following{{follow|pluralize}}</h1>
         {% else %}
-        <h1>Followers</h1>
+        <h1>{{follow|length}} Follower{{follow|pluralize}}</h1>
       {% endif %}
 
-{% for author in following %}
+{% for author in follow %}
 
 <div class="card mb-3" style="max-width: 540px;">
   <div class="row g-0">

@@ -113,7 +113,7 @@ def following(request, username):
     # user = request.user
     author = Author.objects.get(username=username)
     
-    context = {"following": author.following.all(), "mode": "following", "author": author}
+    context = {"follow": author.following.all(), "mode": "following", "author": author}
 
     if request.method == 'GET':
         # return HttpResponse(string)
@@ -126,7 +126,7 @@ def followers(request, username):
     # user = request.user
     author = Author.objects.get(username=username)
 
-    context = {"following": author.followers.all(), "mode": "followers", "author": author}
+    context = {"follow": author.followers.all(), "mode": "followers", "author": author}
 
     if request.method == 'GET':
         # return HttpResponse(string)
