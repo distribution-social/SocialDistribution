@@ -108,17 +108,33 @@ def signout(request):
 
 
 @login_required(login_url="/login")
-@require_http_methods(["GET"])
+@require_http_methods(["GET", "POST"])
 def following(request, username):
-    user = request.user
-    author = Author.objects.get(username=username)
     
-    context = {"follow": author.following.all(), "mode": "following", "author": author}
+    user = request.user
 
     if request.method == 'GET':
-        # return HttpResponse(string)
+        author = Author.objects.get(username=username)
+
+        context = {"follow": author.following.all(), "mode": "following",
+               "author": author}
         return render(request, 'follow.html', context)
     
+    elif request.method == 'POST':
+        # Extract the username of the author to unfollow
+        username_to_unfollow = request.POST.get("unfollow")
+
+        # Get the author object to unfollow
+        author_to_unfollow = Author.objects.get(username=username_to_unfollow)
+
+        # Get the author object of the current user
+        author = Author.objects.get(username=user)
+
+        # Remove the author from the following of the current user
+        author.following.remove(author_to_unfollow) 
+        
+        return redirect(reverse("following", kwargs={'username':user.username}))
+
 
 @login_required(login_url="/login")
 @require_http_methods(["GET"])
@@ -141,8 +157,13 @@ def followers(request, username):
 @require_http_methods(["GET"])
 def profile(request, username):
     # user = request.user
-    author = Author.objects.get(username=username)
+    # print('************', username)
+    # try:
+    #     author = Author.objects.get(username=username)
+    # except:
+    #     pass
 
-    if request.method == 'GET':
-        return HttpResponse(f"Profile of {author.displayName}")
-        # return render(request, 'follow.html', context)
+    # if request.method == 'GET':
+    #     return HttpResponse(f"Profile of {author.displayName}")
+    #     # return render(request, 'follow.html', context)
+    return HttpResponse("Hello World!")
