@@ -224,3 +224,46 @@ def true_friends(request, username):
         context = {"friends": true_friends, "author": author}
 
         return render(request, 'true-friends.html', context)
+    
+
+@login_required(login_url="/login")
+@require_http_methods(["GET", "POST"])
+def received_requests(request, username):
+    user = request.user
+    
+    if request.method == 'GET':
+    
+        follow_requests = Author.objects.get(username=request.user.username).follow_requests.all()
+
+        context = {"requests": follow_requests}
+
+        return render(request, 'requests.html', context)
+
+    elif request.method == "POST":
+        action, sender_username = request.POST.get("action").split("_")
+       
+        sender_author = Author.objects.get(username=sender_username)
+
+        # Get our author object
+        current_user_author = Author.objects.get(username=request.user.username)
+
+        if action == "accept":
+            # Add ourself to the sender author's following
+            sender_author.following.add(current_user_author)
+
+            # Remove this follow request on the sender side
+            sender_author.sent_requests.remove(current_user_author)
+
+            # Remove this follow request on our side
+            current_user_author.follow_requests.remove(sender_author)
+
+        elif action == "decline":
+
+            # Remove this follow request on the sender side
+            sender_author.sent_requests.remove(current_user_author)
+
+            # Remove this follow request on our side
+            current_user_author.follow_requests.remove(sender_author)
+
+        return redirect(reverse("requests", kwargs={'username': user.username}))
+     

@@ -29,6 +29,8 @@ class Author(models.Model):
 
     following = models.ManyToManyField(
         'self', related_name='followers', symmetrical=False, blank=True)
+    
+    sent_requests = models.ManyToManyField('self', related_name='follow_requests', symmetrical=False, blank=True)
 
     # Used for rapid lookup, will improve database performance
     class Meta:
