@@ -12,6 +12,6 @@ urlpatterns = [
     path('authors', views.authors, name='authors'),
     path('<str:username>', views.profile, name='profile'),
     path('<str:username>/true-friends', views.true_friends, name='true-friends'),
-    path('<str:username>/requests', views.received_requests, name='requests'),
+    path('<str:username>/received', views.received_requests, name='requests'),
     path('<str:username>/sent', views.sent_requests, name='sent_requests')
 ]

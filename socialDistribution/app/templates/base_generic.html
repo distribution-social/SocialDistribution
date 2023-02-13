@@ -35,7 +35,7 @@
           <a class="nav-link" href="{% url 'home' %}">Posts</a>
         </li>
 
-          <a class="nav-link" href="{% url 'following' username=user.username %}">Following</a>
+          <!-- <a class="nav-link" href="{% url 'following' username=user.username %}">Following</a>
         </li>
              <li class="nav-item">
           <a class="nav-link" href="{% url 'followers' username=user.username %}">Followers</a>
@@ -43,7 +43,21 @@
 
   <li class="nav-item">
           <a class="nav-link" href="{% url 'true-friends' username=user.username %}">True Friends</a>
+        </li> -->
+
+
+             <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="true">
+            Connections
+          </a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="{% url 'following' username=user.username %}">Following</a></li>
+            <li><a class="dropdown-item" href="{% url 'followers' username=user.username %}">Followers</a></li>
+             <li><a class="dropdown-item" href="{% url 'true-friends' username=user.username %}">True Friends</a></li>
+          </ul>
         </li>
+
+
 
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="true">
