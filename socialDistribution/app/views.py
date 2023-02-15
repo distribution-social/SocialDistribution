@@ -200,7 +200,15 @@ def authors(request):
 @require_http_methods(["GET"])
 def profile(request, username):
     if request.method == 'GET':
-        return HttpResponse("Profile")
+        author = Author.objects.get(username=username)
+        userAuthor = Author.objects.get(username=request.user.username)
+        try:
+            userFollows = userAuthor.following.get(username=username)
+            context = {"author": author, "following": "True"}
+        except:
+            context = {"author": author, "following": "False"}
+
+        return render(request, 'profile.html', context)
 
 
 @login_required(login_url="/login")
