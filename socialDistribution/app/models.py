@@ -1,4 +1,5 @@
 import uuid
+from django.utils import timezone
 from django.db import models
 
 # Create your models here.
@@ -45,3 +46,40 @@ class Author(models.Model):
 
     def __str__(self):
         return f"{self.displayName} ({self.id})"
+
+class Post(models.Model):
+    uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
+    made_by = models.ForeignKey(Author, related_name = "my_posts", on_delete=models.CASCADE)
+
+    #if a private post was sent to a friend(only comes into play, when private, otherwise blank). Could it be sent to multiple people as private?
+    receiver = models.ForeignKey(Author, blank = True, null = True, related_name = "private_posts", on_delete=models.CASCADE)
+
+    title = models.CharField(max_length=50, unique=True)
+    description = models.CharField(max_length=150, unique=True)
+
+    source = models.URLField(max_length=200, unique=True)
+    origin = models.URLField(max_length=200, unique=True)
+
+    date_published = models.DateTimeField(default=timezone.now)
+
+    CONTENT_TYPE_CHOICES = [
+        ("markdown", "text/markdown"),
+        ("plain", "text/plain"),
+        ("image-png", "image/png"),
+        ("image-jpeg", "image/jpeg"),
+    ]
+
+    content_type = models.CharField(max_length=18, choices=CONTENT_TYPE_CHOICES)
+    content = models.TextField()
+    categories = models.TextField()
+    comments_url = models.TextField()
+    VISIBILITY_CHOICES = [
+        ('PUBLIC', 'public'),
+        ('PRIVATE', 'private'),
+        ('FRIENDS', 'friends'),
+    ]
+    visibility = models.CharField(max_length=7, choices=VISIBILITY_CHOICES)
+    unlisted = models.BooleanField(default=False)
+    image = models.CharField(max_length=100,null=True, blank=True)
+
+
