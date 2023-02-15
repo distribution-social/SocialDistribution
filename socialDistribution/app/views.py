@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
-from .forms import SignupForm, SigninForm
+from .forms import SignupForm, SigninForm, PostForm
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
@@ -77,6 +77,17 @@ def home(request):
     return render(request, 'home.html', context)
 
 
+@login_required(login_url="/login")
+@require_http_methods(["GET", "POST"])
+def add_post(request):
+ 
+    if request.method == "POST":
+       pass
+    elif request.method == "GET":
+        context = {"title": "Create a Post", "form": PostForm()}
+        return render(request, 'post.html', context)
+
+
 @require_http_methods(["GET", "POST"])
 def signin(request):
     if request.method == "POST":
@@ -97,6 +108,7 @@ def signin(request):
             return redirect(reverse('home'))
         else:
             context = {"title": "signin", "form": SigninForm()}
+            import pdb; pdb.set_trace()
             return render(request, 'signin.html', context)
 
 
