@@ -108,7 +108,6 @@ def signin(request):
             return redirect(reverse('home'))
         else:
             context = {"title": "signin", "form": SigninForm()}
-            import pdb; pdb.set_trace()
             return render(request, 'signin.html', context)
 
 

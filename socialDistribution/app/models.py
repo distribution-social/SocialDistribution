@@ -55,7 +55,7 @@ class Post(models.Model):
     receiver = models.ForeignKey(Author, blank = True, null = True, related_name = "private_posts", on_delete=models.CASCADE)
 
     title = models.CharField(max_length=50, unique=True)
-    description = models.CharField(max_length=150, unique=True)
+    description = models.CharField(max_length=150, unique=True, blank=True, null=True)
 
     source = models.URLField(max_length=200, unique=True)
     origin = models.URLField(max_length=200, unique=True)
