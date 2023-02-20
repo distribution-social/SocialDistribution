@@ -296,3 +296,145 @@ def sent_requests(request, username):
             receiver_author.follow_requests.remove(current_user_author)
 
         return redirect(reverse("requests", kwargs={'username': user.username}))
+
+@login_required(login_url="/login")
+@require_http_methods(["GET"])
+def posts(request):
+    author = Author.objects.get(username="admin")
+    anna = Author.objects.get(username="annadoe")
+    john = Author.objects.get(username="johndoe")
+    sm = Author.objects.get(username="saadmani")
+
+    posts = [
+        {
+            "id": "1",
+            "author": author,
+            "source": "source_1",
+            "origin": "origin_",
+            "title": "Post Title 1",
+            "description": "This is a post.",
+            "contentType": "text/plain",
+            "content": "I am currently writing this post. I am currently writing this post. I am currently writing this post. I am currently writing this post. I am currently writing this post.",
+            "categories": ["test","useless"],
+            "publishedDate": "Feb 13, 2023",
+            "visibility": "public",
+            "unlisted": "True",
+            "comments": [
+                {
+                    "id": "1",
+                    "author": john,
+                    "comment": "This is a commentThis is a commentThis is a commentThis is a commentThis is a commentThis is a commentThis is a commentThis is a commentThis is a commentThis is a commentThis is a commentThis is a commentThis is a commentThis is a commentThis is a comment",
+                    "content": "text/plain",
+                    "published": "Feb 14, 2023"
+                },
+                {
+                    "id": "2",
+                    "author": sm,
+                    "comment": "This post is sweet.",
+                    "content": "text/plain",
+                    "published": "Feb 14, 2023"
+                }
+            ]
+        },
+        {
+            "id": "2",
+            "author": anna,
+            "source": "source_2",
+            "origin": "origin_",
+            "title": "Post Title 2",
+            "description": "This is a post.",
+            "contentType": "application/x-www-form-urlencoded",
+            "content": "This post is about something that happened last wekk. It was a life changing event that I wanted to share with the world.",
+            "categories": ["test","useless"],
+            "publishedDate": "Feb 13, 2023",
+            "visibility": "public",
+            "unlisted": "True",
+            "comments": []
+        },
+        {
+            "id": "3",
+            "author": sm,
+            "source": "source_3",
+            "origin": "origin_",
+            "title": "Post Title 3",
+            "description": "This is a post.",
+            "contentType": "application/x-www-form-urlencoded",
+            "content": "Post 3.",
+            "categories": ["test","useless"],
+            "publishedDate": "Feb 13, 2023",
+            "visibility": "public",
+            "unlisted": "True",
+            "comments": [{
+                    "id": "2",
+                    "author": author,
+                    "comment": "This is a commentThis is a commentThis is a commentThis is a commentThis is a commentThis is a commentThis is a commentThis is a commentThis is a commentThis is a commentThis is a commentThis is a commentThis is a commentThis is a commentThis is a comment",
+                    "content": "text/plain",
+                    "published": "Feb 14, 2023"
+                },]
+        }
+    ]
+
+    context = {"posts": posts, "mode": "public"}
+
+    return render(request, 'posts_stream.html', context)
+
+@login_required(login_url="/login")
+@require_http_methods(["GET"])
+def post_detail(request, post_source):
+    author = Author.objects.get(username="admin")
+    anna = Author.objects.get(username="annadoe")
+    john = Author.objects.get(username="johndoe")
+    sm = Author.objects.get(username="saadmani")
+
+
+    if post_source == "source_1":
+        post = {
+                "id": "1",
+                "author": author,
+                "source": "source_1",
+                "origin": "origin_",
+                "title": "Post Title 1",
+                "description": "This is a post.",
+                "contentType": "text/plain",
+                "content": "I am currently writing this post. I am currently writing this post. I am currently writing this post. I am currently writing this post. I am currently writing this post.",
+                "categories": ["test","useless"],
+                "publishedDate": "Feb 13, 2023",
+                "visibility": "public",
+                "unlisted": "True",
+                "comments": [
+                    {
+                        "id": "1",
+                        "author": john,
+                        "comment": "This is a commentThis is a commentThis is a commentThis is a commentThis is a commentThis is a commentThis is a commentThis is a commentThis is a commentThis is a commentThis is a commentThis is a commentThis is a commentThis is a commentThis is a comment",
+                        "content": "text/plain",
+                        "published": "Feb 14, 2023"
+                    },
+                    {
+                        "id": "1",
+                        "author": sm,
+                        "comment": "This post is sweet.",
+                        "content": "text/plain",
+                        "published": "Feb 14, 2023"
+                    }
+                ]
+            }
+    else:
+        post = {
+            "id": "2",
+            "author": anna,
+            "source": "source_2",
+            "origin": "origin_",
+            "title": "Post Title 2",
+            "description": "This is a post.",
+            "contentType": "application/x-www-form-urlencoded",
+            "content": "This post is about something that happened last wekk. It was a life changing event that I wanted to share with the world.",
+            "categories": ["test","useless"],
+            "publishedDate": "Feb 13, 2023",
+            "visibility": "public",
+            "unlisted": "True",
+            "comments": []
+        }
+
+    context = {"post": post, "mode": "public"}
+
+    return render(request, 'post_detail.html', context)
