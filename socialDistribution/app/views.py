@@ -10,6 +10,9 @@ from django.urls import reverse
 from django.http import HttpResponseRedirect
 from django.contrib import messages
 
+from django.core import serializers
+from django.http import JsonResponse
+
 from django.contrib.auth.models import User
 from .helpers import is_valid_info
 
@@ -75,6 +78,23 @@ def home(request):
     author = Author.objects.get(username=user.username)
     context = {"user": user, "author": author}
     return render(request, 'home.html', context)
+
+
+@login_required(login_url="/login")
+@require_http_methods(["GET", "POST"])
+def author_search(request):
+  
+    if request.POST.get('action') == 'author-search':
+        search_term = str(request.POST.get('query_term'))
+
+        if search_term:
+            search_term = Author.objects.filter(
+                username__icontains=search_term)[:5]
+
+            data = serializers.serialize('json', list(
+                search_term), fields=('id', 'username'))
+
+            return JsonResponse({'search_term': data})
 
 
 @login_required(login_url="/login")
