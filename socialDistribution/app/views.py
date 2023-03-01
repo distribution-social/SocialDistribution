@@ -199,17 +199,49 @@ def authors(request):
 @login_required(login_url="/login")
 @require_http_methods(["GET"])
 def profile(request, username):
+    user = request.user
     if request.method == 'GET':
         author = Author.objects.get(username=username)
         userAuthor = Author.objects.get(username=request.user.username)
         try:
             userFollows = userAuthor.following.get(username=username)
-            context = {"author": author, "following": "True"}
+            context = {"author": author, "following": "True", "following": author.following.all().order_by('displayName'), "followers": author.followers.all().order_by('displayName'), "user": user}
         except:
-            context = {"author": author, "following": "False"}
+            context = {"author": author, "following": "False", "following": author.following.all().order_by('displayName'), "followers": author.followers.all().order_by('displayName'), "user": user}
+
 
         return render(request, 'profile.html', context)
 
+@login_required(login_url="/login")
+@require_http_methods(["POST"])
+def followingTab(request, username):
+
+    user = request.user
+    # Extract the username of the author to unfollow
+    username_to_unfollow = request.POST.get("unfollow")
+    # Get the author object to unfollow
+    author_to_unfollow = Author.objects.get(username=username_to_unfollow)
+    # Get the author object of the current user
+    author = Author.objects.get(username=user)
+    # Remove the author from the following of the current user
+    author.following.remove(author_to_unfollow)
+
+    return redirect(reverse("following", kwargs={'username': user.username}))
+
+@login_required(login_url="/login")
+@require_http_methods(["POST"])
+def followersTab(request, username):
+    user = request.user
+    # Extract the username of the author to remove from our followers
+    username_to_remove = request.POST.get("remove")
+    # Get the author object
+    author_to_remove = Author.objects.get(username=username_to_remove)
+    # Get our author object
+    current_user_author = Author.objects.get(username=user.username)
+    # We remove ourself to the author's followings list
+    author_to_remove.following.remove(current_user_author)
+
+    return redirect(reverse("followers", kwargs={'username': user.username}))
 
 @login_required(login_url="/login")
 @require_http_methods(["GET"])
