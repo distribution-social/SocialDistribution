@@ -38,7 +38,7 @@
               </li>
 
                       <li class="nav-item">
-                <a class="nav-link" href="{% url 'home' %}">Posts</a>
+                <a class="nav-link" href="{% url 'posts' %}">Posts</a>
               </li>
 
 
@@ -77,12 +77,14 @@
                 </ul>
               </li>
 
-
-
-
-          <li class="nav-item" style="vertical-align: baseline;">
-            <a class="nav-link" href="{% url 'post-form' %}">Create a post</a>
-          </li>
+              <li class="nav-item" style="vertical-align: baseline;">
+                <a class="nav-link" href="{% url 'post-form' %}">Create a post</a>
+              </li>
+              {% if user %}
+              <li class="nav-item" style="vertical-align: baseline;">
+                <a class="nav-link" href="{% url 'inbox' user.username %}">My Inbox</a>
+              </li>
+              {% endif %}
             </ul>
             <form class="d-flex" role="search">
               <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">

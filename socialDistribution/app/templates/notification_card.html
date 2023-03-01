@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+  <div class="card container-fluid p-0 my-3">
+    <div class="card-body">
+      <div class="media">
+        <div class="d-flex flex-row align-items-center">
+          <div class="m-2">
+            <a class="d-flex" href="{% url 'profile' username=item.from_author.username %}">
+              {% if item.from_author.profileImage %}
+              <img src="{{item.from_author.profileImage}}" class="user-avatar-circle rounded-circle my-1" alt=""></img>
+              {% else %}
+              <i class="bi bi-person text-muted" style="font-size: 40px; text-align: center;" alt=""></i>
+              {% endif %}
+            </a>
+          </div>
+          {% if item.type == "post" %}
+          <div class="m-2">
+            <h4>
+              <a class="text-muted" href="{% url 'profile' username=item.post.made_by.username %}" style="text-decoration: none; color:grey;">
+                {{item.post.made_by.displayName}}
+              </a>
+              <span style="color:grey;">posted</span>
+              <a class="card-title" href="{{ item.post.origin }}" style="text-decoration: none;">{{item.post.title}}</a>
+            </h4>
+          </div>
+        </div>
+        <span class="text-muted m-2" style="text-decoration: none;">
+          {{item.post.date_published}}
+        </span>
+
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</html>

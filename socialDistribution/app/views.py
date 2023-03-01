@@ -1,17 +1,19 @@
 from django.shortcuts import render, redirect
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from .forms import SignupForm, SigninForm, PostForm
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from .models import Author
+from .models import *
 from django.views.decorators.http import require_http_methods
 from django.urls import reverse
-from django.http import HttpResponseRedirect
 from django.contrib import messages
+from django.core.serializers import *
 
 from django.contrib.auth.models import User
 from .helpers import is_valid_info
+
+import json
 
 
 @require_http_methods(["GET", "POST"])
@@ -80,7 +82,7 @@ def home(request):
 @login_required(login_url="/login")
 @require_http_methods(["GET", "POST"])
 def add_post(request):
- 
+
     if request.method == "POST":
        pass
     elif request.method == "GET":
@@ -308,144 +310,58 @@ def sent_requests(request, username):
 
         return redirect(reverse("requests", kwargs={'username': user.username}))
 
+
 @login_required(login_url="/login")
 @require_http_methods(["GET"])
 def posts(request):
-    author = Author.objects.get(username="admin")
-    anna = Author.objects.get(username="annadoe")
-    john = Author.objects.get(username="johndoe")
-    sm = Author.objects.get(username="saadmani")
-
-    posts = [
-        {
-            "id": "1",
-            "author": author,
-            "source": "source_1",
-            "origin": "origin_",
-            "title": "Post Title 1",
-            "description": "This is a post.",
-            "contentType": "text/plain",
-            "content": "I am currently writing this post. I am currently writing this post. I am currently writing this post. I am currently writing this post. I am currently writing this post.",
-            "categories": ["test","useless"],
-            "publishedDate": "Feb 13, 2023",
-            "visibility": "public",
-            "unlisted": "True",
-            "comments": [
-                {
-                    "id": "1",
-                    "author": john,
-                    "comment": "This is a commentThis is a commentThis is a commentThis is a commentThis is a commentThis is a commentThis is a commentThis is a commentThis is a commentThis is a commentThis is a commentThis is a commentThis is a commentThis is a commentThis is a comment",
-                    "content": "text/plain",
-                    "published": "Feb 14, 2023"
-                },
-                {
-                    "id": "2",
-                    "author": sm,
-                    "comment": "This post is sweet.",
-                    "content": "text/plain",
-                    "published": "Feb 14, 2023"
-                }
-            ]
-        },
-        {
-            "id": "2",
-            "author": anna,
-            "source": "source_2",
-            "origin": "origin_",
-            "title": "Post Title 2",
-            "description": "This is a post.",
-            "contentType": "application/x-www-form-urlencoded",
-            "content": "This post is about something that happened last wekk. It was a life changing event that I wanted to share with the world.",
-            "categories": ["test","useless"],
-            "publishedDate": "Feb 13, 2023",
-            "visibility": "public",
-            "unlisted": "True",
-            "comments": []
-        },
-        {
-            "id": "3",
-            "author": sm,
-            "source": "source_3",
-            "origin": "origin_",
-            "title": "Post Title 3",
-            "description": "This is a post.",
-            "contentType": "application/x-www-form-urlencoded",
-            "content": "Post 3.",
-            "categories": ["test","useless"],
-            "publishedDate": "Feb 13, 2023",
-            "visibility": "public",
-            "unlisted": "True",
-            "comments": [{
-                    "id": "2",
-                    "author": author,
-                    "comment": "This is a commentThis is a commentThis is a commentThis is a commentThis is a commentThis is a commentThis is a commentThis is a commentThis is a commentThis is a commentThis is a commentThis is a commentThis is a commentThis is a commentThis is a comment",
-                    "content": "text/plain",
-                    "published": "Feb 14, 2023"
-                },]
-        }
-    ]
+    posts = Post.objects.all()
 
     context = {"posts": posts, "mode": "public"}
 
+    if request.META.get("HTTP_ACCEPT") == "application/json":
+        posts = Post.objects.all().values()
+        context.update({"posts": list(posts)})
+        return JsonResponse(context)
+
     return render(request, 'posts_stream.html', context)
+
 
 @login_required(login_url="/login")
 @require_http_methods(["GET"])
-def post_detail(request, post_source):
-    author = Author.objects.get(username="admin")
-    anna = Author.objects.get(username="annadoe")
-    john = Author.objects.get(username="johndoe")
-    sm = Author.objects.get(username="saadmani")
-
-
-    if post_source == "source_1":
-        post = {
-                "id": "1",
-                "author": author,
-                "source": "source_1",
-                "origin": "origin_",
-                "title": "Post Title 1",
-                "description": "This is a post.",
-                "contentType": "text/plain",
-                "content": "I am currently writing this post. I am currently writing this post. I am currently writing this post. I am currently writing this post. I am currently writing this post.",
-                "categories": ["test","useless"],
-                "publishedDate": "Feb 13, 2023",
-                "visibility": "public",
-                "unlisted": "True",
-                "comments": [
-                    {
-                        "id": "1",
-                        "author": john,
-                        "comment": "This is a commentThis is a commentThis is a commentThis is a commentThis is a commentThis is a commentThis is a commentThis is a commentThis is a commentThis is a commentThis is a commentThis is a commentThis is a commentThis is a commentThis is a comment",
-                        "content": "text/plain",
-                        "published": "Feb 14, 2023"
-                    },
-                    {
-                        "id": "1",
-                        "author": sm,
-                        "comment": "This post is sweet.",
-                        "content": "text/plain",
-                        "published": "Feb 14, 2023"
-                    }
-                ]
-            }
-    else:
-        post = {
-            "id": "2",
-            "author": anna,
-            "source": "source_2",
-            "origin": "origin_",
-            "title": "Post Title 2",
-            "description": "This is a post.",
-            "contentType": "application/x-www-form-urlencoded",
-            "content": "This post is about something that happened last wekk. It was a life changing event that I wanted to share with the world.",
-            "categories": ["test","useless"],
-            "publishedDate": "Feb 13, 2023",
-            "visibility": "public",
-            "unlisted": "True",
-            "comments": []
-        }
-
-    context = {"post": post, "mode": "public"}
+def post_detail(request, post_id):
+    post = Post.objects.get(uuid=post_id)
+    context = {"post": post, "mode": post.visibility}
 
     return render(request, 'post_detail.html', context)
+
+
+@login_required(login_url="/login")
+@require_http_methods(["GET","POST","DELETE"])
+def inbox(request,author_id):
+    author = Author.objects.get(username=author_id)
+    context = {"type": "inbox", "author": author.id}
+
+    if request.method == "GET":
+        items = author.my_inbox.all()
+        context.update({"items": items})
+
+
+    elif request.method == "POST":
+        _type = request.POST.get("type")
+        if _type == "post":
+            pass
+        elif _type == "follow":
+            pass
+        elif _type == "like":
+            pass
+        elif _type == "comment":
+            pass
+
+    elif request.method == "DELETE":
+        Inbox.objects.filter(to=author_id).delete()
+
+    if request.META.get("HTTP_ACCEPT") == "application/json":
+        context.update({"items": list(context.get("items"))})
+        return JsonResponse(context)
+
+    return render(request, 'inbox.html', context)
