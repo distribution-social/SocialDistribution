@@ -5,18 +5,18 @@
 
 
 {% block css %}<link rel="stylesheet" type="text/css" href="{% static 'app/signup.css' %}">{% endblock %}
-<div class="sign-up-form-container">
-    <div class="form-group">
-        <h1>Create a post</h1>
-        <br>
-        <form method="POST" action="signup">
 
-            {% csrf_token %}
-            {{ form|crispy }}
-            <button class="btn btn-success">Post</button>
-        </form>
-    </div>
+<div class="form-group mx-auto w-75">
+    <h1 class="mt-3">Create a post</h1>
+    <br>
+    <form method="POST" action="post">
+
+        {% csrf_token %}
+        {{ form|crispy }}
+        <button class="btn btn-success mb-3">Post</button>
+    </form>
 </div>
+
 
 {% endblock %}
 

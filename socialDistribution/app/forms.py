@@ -1,5 +1,5 @@
 from django import forms
-from .models import Post
+from .models import Post, Author
 
 class SignupForm(forms.Form):
     display_name = forms.CharField(label='Display Name', max_length=50, required=True)
@@ -21,7 +21,7 @@ class SigninForm(forms.Form):
 class PostForm(forms.ModelForm):
     class Meta:
         model = Post
-        fields = ('title', 'description', 'content', 'content_type', 'visibility', 'unlisted', 'image')
+        fields = ('title', 'description', 'content', 'content_type', 'visibility','receivers', 'unlisted', 'image' )
         
         widget = {
             'title' : forms.TextInput(attrs={'class': 'form-control'}),
@@ -29,7 +29,25 @@ class PostForm(forms.ModelForm):
             'content' : forms.Textarea(attrs={'class': 'form-control'}),
             'content_type' : forms.Select(attrs={'class': 'form-control'}),
             'visibility' : forms.TextInput(attrs={'class': 'form-control'}),
+            'receivers' : forms.SelectMultiple(attrs={'class': 'form-control'}),
             'unlisted' : forms.TextInput(attrs={'class': 'form-control'}),
-            'image' : forms.TextInput(attrs={'class': 'form-control'})
+            'image' : forms.TextInput(attrs={'class': 'form-control'}),
         }
+
+    def save(self, user,receiver_list = None,commit=True):
+        print('save method called')
+        post = super().save(commit=False)
+        post.made_by = user
+        if commit:
+            post.save()
+            if receiver_list:
+                for receiver_id in receiver_list:
+                    author = Author.objects.get(id=receiver_id)
+                    post.receivers.add(author)
+
+        return post
+
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            self.fields['receiver'].widget.attrs.update({'class': 'form-control'})
 
