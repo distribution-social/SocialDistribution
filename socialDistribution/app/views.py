@@ -349,11 +349,6 @@ def posts(request):
 
     context = {"posts": posts, "mode": "public"}
 
-    if request.META.get("HTTP_ACCEPT") == "application/json":
-        posts = Post.objects.all().values()
-        context.update({"posts": list(posts)})
-        return JsonResponse(context)
-
     return render(request, 'posts_stream.html', context)
 
 
@@ -361,7 +356,7 @@ def posts(request):
 @require_http_methods(["GET"])
 def post_detail(request, post_id):
     post = Post.objects.get(uuid=post_id)
-    context = {"post": post, "mode": post.visibility}
+    context = {"post": post}
 
     return render(request, 'post_detail.html', context)
 
@@ -370,7 +365,7 @@ def post_detail(request, post_id):
 @require_http_methods(["GET","DELETE"])
 def inbox(request,author_id):
     author = Author.objects.get(username=request.user.username)
-    context = {"type": "inbox", "author": author.id}
+    context = {"type": "inbox"}
 
     if request.method == "GET":
         items = author.my_inbox.all()
