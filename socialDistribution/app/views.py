@@ -336,32 +336,16 @@ def post_detail(request, post_id):
 
 
 @login_required(login_url="/login")
-@require_http_methods(["GET","POST","DELETE"])
+@require_http_methods(["GET","DELETE"])
 def inbox(request,author_id):
-    author = Author.objects.get(username=author_id)
+    author = Author.objects.get(username=request.user.username)
     context = {"type": "inbox", "author": author.id}
 
     if request.method == "GET":
         items = author.my_inbox.all()
         context.update({"items": items})
 
-
-    elif request.method == "POST":
-        _type = request.POST.get("type")
-        if _type == "post":
-            pass
-        elif _type == "follow":
-            pass
-        elif _type == "like":
-            pass
-        elif _type == "comment":
-            pass
-
     elif request.method == "DELETE":
-        Inbox.objects.filter(to=author_id).delete()
-
-    if request.META.get("HTTP_ACCEPT") == "application/json":
-        context.update({"items": list(context.get("items"))})
-        return JsonResponse(context)
+        Inbox.objects.filter(to=request.user.username).delete()
 
     return render(request, 'inbox.html', context)
