@@ -345,7 +345,7 @@ def sent_requests(request, username):
 @login_required(login_url="/login")
 @require_http_methods(["GET"])
 def posts(request):
-    posts = Post.objects.all()
+    posts = Post.objects.all().order_by('-date_published')
 
     context = {"posts": posts, "mode": "public"}
 
