@@ -80,9 +80,20 @@ def home(request):
 @login_required(login_url="/login")
 @require_http_methods(["GET", "POST"])
 def add_post(request):
- 
+    user = Author.objects.get(username=request.user.username)
+
     if request.method == "POST":
-       pass
+        form = PostForm(request.POST)
+        if form.is_valid():
+            # Save the form data to the database
+            if request.POST['visibility'] == 'PRIVATE':
+                post = form.save(user=user, receiver_list = request.POST.getlist('receivers'))
+            else:
+                 post = form.save(user=user)
+            # Do something with the saved data (e.g. redirect to a detail view)
+            # return redirect('post_detail', pk=post.pk)
+
+            return redirect(reverse('home'))
     elif request.method == "GET":
         context = {"title": "Create a Post", "form": PostForm()}
         return render(request, 'post.html', context)
