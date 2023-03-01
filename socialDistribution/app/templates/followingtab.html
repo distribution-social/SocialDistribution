@@ -10,7 +10,7 @@
 {% block content %}
 
     <div class="container-fluid d-flex align-items-center flex-column p-3">
-      <h1>{{follow|length}} Following{{follow|pluralize}}</h1>
+      <h1>{{following|length}} Following{{following|pluralize}}</h1>
 
 {% for person in following %}
 
@@ -27,7 +27,7 @@
 
 <div class="btn-group" role="group" aria-label="Basic example">
 
-    <a type="button" class="btn btn-primary" href="{% url 'profile' username=person.username %}" target="_blank"><i class="bi bi-person-fill">&nbsp;Profile</i></a>
+    <a type="button" class="btn btn-primary" href="{% url 'profile' username=person.username %}"><i class="bi bi-person-fill">&nbsp;Profile</i></a>
         <a type="button" href="{{person.github}}" target="_blank" class="btn btn-secondary"><i class="bi bi-github">&nbsp;GitHub</i></a>
 
 </div>
