@@ -1,8 +1,3 @@
-{% block title %}
-<title>{{author.displayName}}'s Followings</title>
-
-{% endblock %}
-
 {% load static %}
 
 {% block css %}
@@ -11,7 +6,6 @@
 {% block content %}
 
 <div class="container-fluid d-flex align-items-center flex-column mb-3">
-    <h1>{{following|length}} Following{{following|pluralize}}</h1>
 
     {% for person in following %}
     <div class="p-2 d-flex flex-column mb-3 flex-fill" style="max-width: 700px;">
@@ -20,8 +14,8 @@
                 <div class="d-flex">
                     <img src="{{person.profileImage}}" width="230px" height="230px"
                         class="object-fit-cover border rounded-start" alt="No profile image available">
-                    <div class="d-flex flex-fill flex-column align-items-between">
-                        <div class="p-2 flex-fill">
+                    <div class="d-flex flex-fill flex-column ">
+                        <div class="card-body">
                             <h5 class="card-title">{{person.displayName}}</h5>
                             <p class="card-subtitle mb-2 text-muted">@{{person.username}}</p>
 
@@ -44,12 +38,11 @@
                             </form>
 
                             {% endif %}
-                            
-                        </div>
-                            <div class="card-footer"><a href="{{person.host}}"
-                                    class="text-decoration-none">{{person.host|cut:'http://'}}</a></div>
-                    </div>
 
+                        </div>
+                        <div class="card-footer"><a href="{{person.host}}"
+                                class="text-decoration-none">{{person.host|cut:'http://'}}</a></div>
+                    </div>
                 </div>
             </div>
         </div>

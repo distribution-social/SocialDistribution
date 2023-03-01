@@ -51,10 +51,10 @@
                                     aria-controls="nav-public-posts" aria-selected="true">Public Posts</button>
                                 <button class="nav-link" id="nav-followers-tab" data-bs-toggle="tab"
                                     data-bs-target="#nav-followers" type="button" role="tab"
-                                    aria-controls="nav-followers" aria-selected="false">Followers</button>
+                                    aria-controls="nav-followers" aria-selected="false">{{followers|length}} Follower{{followers|pluralize}}</button>
                                 <button class="nav-link" id="nav-following-tab" data-bs-toggle="tab"
                                     data-bs-target="#nav-following" type="button" role="tab"
-                                    aria-controls="nav-following" aria-selected="false">Following</button>
+                                    aria-controls="nav-following" aria-selected="false">{{following|length}} Following</button>
                             </div>
                         </nav>
                     </div>
