@@ -24,7 +24,7 @@ Link: https://www.bootdey.com/snippets/view/bs4-s
           </div>
           <div class="m-2">
             <h4>
-              <a class="card-title" href="{{ post.origin }}" style="text-decoration: none;">{{post.title}}</a>
+              <a class="card-title" href={% url 'post_detail' post_id=post.uuid %} style="text-decoration: none;">{{post.title}}</a>
             </h4>
           </div>
         </div>
