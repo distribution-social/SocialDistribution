@@ -15,12 +15,12 @@
 
 {% for person in followers %}
 
-<div class="card mb-3" style="max-width: 540px;">
-  <div class="row g-0">
-    <div class="col-md-4">
-      <img src="{{person.profileImage}}" class="img-fluid" alt="...">
+<div class="card mb-3" style="width: 700px;">
+  <div class="row g-0 d-flex justify-content-start">
+    <div class="col-md-6">
+      <img src="{{person.profileImage}}" width="270px" height="270px" class="object-fit-cover border rounded" alt="...">
     </div>
-    <div class="col-md-8">
+    <div class="col-md-6 flex-grow-1" >
       <div class="card-body">
         <h5 class="card-title">{{person.displayName}}</h5>
         <p class="card-subtitle mb-2 text-muted">@{{person.username}}</p>
