@@ -1,9 +1,11 @@
 import uuid
 from django.utils import timezone
 from django.db import models
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.fields import GenericRelation
 
 # Create your models here.
-
 
 class Author(models.Model):
     # Unique ID of the user
@@ -47,11 +49,23 @@ class Author(models.Model):
     def __str__(self):
         return f"{self.username}"
 
+class LikedItem(models.Model):
+    POST = 'post'
+    COMMENT = 'commment'
+    TYPE_CHOICES = [
+        ('post','post'),
+        ('comment','comment')
+    ]
+    type = models.CharField(max_length=10, choices=TYPE_CHOICES)
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.UUIDField()
+    content_object = GenericForeignKey()
+
 class Post(models.Model):
     uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
     made_by = models.ForeignKey(Author, related_name = "my_posts", on_delete=models.CASCADE)
 
-    #if a private post was sent to a friend(only comes into play, when private, otherwise blank). 
+    #if a private post was sent to a friend(only comes into play, when private, otherwise blank).
     receivers = models.ManyToManyField(Author, blank = True, null = True, related_name = "private_posts")
 
     title = models.CharField(max_length=50, unique=True)
@@ -81,20 +95,50 @@ class Post(models.Model):
     unlisted = models.BooleanField(default=False)
     image = models.CharField(max_length=100,null=True, blank=True)
 
-class Inbox(models.Model):
-    uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
-    from_author = models.ForeignKey(Author, blank = False, null = False, related_name = "my_outbox", on_delete=models.CASCADE)
-    to = models.ForeignKey(Author, blank = False, null = False, related_name = "my_inbox", on_delete=models.CASCADE)
+    likes = GenericRelation(LikedItem)
+
+class Like(models.Model):
+    POST = 'post'
+    COMMENT = 'commment'
     TYPE_CHOICES = [
         ('post','post'),
-        ('like','like'),
-        ('comment','comment'),
-        ('follow','follow'),
+        ('comment','comment')
     ]
-    type = models.CharField(max_length=7, null=False, choices=TYPE_CHOICES, default='post')
-    post = models.ForeignKey(Post, blank = True, null = True, on_delete=models.CASCADE)
-    # to = models.ForeignKey(Author, blank = False, null = False, related_name = "my_inbox", on_delete=models.CASCADE)
-    # to = models.ForeignKey(Author, blank = False, null = False, related_name = "my_inbox", on_delete=models.CASCADE)
-    # to = models.ForeignKey(Author, blank = False, null = False, related_name = "my_inbox", on_delete=models.CASCADE)
+    summary = models.CharField(max_length=20)
+    author = models.ForeignKey(Author, blank = False, null = False, related_name = "my_likes", on_delete=models.CASCADE)
+
+    type = models.CharField(max_length=10, choices=TYPE_CHOICES)
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.UUIDField()
+    content_object = GenericForeignKey()
+
+class Activity(models.Model):
+    POST = 'post'
+    COMMENT = 'commment'
+    FOLLOW = 'follow'
+    LIKE = 'like'
+    TYPE_CHOICES = [
+        (POST,POST),
+        (COMMENT,COMMENT),
+        (FOLLOW,FOLLOW),
+        (LIKE,LIKE)
+    ]
+    type = models.CharField(max_length=10, choices=TYPE_CHOICES)
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.UUIDField()
+    content_object = GenericForeignKey()
+
+class Inbox(models.Model):
+    uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
+    date = models.DateTimeField(default=timezone.now)
+    from_author = models.ForeignKey(Author, blank = False, null = False, related_name = "my_outbox", on_delete=models.CASCADE)
+    to = models.ForeignKey(Author, blank = False, null = False, related_name = "my_inbox", on_delete=models.CASCADE)
+    object = GenericRelation(Activity)
+
+class Comment(models.Model):
+    author = models.ForeignKey(Author, blank = False, null = False, related_name = "my_comments", on_delete=models.CASCADE)
+    likes = GenericRelation(LikedItem)
+
+
 
 
