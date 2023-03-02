@@ -124,7 +124,7 @@ class Post(models.Model):
 
     content_type = models.CharField(max_length=18, choices=CONTENT_TYPE_CHOICES)
     content = models.TextField()
-    comments_url = models.TextField()
+    comments_url = models.URLField()
     VISIBILITY_CHOICES = [
         ('PUBLIC', 'public'),
         ('PRIVATE', 'private'),
