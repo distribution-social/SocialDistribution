@@ -450,12 +450,3 @@ def add_like_comment(request,post_id,comment_id):
             response.content = "Already liked this comment."
 
     return response
-
-
-@require_http_methods(["GET"])
-def like_test(request,post_id):
-    user = Author.objects.get(username="NickSNFK")
-    post = Post.objects.get(uuid=post_id)
-    post.likes.create(type=Like.POST,author=user,summary="Test Like")
-    print(post.likes.count())
-    return HttpResponse("Test")
