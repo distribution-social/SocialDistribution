@@ -13,8 +13,13 @@ urlpatterns = [
     path('logout', views.signout, name='logout'),
     path('posts', views.posts, name='posts'),
     path('posts/<str:post_id>', views.post_detail, name='post_detail'),
+    path('posts/<str:post_id>/comment', views.add_comment, name='comment-form'),
+    path('posts/<str:post_id>/like', views.add_like_post, name='add_like_post'),
+    path('posts/<str:post_id>/comments/<str:comment_id>/like', views.add_like_comment, name='add_like_comment'),
+
+
     path('authors', views.authors, name='authors'),
-    path('authors/<str:author_id>/inbox', views.inbox, name='inbox'),
+    path('authors/<str:username>/inbox', views.inbox, name='inbox'),
     path('<str:username>/following', views.following, name='following'),
     path('<str:username>/followers', views.followers, name='followers'),
     path('<str:username>', views.profile, name='profile'),

@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
-from django.http import HttpResponse, JsonResponse
-from .forms import SignupForm, SigninForm, PostForm
+from django.http import *
+from .forms import *
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
@@ -14,10 +14,10 @@ from django.core import serializers
 from django.http import JsonResponse
 
 from django.contrib.auth.models import User
-from .helpers import is_valid_info
+from .helpers import *
 
-import json
-
+class HttpResponseUnauthorized(HttpResponse):
+    status_code = 401
 
 @require_http_methods(["GET", "POST"])
 def signup(request):
@@ -236,6 +236,7 @@ def authors(request):
 
         # Add the author object to our sent_request list (Need to send this to inbox in the future to get approval on the other end)
         current_user_author.sent_requests.add(author_to_follow)
+        add_to_inbox(current_user_author,author_to_follow,Activity.FOLLOW,current_user_author)
 
         return redirect(reverse("authors"))
 
@@ -280,8 +281,16 @@ def received_requests(request, username):
         return render(request, 'requests.html', context)
 
     elif request.method == "POST":
-        action, sender_username = request.POST.get("action").split("_")
-
+        response = ""
+        inbox = None
+        request_action = request.POST.get("action").split("_")
+        if len(request_action) < 2:
+            return HttpResponseBadRequest("Not enough action parameters")
+        action = request_action[0]
+        sender_username = request_action[1]
+        if len(request_action) > 2:
+            inbox = request_action[2]
+        print(action,sender_username,inbox)
         sender_author = Author.objects.get(username=sender_username)
 
         # Get our author object
@@ -297,6 +306,7 @@ def received_requests(request, username):
 
             # Remove this follow request on our side
             current_user_author.follow_requests.remove(sender_author)
+            response = "Accepted"
 
         elif action == "decline":
 
@@ -305,7 +315,10 @@ def received_requests(request, username):
 
             # Remove this follow request on our side
             current_user_author.follow_requests.remove(sender_author)
+            response = "Declined"
 
+        if inbox:
+            return redirect(reverse("inbox", kwargs={'username': user.username}))
         return redirect(reverse("requests", kwargs={'username': user.username}))
 
 
@@ -347,7 +360,7 @@ def sent_requests(request, username):
 def posts(request):
     posts = Post.objects.all().order_by('-date_published')
 
-    context = {"posts": posts, "mode": "public"}
+    context = {"posts": posts, "mode": "public", "comment_form": CommentForm()}
 
     return render(request, 'posts_stream.html', context)
 
@@ -356,22 +369,84 @@ def posts(request):
 @require_http_methods(["GET"])
 def post_detail(request, post_id):
     post = Post.objects.get(uuid=post_id)
-    context = {"post": post}
+    context = {"post": post, "comment_form": CommentForm()}
 
     return render(request, 'post_detail.html', context)
 
 
 @login_required(login_url="/login")
-@require_http_methods(["GET","DELETE"])
-def inbox(request,author_id):
+@require_http_methods(["GET","POST"])
+def inbox(request,username):
     author = Author.objects.get(username=request.user.username)
+    if username != author.username:
+        return HttpResponseUnauthorized()
     context = {"type": "inbox"}
 
     if request.method == "GET":
-        items = author.my_inbox.all()
+        items = author.my_inbox.all().order_by("-date")
         context.update({"items": items})
 
-    elif request.method == "DELETE":
-        Inbox.objects.filter(to=request.user.username).delete()
+    elif request.method == "POST":
+        author.my_inbox.all().delete()
 
     return render(request, 'inbox.html', context)
+
+@login_required(login_url="/login")
+@require_http_methods(["POST"])
+def add_comment(request,post_id):
+    user = Author.objects.get(username=request.user.username)
+    post = Post.objects.get(uuid=post_id)
+
+    if request.method == "POST":
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            comment = form.save(user=user,post=post)
+            add_to_inbox(user,post.made_by,Activity.COMMENT,post)
+
+            # Do something with the saved data (e.g. redirect to a detail view)
+            # return redirect('post_detail', pk=post.pk)
+
+            return redirect(reverse('post_detail',kwargs={'post_id': post.uuid}))
+
+@login_required(login_url="/login")
+@require_http_methods(["POST"])
+def add_like_post(request,post_id):
+    user = Author.objects.get(username=request.user.username)
+    post = Post.objects.get(uuid=post_id)
+    response = HttpResponse()
+
+    if request.method == "POST":
+        if post.made_by.username == user.username:
+            response.content = "Can't like your own post."
+            return response
+        found = post.likes.filter(author=user)
+        if not found:
+            post.likes.create(type=Like.POST,author=user,summary=f'{user.displayName} liked your post.')
+            add_to_inbox(user,post.made_by,Activity.LIKE,post)
+            response.content = "Liked"
+        else:
+            response.content = "Already liked this post."
+
+    return response
+
+@login_required(login_url="/login")
+@require_http_methods(["POST"])
+def add_like_comment(request,post_id,comment_id):
+    user = Author.objects.get(username=request.user.username)
+    post = Post.objects.get(uuid=post_id)
+    comment = Comment.objects.get(uuid=comment_id)
+    response = HttpResponse()
+
+    if request.method == "POST":
+        if comment.author.username == user.username:
+            response.content = "Can't like your own comment."
+            return response
+        found = comment.likes.filter(author=user)
+        if not found:
+            comment.likes.create(type=Like.COMMENT,author=user,summary=f'{user.displayName} liked your comment.')
+            add_to_inbox(user,comment.author,Activity.LIKE,comment)
+            response.content = "Liked"
+        else:
+            response.content = "Already liked this comment."
+
+    return response

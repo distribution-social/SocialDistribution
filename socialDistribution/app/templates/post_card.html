@@ -9,6 +9,54 @@ Link: https://www.bootdey.com/snippets/view/bs4-s
 -->
 <!doctype html>
 <html lang="en">
+
+  {% block css %}<link rel="stylesheet" type="text/css" href="{% static 'app/posts.css' %}">{% endblock %}
+
+  <script>
+    $(document).ready(function() {
+      $("#like-post-{{post.uuid}}").click(function(e) {
+          e.preventDefault();
+
+          $.ajax({
+              type: 'POST',
+              url: '{% url "add_like_post" post_id=post.uuid %}',
+              data: {
+                  csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
+                  action: 'add_like_post'
+              },
+              success: function (result) {
+                showAndDismissAlert("info",result)
+                if(result == "Liked"){
+                  let value = parseInt($("#like-count-{{post.uuid}}").html());
+                  value++;
+                  $("#like-count-{{post.uuid}}").html(value);
+                }
+              },
+              error: function (xhr, exception) {
+                let error_message = '';
+                if (xhr.status === 0) {
+                  error_message = 'No connection to server. Check Network.';
+                } else if (xhr.status == 404) {
+                  error_message = 'Requested page not found. [404]';
+                } else if (xhr.status == 500) {
+                  error_message = 'Internal Server Error [500].';
+                } else if (exception === 'timeout') {
+                  error_message = 'Timed out. Try again.';
+                } else if (exception === 'abort') {
+                  error_message = 'Request aborted.';
+                } else {
+                  error_message = 'Could not make request. ' + xhr.responseText;
+                }
+                showAndDismissAlert("error",error_message)
+              }
+          });
+      }
+      )
+    })
+  </script>
+  {% if user %}
+  {% csrf_token %}
+  {% endif %}
   <div class="card container-fluid p-0 my-3">
     <div class="card-header">
       <div class="media">
@@ -38,12 +86,13 @@ Link: https://www.bootdey.com/snippets/view/bs4-s
     </div>
     <p class="card-body">{{post.content}}</p>
     <div class="card-footer likes-reply">
-      <a class="d-inline-flex text-muted" href="" style="text-decoration: none;">
+
+      <button id="like-post-{{post.uuid}}" class="d-inline-flex text-muted like-button" style="text-decoration: none;">
         <i class="bi bi-heart mx-1" ></i>
-        <strong>256</strong>
-      </a>
+        <strong id="like-count-{{post.uuid}}">{{post.likes.all|length}}</strong>
+      </button>
       {% if user %}
-        <a type="button" class="d-inline-flex text-muted mx-2" data-bs-toggle="modal" data-bs-target="#new-comment-{{post.id}}" style="text-decoration: none;">
+        <a type="button" class="d-inline-flex text-muted mx-2" data-bs-toggle="modal" data-bs-target="#new-comment-{{post.uuid}}" style="text-decoration: none;">
           <i class="bi bi-reply mx-1"></i>
           <strong>Reply</strong>
         </a>
@@ -51,16 +100,16 @@ Link: https://www.bootdey.com/snippets/view/bs4-s
       {% endif %}
     </div>
     <div class="card-footer">
-      <a class="d-inline-flex btn btn-primary" data-bs-toggle="collapse" href="#collapse_{{post.id}}" role="button" aria-expanded="false" aria-controls="collapse_{{post.id}}">
+      <button class="d-inline-flex btn btn-primary" data-bs-toggle="collapse" data-bs-target="#collapse_{{post.uuid}}" role="button" aria-expanded="false" aria-controls="collapse_{{post.uuid}}">
         <span class="d-inline-flex">Comments</span>
         <i class="d-inline-flex bi bi-chat mx-1" ></i>
-        <span class="d-inline-flex">{{post.comments|length}}</span>
-      </a>
+        <span class="d-inline-flex">{{post.comments.all|length}}</span>
+      </button>
     </div>
 
-    <div class="collapse" id="collapse_{{post.id}}">
+    <div class="collapse" id="collapse_{{post.uuid}}">
 
-      {% for comment in post.comments %}
+      {% for comment in post.comments.all %}
 
       <div class="card-footer">
         {% include "comment.html" %}
@@ -69,6 +118,8 @@ Link: https://www.bootdey.com/snippets/view/bs4-s
       {% endfor %}
 
     </div>
+    {% if user %}
     {% include "new_comment_modal.html" %}
+    {% endif %}
   </div>
 </html>
