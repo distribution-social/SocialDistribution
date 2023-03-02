@@ -1,0 +1,74 @@
+{% load static %}
+<!--
+Some of the html in this file is based off of the following UNDER MIT License:
+Title: Bootstrap snippet. bs4 simple social network post
+Author: Bootdey.com
+Link: https://www.bootdey.com/snippets/view/bs4-simple-social-network-post
+Date Accessed: Feb 15, 2023
+Link: https://www.bootdey.com/snippets/view/bs4-s
+-->
+<!doctype html>
+<html lang="en">
+  <div class="card container-fluid p-0 my-3">
+    <div class="card-header">
+      <div class="media">
+        <div class="d-flex flex-row">
+          <div class="m-2">
+            <a class="d-flex" href="{% url 'profile' username=post.made_by.username %}">
+              {% if post.made_by.profileImage %}
+              <img src="{{post.made_by.profileImage}}" class="user-avatar-circle rounded-circle my-1" alt=""></img>
+              {% else %}
+              <i class="bi bi-person text-muted" style="font-size: 40px; text-align: center;" alt=""></i>
+              {% endif %}
+            </a>
+          </div>
+          <div class="m-2">
+            <h4>
+              <a class="card-title" href={% url 'post_detail' post_id=post.uuid %} style="text-decoration: none;">{{post.title}}</a>
+            </h4>
+          </div>
+        </div>
+        <a class="text-muted m-2" href="{% url 'profile' username=post.made_by.username %}" style="text-decoration: none;">
+          {{post.made_by.displayName}}
+        </a>
+        <span class="text-muted m-2" style="text-decoration: none;">
+          {{post.date_published}}
+        </span>
+      </div>
+    </div>
+    <p class="card-body">{{post.content}}</p>
+    <div class="card-footer likes-reply">
+      <a class="d-inline-flex text-muted" href="" style="text-decoration: none;">
+        <i class="bi bi-heart mx-1" ></i>
+        <strong>256</strong>
+      </a>
+      {% if user %}
+        <a type="button" class="d-inline-flex text-muted mx-2" data-bs-toggle="modal" data-bs-target="#new-comment-{{post.id}}" style="text-decoration: none;">
+          <i class="bi bi-reply mx-1"></i>
+          <strong>Reply</strong>
+        </a>
+
+      {% endif %}
+    </div>
+    <div class="card-footer">
+      <a class="d-inline-flex btn btn-primary" data-bs-toggle="collapse" href="#collapse_{{post.id}}" role="button" aria-expanded="false" aria-controls="collapse_{{post.id}}">
+        <span class="d-inline-flex">Comments</span>
+        <i class="d-inline-flex bi bi-chat mx-1" ></i>
+        <span class="d-inline-flex">{{post.comments|length}}</span>
+      </a>
+    </div>
+
+    <div class="collapse" id="collapse_{{post.id}}">
+
+      {% for comment in post.comments %}
+
+      <div class="card-footer">
+        {% include "comment.html" %}
+      </div>
+
+      {% endfor %}
+
+    </div>
+    {% include "new_comment_modal.html" %}
+  </div>
+</html>

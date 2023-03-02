@@ -1,0 +1,24 @@
+{% extends "base_generic.html" %}
+
+{% block title %}
+<title>My Inbox</title>
+
+{% endblock %}
+
+{% load static %}
+
+{% block css %}<link rel="stylesheet" type="text/css" href="{% static 'app/inbox.css' %}">{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid d-flex align-items-center flex-column p-3">
+
+{% for item in items %}
+
+{% include "notification_card.html" %}
+
+{% endfor %}
+
+</div>
+
+{% endblock %}
