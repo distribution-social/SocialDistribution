@@ -20,7 +20,7 @@
                 {{item.post.made_by.displayName}}
               </a>
               <span style="color:grey;">posted</span>
-              <a class="card-title" href="{{ item.post.origin }}" style="text-decoration: none;">{{item.post.title}}</a>
+              <a class="card-title" href="{% url 'post_detail' post_id=item.post.uuid %}" style="text-decoration: none;">{{item.post.title}}</a>
             </h4>
           </div>
         </div>
