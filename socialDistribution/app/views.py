@@ -9,6 +9,7 @@ from django.views.decorators.http import require_http_methods
 from django.urls import reverse
 from django.http import HttpResponseRedirect
 from django.contrib import messages
+import urllib.parse
 
 from django.contrib.auth.models import User
 from .helpers import is_valid_info
@@ -198,23 +199,23 @@ def authors(request):
 
 @login_required(login_url="/login")
 @require_http_methods(["GET"])
-def profile(request, username):
+def profile(request, username, active_tab="posts"):
     user = request.user
     if request.method == 'GET':
         author = Author.objects.get(username=username)
         userAuthor = Author.objects.get(username=request.user.username)
+        context = {"author": author, "following": author.following.all().order_by('displayName'), "followers": author.followers.all().order_by('displayName'), "user": user, "active_tab": active_tab}
         try:
             userFollows = userAuthor.following.get(username=username)
-            context = {"author": author, "following": "True", "following": author.following.all().order_by('displayName'), "followers": author.followers.all().order_by('displayName'), "user": user}
+            context.update({"user_is_following": "True"})
         except:
-            context = {"author": author, "following": "False", "following": author.following.all().order_by('displayName'), "followers": author.followers.all().order_by('displayName'), "user": user}
-
+            context.update({"user_is_following": "False"})
 
         return render(request, 'profile.html', context)
 
 @login_required(login_url="/login")
 @require_http_methods(["POST"])
-def followingTab(request, username):
+def followingTab(request):
 
     user = request.user
     # Extract the username of the author to unfollow
@@ -225,15 +226,15 @@ def followingTab(request, username):
     author = Author.objects.get(username=user)
     # Remove the author from the following of the current user
     author.following.remove(author_to_unfollow)
-
-    return redirect(reverse("following", kwargs={'username': user.username}))
+    
+    return redirect(reverse("profile", kwargs={"username": user.username, "active_tab": "following"}))
 
 @login_required(login_url="/login")
 @require_http_methods(["POST"])
-def followersTab(request, username):
+def followersTab(request):
     user = request.user
     # Extract the username of the author to remove from our followers
-    username_to_remove = request.POST.get("remove")
+    username_to_remove = request.POST.get("removefollower")
     # Get the author object
     author_to_remove = Author.objects.get(username=username_to_remove)
     # Get our author object
@@ -241,7 +242,7 @@ def followersTab(request, username):
     # We remove ourself to the author's followings list
     author_to_remove.following.remove(current_user_author)
 
-    return redirect(reverse("followers", kwargs={'username': user.username}))
+    return redirect(reverse("profile", kwargs={'username': user.username, "active_tab": "followers"}))
 
 @login_required(login_url="/login")
 @require_http_methods(["GET"])
