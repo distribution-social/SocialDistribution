@@ -23,14 +23,14 @@ class Author(models.Model):
     email = models.EmailField(max_length=320, unique=True)
 
     username = models.CharField(max_length=30, unique=True)
-    
+
     created = models.DateTimeField(auto_now_add=True)
 
     updated = models.DateTimeField(auto_now=True)
 
     following = models.ManyToManyField(
         'self', related_name='followers', symmetrical=False, blank=True)
-    
+
     sent_requests = models.ManyToManyField('self', related_name='follow_requests', symmetrical=False, blank=True)
 
     # Used for rapid lookup, will improve database performance
@@ -80,5 +80,21 @@ class Post(models.Model):
     visibility = models.CharField(max_length=7, choices=VISIBILITY_CHOICES)
     unlisted = models.BooleanField(default=False)
     image = models.CharField(max_length=100,null=True, blank=True)
+
+class Inbox(models.Model):
+    uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
+    from_author = models.ForeignKey(Author, blank = False, null = False, related_name = "my_outbox", on_delete=models.CASCADE)
+    to = models.ForeignKey(Author, blank = False, null = False, related_name = "my_inbox", on_delete=models.CASCADE)
+    TYPE_CHOICES = [
+        ('post','post'),
+        ('like','like'),
+        ('comment','comment'),
+        ('follow','follow'),
+    ]
+    type = models.CharField(max_length=7, null=False, choices=TYPE_CHOICES, default='post')
+    post = models.ForeignKey(Post, blank = True, null = True, on_delete=models.CASCADE)
+    # to = models.ForeignKey(Author, blank = False, null = False, related_name = "my_inbox", on_delete=models.CASCADE)
+    # to = models.ForeignKey(Author, blank = False, null = False, related_name = "my_inbox", on_delete=models.CASCADE)
+    # to = models.ForeignKey(Author, blank = False, null = False, related_name = "my_inbox", on_delete=models.CASCADE)
 
 

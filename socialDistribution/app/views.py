@@ -1,20 +1,22 @@
 from django.shortcuts import render, redirect
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from .forms import SignupForm, SigninForm, PostForm
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from .models import Author
+from .models import *
 from django.views.decorators.http import require_http_methods
 from django.urls import reverse
-from django.http import HttpResponseRedirect
 from django.contrib import messages
+from django.core.serializers import *
 
 from django.core import serializers
 from django.http import JsonResponse
 
 from django.contrib.auth.models import User
 from .helpers import is_valid_info
+
+import json
 
 
 @require_http_methods(["GET", "POST"])
@@ -83,7 +85,7 @@ def home(request):
 @login_required(login_url="/login")
 @require_http_methods(["GET", "POST"])
 def author_search(request):
-  
+
     if request.POST.get('action') == 'author-search':
         search_term = str(request.POST.get('query_term'))
 
@@ -338,3 +340,38 @@ def sent_requests(request, username):
             receiver_author.follow_requests.remove(current_user_author)
 
         return redirect(reverse("requests", kwargs={'username': user.username}))
+
+
+@login_required(login_url="/login")
+@require_http_methods(["GET"])
+def posts(request):
+    posts = Post.objects.all().order_by('-date_published')
+
+    context = {"posts": posts, "mode": "public"}
+
+    return render(request, 'posts_stream.html', context)
+
+
+@login_required(login_url="/login")
+@require_http_methods(["GET"])
+def post_detail(request, post_id):
+    post = Post.objects.get(uuid=post_id)
+    context = {"post": post}
+
+    return render(request, 'post_detail.html', context)
+
+
+@login_required(login_url="/login")
+@require_http_methods(["GET","DELETE"])
+def inbox(request,author_id):
+    author = Author.objects.get(username=request.user.username)
+    context = {"type": "inbox"}
+
+    if request.method == "GET":
+        items = author.my_inbox.all()
+        context.update({"items": items})
+
+    elif request.method == "DELETE":
+        Inbox.objects.filter(to=request.user.username).delete()
+
+    return render(request, 'inbox.html', context)
