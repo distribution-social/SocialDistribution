@@ -1,5 +1,5 @@
 from django.contrib.auth.models import User
-from .models import Author
+from .models import *
 from django.contrib import messages
 
 
@@ -34,3 +34,10 @@ def is_valid_info(request, username, email, github, password, confirm_password):
 
     else:
         return True
+
+
+def add_to_inbox(from_author,to,type,object):
+    if from_author != to:
+        activity = Activity.objects.create(type=type,content_object=object)
+        return Inbox.objects.create(from_author=from_author,to=to,object=activity)
+    return None
