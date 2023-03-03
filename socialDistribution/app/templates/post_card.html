@@ -139,14 +139,14 @@ Link: https://www.bootdey.com/snippets/view/bs4-s
           <strong>Reply</strong>
         </a>
         {% if request.user.username == post.made_by.username %}
-          <a type="button" class="d-inline-flex text-muted mx-2 delete-button" style="text-decoration: none;" id="delete-post-{{post.uuid}}" data-toggle="modal" data-target="#delete-post-modal-{{post.uuid}}">
+          <a type="button" class="d-inline-flex text-muted mx-2 delete-button" style="text-decoration: none;" id="delete-post-{{post.uuid}}" data-bs-toggle="modal" data-bs-target="#delete-post-modal-{{post.uuid}}">
             <i class="bi bi-trash"></i>
             <strong>Delete</strong>
           </a>
         {% endif %}
 
         <!--Delete Modal -->
-      <div class="modal fade" id="delete-post-modal-{{post.uuid}}" tabindex="-1" role="dialog" aria-labelledby="delete-post-modal-label-{{post.uuid}}" aria-hidden="true" data-backdrop="false">
+      <div class="modal fade" id="delete-post-modal-{{post.uuid}}" tabindex="-1" role="dialog" aria-labelledby="delete-post-modal-label-{{post.uuid}}" aria-hidden="true" data-bs-backdrop="false">
         <div class="modal-dialog" role="document">
           <div class="modal-content">
             <div class="modal-header">
@@ -168,7 +168,7 @@ Link: https://www.bootdey.com/snippets/view/bs4-s
 
 
       {% endif %}
-    
+
     </div>
     <div class="card-footer">
       <button class="d-inline-flex btn btn-primary" data-bs-toggle="collapse" data-bs-target="#collapse_{{post.uuid}}" role="button" aria-expanded="false" aria-controls="collapse_{{post.uuid}}">
