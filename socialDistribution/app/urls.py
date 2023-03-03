@@ -16,7 +16,7 @@ urlpatterns = [
     path('posts/<str:post_id>/comment', views.add_comment, name='comment-form'),
     path('posts/<str:post_id>/like', views.add_like_post, name='add_like_post'),
     path('posts/<str:post_id>/comments/<str:comment_id>/like', views.add_like_comment, name='add_like_comment'),
-
+    path('delete-post/<uuid:post_id>/', views.delete_post, name='delete_post'),
 
     path('authors', views.authors, name='authors'),
     path('authors/<str:username>/inbox', views.inbox, name='inbox'),
