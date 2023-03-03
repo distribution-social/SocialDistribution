@@ -1,5 +1,7 @@
 # SocialDistribution
 
+To run server: run python socialDistribution/manage.py runserver
+
 License/Copyright
 =================
 
@@ -19,7 +21,7 @@ Refrences for views.py:
         https://stackoverflow.com/questions/4411049/how-can-i-find-the-union-of-two-django-querysets
         https://stackoverflow.com/a/4412293
         Author: Jordan Reiter https://stackoverflow.com/users/255918/jordan-reiter
-        
+
         Stackoverflow Answer
         Title: How do I do an OR filter in a Django query?
         https://stackoverflow.com/questions/739776/how-do-i-do-an-or-filter-in-a-django-query
