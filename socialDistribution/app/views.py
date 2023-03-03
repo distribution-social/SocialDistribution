@@ -75,11 +75,14 @@ def signup(request):
 
 @require_http_methods(["GET"])
 @login_required(login_url="/login")
-def home(request):
+def home(request): 
     user = request.user
     author = Author.objects.get(username=user.username)
-    context = {"user": user, "author": author}
-    return render(request, 'home.html', context)
+    posts1 = Post.objects.filter(visibility="PUBLIC")
+    posts2 = Post.objects.filter(visibility="FRIENDS", made_by__in=author.following.all())
+    posts = (posts1 | posts2).order_by('-date_published')
+    context = {"posts": posts, "comment_form": CommentForm()}
+    return render(request, 'posts_stream.html', context)
 
 
 @login_required(login_url="/login")
@@ -447,7 +450,7 @@ def sent_requests(request, username):
 def posts(request):
     posts = Post.objects.all().order_by('-date_published')
 
-    context = {"posts": posts, "mode": "public", "comment_form": CommentForm()}
+    context = {"posts": posts, "comment_form": CommentForm()}
 
     return render(request, 'posts_stream.html', context)
 
