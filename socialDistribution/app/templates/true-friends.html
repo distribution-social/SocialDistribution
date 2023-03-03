@@ -30,7 +30,7 @@
 
 <div class="btn-group" role="group" aria-label="Basic example">
 
-    <a type="button" class="btn btn-primary" href="{% url 'profile' username=friend.username %}" target="_blank"><i class="bi bi-person-fill">&nbsp;Profile</i></a>
+    <a type="button" class="btn btn-primary" href="{% url 'profile' author_id=friend.username|convert_username_to_id %}" target="_blank"><i class="bi bi-person-fill">&nbsp;Profile</i></a>
         <a type="button" href="{{friend.github}}" target="_blank" class="btn btn-secondary"><i class="bi bi-github">&nbsp;GitHub</i></a>
 
            
