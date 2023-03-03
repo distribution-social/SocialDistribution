@@ -142,7 +142,7 @@ Link: https://www.bootdey.com/snippets/view/bs4-s
           <i class="bi bi-reply mx-1"></i>
           <strong>Reply</strong>
         </a>
-        {% if request.user.username == post.made_by.username %}
+        {% if request.user.username|convert_username_to_id == post.made_by.id %}
           <a type="button" class="d-inline-flex text-muted mx-2 delete-button" style="text-decoration: none;" id="delete-post-{{post.uuid}}" data-bs-toggle="modal" data-bs-target="#delete-post-modal-{{post.uuid}}">
             <i class="bi bi-trash"></i>
             <strong>Delete</strong>

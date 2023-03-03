@@ -114,12 +114,15 @@ class Post(models.Model):
     origin = models.URLField(max_length=200)
 
     date_published = models.DateTimeField(default=timezone.now)
-
+    PLAIN = "text/plain"
+    MARKDOWN = "text/markdown"
+    PNG = "image/png"
+    JPG = "image/jpeg"
     CONTENT_TYPE_CHOICES = [
-        ("markdown", "text/markdown"),
-        ("plain", "text/plain"),
-        ("image-png", "image/png"),
-        ("image-jpeg", "image/jpeg"),
+        (MARKDOWN, "markdown"),
+        (PLAIN, "plain"),
+        (PNG, "image-png"),
+        (JPG, "image-jpeg"),
     ]
 
     content_type = models.CharField(max_length=18, choices=CONTENT_TYPE_CHOICES)
@@ -142,13 +145,17 @@ class Post(models.Model):
 
 class Comment(models.Model):
     uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
-
+    published = models.DateTimeField(default=timezone.now)
+    PLAIN = "text/plain"
+    MARKDOWN = "text/markdown"
     CONTENT_TYPE_CHOICES = [
-        ("markdown", "text/markdown"),
-        ("plain", "text/plain")
+        (MARKDOWN,"markdown" ),
+        (PLAIN,"plain_text")
     ]
     author = models.ForeignKey(Author, blank = False, null = False, related_name = "comments", on_delete=models.CASCADE)
     comment = models.CharField(max_length=200)
+
+    contentType = models.CharField(max_length=18, choices=CONTENT_TYPE_CHOICES,default=PLAIN)
     post = models.ForeignKey(Post, blank = False, null = False, related_name='comments', on_delete=models.CASCADE)
     likes = GenericRelation(Like)
     activity = GenericRelation(Activity)
