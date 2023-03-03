@@ -70,8 +70,12 @@ Link: https://www.bootdey.com/snippets/view/bs4-s
                   action: 'delete_post'
               },
               success: function (result) {
-                location.reload(); // reload the page on success
-                showAndDismissAlert("info","Post successfully deleted!")
+
+                $('#delete-post-modal-{{post.uuid}}').hide()
+                showAndDismissAlert("info","Post successfully deleted!");
+                setTimeout(function(){
+                  location.reload();
+                },500);
               },
               error: function (xhr, exception) {
                 let error_message = '';
