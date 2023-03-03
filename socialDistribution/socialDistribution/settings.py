@@ -85,18 +85,18 @@ WSGI_APPLICATION = 'socialDistribution.wsgi.application'
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
     # 'default': {
-    #     'ENGINE': 'django.db.backends.postgresql',
-    #     'NAME': 'df4fj8louh1vja',
-    #     'USER': 'mxsbfgthsrlphp',
-    #     'PASSWORD': 'e5ef20b4e5a19a11132658a17d4a3e924a2eef43669ed6f832671410c7916e65',
-    #     'HOST': 'ec2-54-160-109-68.compute-1.amazonaws.com',
-    #     'PORT': '5432',
+    #     'ENGINE': 'django.db.backends.sqlite3',
+    #     'NAME': BASE_DIR / 'db.sqlite3',
     # }
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'df4fj8louh1vja',
+        'USER': 'mxsbfgthsrlphp',
+        'PASSWORD': 'e5ef20b4e5a19a11132658a17d4a3e924a2eef43669ed6f832671410c7916e65',
+        'HOST': 'ec2-54-160-109-68.compute-1.amazonaws.com',
+        'PORT': '5432',
+    }
 }
 
 
