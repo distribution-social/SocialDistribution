@@ -25,14 +25,14 @@
                                 </div>
                                 <div class="p-2">
                                     {% if user.username != author.username %}
-                                    <form class="mt-3" action="{% url 'profile' username=author.username %}" method="post">
+                                    <form class="mt-3" action="{% url 'profile' author_id=author.id %}" method="post">
                                         {% csrf_token %}
                                     {% if user_is_following == "True" %}
-                                    <button type="submit" name="unfollow" value="{{author.username}}"
+                                    <button type="submit" name="unfollow" value="{{author.id}}"
                                         class="btn btn-outline-primary btn-lg">
                                         <i class="bi bi-person-fill-add">&nbsp;Unfollow</i></button>
                                     {% else %}
-                                    <button type="submit" name="follow" value="{{author.username}}"
+                                    <button type="submit" name="follow" value="{{author.id}}"
                                         class="btn btn-primary btn-lg">
                                         <i class="bi bi-person-fill-add">&nbsp;Request to Follow</i></button>
                                     {% endif %}
@@ -71,7 +71,7 @@
                                 <button class="nav-link {% if active_tab == 'friends' %} active{% endif %}"
                                     id="nav-friends-tab" data-bs-toggle="tab" data-bs-target="#nav-friends"
                                     type="button" role="tab" href="#" aria-controls="nav-friends"
-                                    aria-selected="false">{{friends|length}} Friend{{friends|pluralize}}</button>
+                                    aria-selected="false">{{friends|length}} True Friend{{friends|pluralize}}</button>
                             </div>
                         </nav>
                     </div>

@@ -244,10 +244,10 @@ def authors(request):
 
     elif request.method == "POST":
         # Get the username to follow
-        username_to_follow = request.POST.get("follow")
+        id_to_follow = request.POST.get("follow")
 
         # Get the author object
-        author_to_follow = Author.objects.get(username=username_to_follow)
+        author_to_follow = Author.objects.get(id=id_to_follow)
 
         # Get our author object
         current_user_author = Author.objects.get(
@@ -262,17 +262,18 @@ def authors(request):
 
 @login_required(login_url="/login")
 @require_http_methods(["GET", "POST"])
-def profile(request, username, active_tab="posts"):
+def profile(request, author_id):
     user = request.user
     userAuthor = Author.objects.get(username=request.user.username)
     if request.method == 'GET':
-        author = Author.objects.get(username=username)
+        author = Author.objects.get(id=author_id)
+        username = author.username
         following = author.following.all().order_by('displayName')
         followers = author.followers.all().order_by('displayName')
         friends = list(following & followers)
         posts = get_posts_visible_to_user(userAuthor, author, friends)
         context = {"posts": posts, "comment_form": CommentForm()}
-        context.update({"author": author, "following": following, "followers": followers, "friends": friends, "user": user, "active_tab": active_tab})
+        context.update({"author": author, "following": following, "followers": followers, "friends": friends, "user": user, "active_tab": "posts"})
         try:
             userFollows = userAuthor.following.get(username=username)
             context.update({"user_is_following": "True"})
@@ -282,7 +283,7 @@ def profile(request, username, active_tab="posts"):
         return render(request, 'profile.html', context)
     
     elif request.method == "POST":
-        author_for_action = Author.objects.get(username=username)
+        author_for_action = Author.objects.get(id=author_id)
         if author_for_action in userAuthor.following.all():
             # Remove the author from the following of the current user
             userAuthor.following.remove(author_for_action)
@@ -290,15 +291,15 @@ def profile(request, username, active_tab="posts"):
             # Add the author object to our sent_request list (Need to send this to inbox in the future to get approval on the other end)
             userAuthor.sent_requests.add(author_for_action)
 
-        return redirect(reverse("profile", kwargs={"username": username}))
+        return redirect(reverse("profile", kwargs={"author_id": userAuthor.id}))
     
 
-def get_posts_visible_to_user(user, author, friends):
-    if user==author:
+def get_posts_visible_to_user(userAuthor, author, friends):
+    if userAuthor.id==author.id:
         return Post.objects.filter(made_by=author).order_by('-date_published')
     public = Post.objects.filter(made_by=author, visibility="PUBLIC")
     #private = Post.objects.filter(made_by=author, receivers__contains=user)
-    if user in friends:
+    if userAuthor in friends:
         friends = Post.objects.filter(made_by=author, visibility="FRIENDS")
         #posts = (private | public | friends).distinct()
         posts = (public | friends).distinct()
@@ -313,30 +314,30 @@ def get_posts_visible_to_user(user, author, friends):
 def unfollow(request):
     user = request.user
     # Extract the username of the author to unfollow
-    username_to_unfollow = request.POST.get("unfollow")
+    id_to_unfollow = request.POST.get("unfollow")
     # Get the author object to unfollow
-    author_to_unfollow = Author.objects.get(username=username_to_unfollow)
+    author_to_unfollow = Author.objects.get(id=id_to_unfollow)
     # Get the author object of the current user
-    author = Author.objects.get(username=user)
+    user_author = Author.objects.get(username=user)
     # Remove the author from the following of the current user
-    author.following.remove(author_to_unfollow)
+    user_author.following.remove(author_to_unfollow)
     
-    return redirect(reverse("profile", kwargs={"username": user.username, "active_tab": "following"}))
+    return redirect(reverse("profile", kwargs={"author_id": user_author.id}))
 
 @login_required(login_url="/login")
 @require_http_methods(["POST"])
 def removeFollower(request):
     user = request.user
     # Extract the username of the author to remove from our followers
-    username_to_remove = request.POST.get("removefollower")
+    id_to_remove = request.POST.get("removefollower")
     # Get the author object
-    author_to_remove = Author.objects.get(username=username_to_remove)
+    author_to_remove = Author.objects.get(id=id_to_remove)
     # Get our author object
-    current_user_author = Author.objects.get(username=user.username)
+    user_author = Author.objects.get(username=user.username)
     # We remove ourself to the author's followings list
-    author_to_remove.following.remove(current_user_author)
+    author_to_remove.following.remove(user_author)
 
-    return redirect(reverse("profile", kwargs={'username': user.username, "active_tab": "followers"}))
+    return redirect(reverse("profile", kwargs={"author_id": user_author.id}))
 
 @login_required(login_url="/login")
 @require_http_methods(["GET"])
