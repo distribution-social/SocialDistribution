@@ -2,7 +2,7 @@ from django.test import TestCase
 
 from .models import Author
 
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, ObjectDoesNotExist
 
 class AuthorTest(TestCase):
 
@@ -91,3 +91,34 @@ class AuthorTest(TestCase):
                         github=self.github, profileImage=self.profileImage, email='google.com', username=self.username, confirmed=self.confirmed)
         self.assertRaises(ValidationError, author.full_clean)
 
+
+    def test_add_author_to_db(self):
+        author = Author(host=self.host, displayName="Jane Doe",
+                        github=self.github, profileImage=self.profileImage, email=self.email, username=self.username, confirmed=self.confirmed)
+
+        author.full_clean()
+        author.save()
+
+        retrieved_author = Author.objects.get(displayName="Jane Doe")
+
+        self.assertEqual(retrieved_author.displayName, "Jane Doe")
+
+    def test_delete_author_from_db(self):
+        author = Author(host=self.host, displayName="Deleted Author",
+                        github=self.github, profileImage=self.profileImage, email=self.email, username=self.username, confirmed=self.confirmed)
+        
+        author.full_clean()
+        author.save()
+
+        retrieved_author = Author.objects.get(displayName="Deleted Author")
+
+        self.assertEqual(retrieved_author.displayName, "Deleted Author")
+        
+        retrieved_author.delete()
+
+        # Reference: https: // stackoverflow.com/questions/69781507/django-unit-test-an-object-has-been-deleted-how-to-use-assertraise-doesnot
+        with self.assertRaises(Author.DoesNotExist):
+            Author.objects.get(displayName="Deleted Author")
+
+        
+        
