@@ -1,5 +1,14 @@
 # SocialDistribution
 
+Instruction
+=================
+To run: `python manage.py runserver`
+
+To run tests: `python manage.py tests`
+
+API Documentation is available in `/swagger`
+
+
 License/Copyright
 =================
 
