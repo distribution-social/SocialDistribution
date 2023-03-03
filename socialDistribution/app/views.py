@@ -9,7 +9,6 @@ from django.views.decorators.http import require_http_methods
 from django.urls import reverse
 from django.http import HttpResponseRedirect
 from django.contrib import messages
-import urllib.parse
 
 from django.contrib.auth.models import User
 from .helpers import is_valid_info
@@ -198,13 +197,16 @@ def authors(request):
 
 
 @login_required(login_url="/login")
-@require_http_methods(["GET"])
+@require_http_methods(["GET", "POST"])
 def profile(request, username, active_tab="posts"):
     user = request.user
+    userAuthor = Author.objects.get(username=request.user.username)
     if request.method == 'GET':
         author = Author.objects.get(username=username)
-        userAuthor = Author.objects.get(username=request.user.username)
-        context = {"author": author, "following": author.following.all().order_by('displayName'), "followers": author.followers.all().order_by('displayName'), "user": user, "active_tab": active_tab}
+        following = author.following.all().order_by('displayName')
+        followers = author.followers.all().order_by('displayName')
+        friends = list(following & followers)
+        context = {"author": author, "following": following, "followers": followers, "friends": friends, "user": user, "active_tab": active_tab}
         try:
             userFollows = userAuthor.following.get(username=username)
             context.update({"user_is_following": "True"})
@@ -212,11 +214,21 @@ def profile(request, username, active_tab="posts"):
             context.update({"user_is_following": "False"})
 
         return render(request, 'profile.html', context)
+    
+    elif request.method == "POST":
+        author_for_action = Author.objects.get(username=username)
+        if author_for_action in userAuthor.following.all():
+            # Remove the author from the following of the current user
+            userAuthor.following.remove(author_for_action)
+        else:
+            # Add the author object to our sent_request list (Need to send this to inbox in the future to get approval on the other end)
+            userAuthor.sent_requests.add(author_for_action)
+
+        return redirect(reverse("profile", kwargs={"username": username}))
 
 @login_required(login_url="/login")
 @require_http_methods(["POST"])
-def followingTab(request):
-
+def unfollow(request):
     user = request.user
     # Extract the username of the author to unfollow
     username_to_unfollow = request.POST.get("unfollow")
@@ -231,7 +243,7 @@ def followingTab(request):
 
 @login_required(login_url="/login")
 @require_http_methods(["POST"])
-def followersTab(request):
+def removeFollower(request):
     user = request.user
     # Extract the username of the author to remove from our followers
     username_to_remove = request.POST.get("removefollower")

@@ -19,18 +19,22 @@
                                 </div>
                                 <div class="p-2">
                                     {% if user.username != author.username %}
+                                    <form class="mt-3" action="{% url 'profile' username=author.username %}" method="post">
+                                        {% csrf_token %}
                                     {% if user_is_following == "True" %}
-                                    <a href="#" class="btn btn-outline-primary btn-lg">
-                                        Following</a>
+                                    <button type="submit" name="unfollow" value="{{author.username}}"
+                                        class="btn btn-outline-primary btn-lg">
+                                        <i class="bi bi-person-fill-add">&nbsp;Unfollow</i></button>
                                     {% else %}
-                                    <a href="#" class="btn btn-primary btn-lg">
-                                        Request to Follow</a>
+                                    <button type="submit" name="follow" value="{{author.username}}"
+                                        class="btn btn-primary btn-lg">
+                                        <i class="bi bi-person-fill-add">&nbsp;Request to Follow</i></button>
                                     {% endif %}
+                                    </form>
                                     {% endif %}
                                 </div>
                             </div>
                             <div>
-                                <p class="card-text">About author?</p>
                                 <a type="button" class="btn btn-secondary" href="{{person.github}}" target="_blank"><i
                                         class="bi bi-github">&nbsp;GitHub</i></a>
                             </div>
@@ -46,32 +50,44 @@
                     <div class="p-2">
                         <nav>
                             <div class="nav nav-tabs justify-content-center" id="nav-tab" role="tablist">
-                                <button class="nav-link {% if active_tab == 'posts' %} active{% endif %}" id="nav-public-posts-tab" data-bs-toggle="tab" href="#"
+                                <button class="nav-link {% if active_tab == 'posts' %} active{% endif %}"
+                                    id="nav-public-posts-tab" data-bs-toggle="tab" href="#"
                                     data-bs-target="#nav-public-posts" type="button" role="tab"
                                     aria-controls="nav-public-posts" aria-selected="true">Public Posts</button>
-                                <button class="nav-link {% if active_tab == 'followers' %} active{% endif %}" id="nav-followers-tab" data-bs-toggle="tab" href="#"
-                                    data-bs-target="#nav-followers" type="button" role="tab"
-                                    aria-controls="nav-followers" aria-selected="false">{{followers|length}} Follower{{followers|pluralize}}</button>
-                                <button class="nav-link {% if active_tab == 'following' %} active{% endif %}" id="nav-following-tab" data-bs-toggle="tab"
-                                    data-bs-target="#nav-following" type="button" role="tab" href="#"
-                                    aria-controls="nav-following" aria-selected="false">{{following|length}} Following</button>
+                                <button class="nav-link {% if active_tab == 'followers' %} active{% endif %}"
+                                    id="nav-followers-tab" data-bs-toggle="tab" href="#" data-bs-target="#nav-followers"
+                                    type="button" role="tab" aria-controls="nav-followers"
+                                    aria-selected="false">{{followers|length}} Follower{{followers|pluralize}}</button>
+                                <button class="nav-link {% if active_tab == 'following' %} active{% endif %}"
+                                    id="nav-following-tab" data-bs-toggle="tab" data-bs-target="#nav-following"
+                                    type="button" role="tab" href="#" aria-controls="nav-following"
+                                    aria-selected="false">{{following|length}} Following</button>
+                                <button class="nav-link {% if active_tab == 'friends' %} active{% endif %}"
+                                    id="nav-friends-tab" data-bs-toggle="tab" data-bs-target="#nav-friends"
+                                    type="button" role="tab" href="#" aria-controls="nav-friends"
+                                    aria-selected="false">{{friends|length}} Friend{{friends|pluralize}}</button>
                             </div>
                         </nav>
                     </div>
                     <div class="p-2">
 
                         <div class="tab-content" id="nav-tabContent">
-                            <div class="tab-pane fade  {% if active_tab == 'posts' %} show active{% endif %}" id="nav-public-posts" role="tabpanel"
-                                aria-labelledby="nav-public-posts-tab" tabindex="0">
+                            <div class="tab-pane fade  {% if active_tab == 'posts' %} show active{% endif %}"
+                                id="nav-public-posts" role="tabpanel" aria-labelledby="nav-public-posts-tab"
+                                tabindex="0">
                                 Public posts stream
                             </div>
-                            <div class="tab-pane fade {% if active_tab == 'following' %} show active{% endif %}" id="nav-followers" role="tabpanel"
-                                aria-labelledby="nav-followers-tab" tabindex="0">
+                            <div class="tab-pane fade {% if active_tab == 'following' %} show active{% endif %}"
+                                id="nav-followers" role="tabpanel" aria-labelledby="nav-followers-tab" tabindex="1">
                                 {% include 'followerstab.html' %}
                             </div>
-                            <div class="tab-pane fade {% if active_tab == 'followers' %} show active{% endif %}" id="nav-following" role="tabpanel"
-                                aria-labelledby="nav-following-tab" tabindex="0">
+                            <div class="tab-pane fade {% if active_tab == 'followers' %} show active{% endif %}"
+                                id="nav-following" role="tabpanel" aria-labelledby="nav-following-tab" tabindex="2">
                                 {% include 'followingtab.html' %}
+                            </div>
+                            <div class="tab-pane fade {% if active_tab == 'friends' %} show active{% endif %}"
+                                id="nav-friends" role="tabpanel" aria-labelledby="nav-friends-tab" tabindex="3">
+                                {% include 'friendstab.html' %}
                             </div>
                         </div>
                     </div>

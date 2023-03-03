@@ -15,6 +15,6 @@ urlpatterns = [
     path('<str:username>/true-friends', views.true_friends, name='true-friends'),
     path('<str:username>/received', views.received_requests, name='requests'),
     path('<str:username>/sent', views.sent_requests, name='sent_requests'),
-    path('unfollow', views.followingTab, name='unfollow'),
-    path('removefollower', views.followersTab, name='removefollower')
+    path('unfollow', views.unfollow, name='unfollow'),
+    path('removefollower', views.removeFollower, name='removefollower')
 ]
