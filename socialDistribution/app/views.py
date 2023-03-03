@@ -15,7 +15,7 @@ from django.http import JsonResponse
 
 from django.contrib.auth.models import User
 from .helpers import *
-
+from django.db.models import Q
 
 
 class HttpResponseUnauthorized(HttpResponse):
@@ -53,16 +53,22 @@ def signup(request):
 
             try:
                 Author.objects.create(host="http://127.0.0.1:8000", displayName=display_name,
-                                      github=f"https://github.com/{github}", profileImage=None, email=email, username=username)
+                                      github=f"https://github.com/{github}", profileImage=None, email=email, username=username, confirmed=False)
             except Exception as e:
                 messages.warning(request, e)
                 return redirect(reverse('signup'))
 
             user = authenticate(username=username, password=password)
             if user is not None:
-                login(request, user)
-                return redirect(reverse('home'))
+                if user.is_active:
+                    login(request, user)
+                    return redirect(reverse('home'))
+                else:
+                    messages.warning(
+                        request, "Please contact the admin to get confirmed and be able to login")
+                    return redirect(reverse('login'))
             else:
+                messages.warning(request, "Please contact the admin to get confirmed and be able to login")
                 return redirect(reverse('signup'))
         else:
             return redirect(reverse('signup'))
@@ -150,11 +156,16 @@ def signin(request):
             username = form.cleaned_data.get('username')
             password = form.cleaned_data.get('password')
             user = authenticate(username=username, password=password)
+         
             if user is not None:
-                login(request, user)
-                return redirect(reverse('home'))
+                if user.is_active:
+                    login(request, user)
+                    return redirect(reverse('home'))
+                else:
+                    messages.warning(request, "Your account is not confirmed. Please contact the admin to get their approval.")
+                    return redirect(reverse('login'))
             else:
-                messages.warning(request, "Invalid username or password")
+                messages.warning(request, "Invalid username, invalid password, or unconfirmed user.")
                 return redirect(reverse('login'))
     elif request.method == "GET":
         # No need to sign in again
@@ -232,8 +243,8 @@ def followers(request, username):
 @require_http_methods(["GET", "POST"])
 def authors(request):
     if request.method == "GET":
-        authors = list(Author.objects.exclude(
-            username=request.user.username).order_by('displayName'))
+        authors = list(Author.objects.exclude(Q(
+            username=request.user.username) | Q(confirmed=False)).order_by('displayName'))
         current_user_followings = Author.objects.get(
             username=request.user.username).following.all()
         current_user_sent_requests = Author.objects.get(
@@ -246,10 +257,10 @@ def authors(request):
 
     elif request.method == "POST":
         # Get the username to follow
-        username_to_follow = request.POST.get("follow")
+        id_to_follow = request.POST.get("follow")
 
         # Get the author object
-        author_to_follow = Author.objects.get(username=username_to_follow)
+        author_to_follow = Author.objects.get(id=id_to_follow)
 
         # Get our author object
         current_user_author = Author.objects.get(
@@ -263,11 +274,83 @@ def authors(request):
 
 
 @login_required(login_url="/login")
-@require_http_methods(["GET"])
+@require_http_methods(["GET", "POST"])
 def profile(request, author_id):
+    user = request.user
+    userAuthor = Author.objects.get(username=request.user.username)
     if request.method == 'GET':
-        return HttpResponse("Profile")
+        author = Author.objects.get(id=author_id)
+        username = author.username
+        following = author.following.all().order_by('displayName')
+        followers = author.followers.all().order_by('displayName')
+        friends = list(following & followers)
+        posts = get_posts_visible_to_user(userAuthor, author, friends)
+        context = {"posts": posts, "comment_form": CommentForm()}
+        context.update({"author": author, "following": following, "followers": followers, "friends": friends, "user": user, "active_tab": "posts"})
+        try:
+            userFollows = userAuthor.following.get(username=username)
+            context.update({"user_is_following": "True"})
+        except:
+            context.update({"user_is_following": "False"})
 
+        return render(request, 'profile.html', context)
+    
+    elif request.method == "POST":
+        author_for_action = Author.objects.get(id=author_id)
+        if author_for_action in userAuthor.following.all():
+            # Remove the author from the following of the current user
+            userAuthor.following.remove(author_for_action)
+        else:
+            # Add the author object to our sent_request list (Need to send this to inbox in the future to get approval on the other end)
+            userAuthor.sent_requests.add(author_for_action)
+
+        return redirect(reverse("profile", kwargs={"author_id": userAuthor.id}))
+    
+
+def get_posts_visible_to_user(userAuthor, author, friends):
+    if userAuthor.id==author.id:
+        return Post.objects.filter(made_by=author).order_by('-date_published')
+    public = Post.objects.filter(made_by=author, visibility="PUBLIC")
+    #private = Post.objects.filter(made_by=author, receivers__contains=user)
+    if userAuthor in friends:
+        friends = Post.objects.filter(made_by=author, visibility="FRIENDS")
+        #posts = (private | public | friends).distinct()
+        posts = (public | friends).distinct()
+    else:
+        #posts = (private | public).distinct()
+        posts = public
+
+    return posts.order_by('-date_published')
+
+@login_required(login_url="/login")
+@require_http_methods(["POST"])
+def unfollow(request):
+    user = request.user
+    # Extract the username of the author to unfollow
+    id_to_unfollow = request.POST.get("unfollow")
+    # Get the author object to unfollow
+    author_to_unfollow = Author.objects.get(id=id_to_unfollow)
+    # Get the author object of the current user
+    user_author = Author.objects.get(username=user)
+    # Remove the author from the following of the current user
+    user_author.following.remove(author_to_unfollow)
+    
+    return redirect(reverse("profile", kwargs={"author_id": user_author.id}))
+
+@login_required(login_url="/login")
+@require_http_methods(["POST"])
+def removeFollower(request):
+    user = request.user
+    # Extract the username of the author to remove from our followers
+    id_to_remove = request.POST.get("removefollower")
+    # Get the author object
+    author_to_remove = Author.objects.get(id=id_to_remove)
+    # Get our author object
+    user_author = Author.objects.get(username=user.username)
+    # We remove ourself to the author's followings list
+    author_to_remove.following.remove(user_author)
+
+    return redirect(reverse("profile", kwargs={"author_id": user_author.id}))
 
 @login_required(login_url="/login")
 @require_http_methods(["GET"])
