@@ -166,4 +166,25 @@ class LikeSerializer(serializers.ModelSerializer):
         fields = ['type', 'author', 'summary','content_object','object']
 
 
+class ActivitySerializer(serializers.ModelSerializer):
+    content_object = GenericRelatedField({
+        Post: PostSerializer(),
+        Like: LikeSerializer(),
+        Comment: CommentSerializer(),
+        Author: AuthorSerializer()
+    })
 
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+
+        request = self.context.get('request')
+        kwargs = self.context.get('kwargs')
+        # kwargs = {
+        #     'author_id':kwargs.get('author_id')
+        # }
+        # data['author'] = get_full_uri(request,'api-author',kwargs)
+        return data
+
+    class Meta:
+        model = Activity
+        fields = [ 'content_object']

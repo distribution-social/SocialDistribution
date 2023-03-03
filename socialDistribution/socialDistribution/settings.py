@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
 from pathlib import Path
+import sys
 
 import sys
 
@@ -44,6 +45,8 @@ INSTALLED_APPS = [
     'crispy_bootstrap5',
     'rest_framework',
     'generic_relations',
+    'rest_framework_swagger',
+    'drf_yasg'
 ]
 
 MIDDLEWARE = [
@@ -82,7 +85,6 @@ CRISPY_TEMPLATE_PACK = "bootstrap5"
 
 WSGI_APPLICATION = 'socialDistribution.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
@@ -102,10 +104,10 @@ DATABASES = {
 }
 
 if 'test' in sys.argv:
-    DATABASES['default'] = {
-        'ENGINE': 'django.db.backends.sqlite3',
+    DATABASES['default'] = { 
+       'ENGINE': 'django.db.backends.sqlite3',
         'NAME': 'testdatabase'
-    }
+}
 
 
 # Password validation
@@ -148,3 +150,5 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+

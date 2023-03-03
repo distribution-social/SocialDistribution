@@ -141,6 +141,4 @@ class AuthorTest(TestCase):
 
 
 
-
-        
-        
+  
