@@ -37,8 +37,8 @@
                 <span style="color:grey;">wants to follow you</span>
                 <form class="mt-3" action="{% url 'requests' author_id=item.object.content_object.id %}" method="post">
                   {% csrf_token %}
-                  <button type="submit" name="action" value="accept_{{item.object.content_object.id}}_inbox" data-id="{{item.object.content_object.id}}" class="btn btn-success"><i class="bi bi-check">&nbsp;Accept</i></button>
-                  <button type="submit" name="action" value="decline_{{item.object.content_object.id}}_inbox" data-id="{{item.object.content_object.id}}" class="btn btn-danger"><i class="bi bi-x">&nbsp;Decline</i></button>
+                  <button type="submit" name="action" value="accept_{{item.object.content_object.username}}_inbox" data-username="{{item.object.content_object.username}}" class="btn btn-success"><i class="bi bi-check">&nbsp;Accept</i></button>
+                  <button type="submit" name="action" value="decline_{{item.object.content_object.username}}_inbox" data-username="{{item.object.content_object.username}}" class="btn btn-danger"><i class="bi bi-x">&nbsp;Decline</i></button>
                 </form>
                 {% else %}
                   {% if user.username|convert_username_to_id|isFollowing:item.object.content_object.id %}

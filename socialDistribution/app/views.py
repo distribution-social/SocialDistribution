@@ -101,17 +101,17 @@ def author_search(request):
 
 def delete_post(request, post_id):
     post = Post.objects.get(uuid=post_id)
-    
+
     if request.method == 'POST':
         # Verify that the user is allowed to delete the post
         if post.made_by.username != request.user.username:
             return JsonResponse({'success': False, 'message': 'You are not authorized to delete this post.'})
-        
+
         # Delete the post
         post.delete()
-        
+
         return JsonResponse({'success': True})
-    
+
     return JsonResponse({'success': False, 'message': 'Invalid request method.'})
 
 
@@ -306,7 +306,6 @@ def received_requests(request, author_id):
         sender_username = request_action[1]
         if len(request_action) > 2:
             inbox = request_action[2]
-        print(action,sender_username,inbox)
         sender_author = Author.objects.get(username=sender_username)
 
         # Get our author object
@@ -393,13 +392,13 @@ def post_detail(request, post_id):
 @login_required(login_url="/login")
 @require_http_methods(["GET","POST"])
 def inbox(request, author_id):
-    
+
     # Requested author
     requested_author = Author.objects.get(id=author_id)
 
     # Current user's author
     author = Author.objects.get(username=request.user.username)
-    
+
     if requested_author.username != author.username:
         return HttpResponseUnauthorized()
     context = {"type": "inbox"}

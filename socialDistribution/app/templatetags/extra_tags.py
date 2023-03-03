@@ -10,13 +10,13 @@ def classname(obj):
 
 @register.filter(name='isRequest')
 def is_request(user_id,id):
-  user = Author.objects.get(id=user_id)
-  return len(user.sent_requests.filter(id=id)) >= 1
+  user = Author.objects.get(id=id)
+  return len(user.sent_requests.filter(id=user_id)) >= 1
 
 @register.filter(name='isFollowing')
 def is_following(user_id,id):
-  user = Author.objects.get(id=user_id)
-  return len(user.following.filter(id=id)) >= 1
+  user = Author.objects.get(id=id)
+  return len(user.following.filter(id=user_id)) >= 1
 
 @register.filter
 def convert_username_to_id(value):
