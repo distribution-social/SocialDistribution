@@ -259,7 +259,7 @@ def authors(request):
 
 @login_required(login_url="/login")
 @require_http_methods(["GET"])
-def profile(request, username):
+def profile(request, author_id):
     if request.method == 'GET':
         return HttpResponse("Profile")
 
@@ -392,9 +392,15 @@ def post_detail(request, post_id):
 
 @login_required(login_url="/login")
 @require_http_methods(["GET","POST"])
-def inbox(request,username):
+def inbox(request, author_id):
+    
+    # Requested author
+    requested_author = Author.objects.get(id=author_id)
+
+    # Current user's author
     author = Author.objects.get(username=request.user.username)
-    if username != author.username:
+    
+    if requested_author.username != author.username:
         return HttpResponseUnauthorized()
     context = {"type": "inbox"}
 

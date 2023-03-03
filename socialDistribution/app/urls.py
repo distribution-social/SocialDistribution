@@ -19,10 +19,10 @@ urlpatterns = [
     path('delete-post/<uuid:post_id>/', views.delete_post, name='delete_post'),
 
     path('authors', views.authors, name='authors'),
-    path('authors/<str:username>/inbox', views.inbox, name='inbox'),
+    path('authors/<uuid:author_id>/inbox', views.inbox, name='inbox'),
     path('<str:username>/following', views.following, name='following'),
     path('<str:username>/followers', views.followers, name='followers'),
-    path('<str:username>', views.profile, name='profile'),
+    path('authors/<uuid:author_id>', views.profile, name='profile'),
     path('<str:username>/true-friends', views.true_friends, name='true-friends'),
     path('authors/<uuid:author_id>/received', views.received_requests, name='requests'),
     path('authors/<uuid:author_id>/sent', views.sent_requests, name='sent_requests'),
