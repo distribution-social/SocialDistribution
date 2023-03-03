@@ -21,10 +21,7 @@ urlpatterns = [
 
     path('authors', views.authors, name='authors'),
     path('authors/<uuid:author_id>/inbox', views.inbox, name='inbox'),
-    path('<str:username>/following', views.following, name='following'),
-    path('<str:username>/followers', views.followers, name='followers'),
     path('authors/<str:author_id>', views.profile, name='profile'),
-    #path('authors/<str:author_id>/<active_tab>', views.profile, name='profile'),
     path('unfollow', views.unfollow, name='unfollow'),
     path('removefollower', views.removeFollower, name='removefollower'),
     path('authors/<uuid:author_id>', views.profile, name='profile'),
