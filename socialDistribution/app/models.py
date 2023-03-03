@@ -34,6 +34,8 @@ class Author(models.Model):
 
     sent_requests = models.ManyToManyField('self', related_name='follow_requests', symmetrical=False, blank=True)
 
+    confirmed = models.BooleanField()
+
     # Used for rapid lookup, will improve database performance
     class Meta:
         indexes = [
