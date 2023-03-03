@@ -1,6 +1,12 @@
 {% extends "base_generic.html" %}
 
-{% block title %} <title>Profile</title> {% endblock %}
+{% block title %} 
+{% if user.username == author.username %}
+<title>Profile</title> 
+{% else %}
+<title>{{author.displayName}}</title>
+{% endif %}
+{% endblock %}
 
 {% block content %}
 </style>
@@ -75,7 +81,7 @@
                             <div class="tab-pane fade  {% if active_tab == 'posts' %} show active{% endif %}"
                                 id="nav-public-posts" role="tabpanel" aria-labelledby="nav-public-posts-tab"
                                 tabindex="0">
-                                Public posts stream
+                                {% include 'posts_tab.html' %}
                             </div>
                             <div class="tab-pane fade {% if active_tab == 'following' %} show active{% endif %}"
                                 id="nav-followers" role="tabpanel" aria-labelledby="nav-followers-tab" tabindex="1">

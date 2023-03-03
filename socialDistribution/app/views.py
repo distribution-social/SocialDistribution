@@ -267,7 +267,9 @@ def profile(request, username, active_tab="posts"):
         following = author.following.all().order_by('displayName')
         followers = author.followers.all().order_by('displayName')
         friends = list(following & followers)
-        context = {"author": author, "following": following, "followers": followers, "friends": friends, "user": user, "active_tab": active_tab}
+        posts = get_posts_visible_to_user(userAuthor, author, friends)
+        context = {"posts": posts, "comment_form": CommentForm()}
+        context.update({"author": author, "following": following, "followers": followers, "friends": friends, "user": user, "active_tab": active_tab})
         try:
             userFollows = userAuthor.following.get(username=username)
             context.update({"user_is_following": "True"})
@@ -286,6 +288,22 @@ def profile(request, username, active_tab="posts"):
             userAuthor.sent_requests.add(author_for_action)
 
         return redirect(reverse("profile", kwargs={"username": username}))
+    
+
+def get_posts_visible_to_user(user, author, friends):
+    if user==author:
+        return Post.objects.filter(made_by=author).order_by('-date_published')
+    public = Post.objects.filter(made_by=author, visibility="PUBLIC")
+    #private = Post.objects.filter(made_by=author, receivers__contains=user)
+    if user in friends:
+        friends = Post.objects.filter(made_by=author, visibility="FRIENDS")
+        #posts = (private | public | friends).distinct()
+        posts = (public | friends).distinct()
+    else:
+        #posts = (private | public).distinct()
+        posts = public
+
+    return posts.order_by('-date_published')
 
 @login_required(login_url="/login")
 @require_http_methods(["POST"])
