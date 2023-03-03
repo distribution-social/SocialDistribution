@@ -29,12 +29,7 @@ class SingleAuthorAPIView(APIView):
 
         serializer = AuthorSerializer(author, context={'request':request,'kwargs':{}})
 
-        data = {
-            "type": "author",
-            "items": serializer.data
-        }
-
-        return Response(data)
+        return Response(serializer.data)
 
     # In the requirements it says it should be POST. I kept it as put now, is that a typo on requirements since it says it should update the author
     def put(self, request, author_id):
@@ -151,7 +146,11 @@ class PostDetailView(APIView):
 
     def post(self, request, author_id, post_id):
         try:
-            post = Post.objects.get(uuid=post_id, made_by=request.user)
+            author = Author.objects.get(id=author_id)
+        except Author.DoesNotExist:
+            return Response({"error": "Author does not exist."}, status=400)
+        try:
+            post = Post.objects.get(uuid=post_id, made_by=author)
             return Response({"error": "Post with that id already exist"}, status=400)
         except Post.DoesNotExist:
 
@@ -163,7 +162,11 @@ class PostDetailView(APIView):
 
     def delete(self, request, author_id, post_id):
         try:
-            post = Post.objects.get(uuid=post_id, made_by=request.user)
+            author = Author.objects.get(id=author_id)
+        except Author.DoesNotExist:
+            return Response({"error": "Author does not exist."}, status=400)
+        try:
+            post = Post.objects.get(uuid=post_id, made_by=author)
         except Post.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
         post.delete()
@@ -171,15 +174,38 @@ class PostDetailView(APIView):
 
     def put(self, request, author_id, post_id):
         try:
-            post = Post.objects.get(uuid=post_id, made_by=request.user)
+            author = Author.objects.get(id=author_id)
+        except Author.DoesNotExist:
+            return Response({"error": "Author does not exist."}, status=400)
+        try:
+            post = Post.objects.get(uuid=post_id, made_by=author)
         except Post.DoesNotExist:
-            post = Post(uuid=post_id, made_by=request.user)
+            post = Post(uuid=post_id, made_by=author)
 
         serializer = PostSerializer(post,data=request.data, context={'request':request,'kwargs':{'author_id':author_id,'post_id':post_id}})
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class CommentView(APIView):
+    def get(self,request,author_id,post_id,comment_id):
+        try:
+            author = Author.objects.get(id=author_id)
+        except Author.DoesNotExist:
+            return Response({"error": "Author does not exist."}, status=400)
+        try:
+            post = Post.objects.get(uuid=post_id)
+        except Post.DoesNotExist:
+            return Response({"error": "Post does not exist."}, status=400)
+        try:
+            comment = post.comments.get(uuid=comment_id)
+        except Comment.DoesNotExist:
+            return Response({"error": "Comment does not exist."}, status=400)
+
+        serializer = CommentSerializer(comment, context={'request':request,'kwargs':{'author_id':author_id,'post_id':post_id,'comment_id':comment_id}})
+
+        return Response(serializer.data)
 
 class CommentsView(APIView):
     def get(self,request,author_id,post_id):
@@ -312,3 +338,41 @@ class LikedView(APIView):
         }
 
         return Response(response)
+
+class InboxView(APIView):
+    def get(self,request,author_id):
+        try:
+            author = Author.objects.get(id=author_id)
+            items = author.my_inbox.all().order_by("-date")
+        except Author.DoesNotExist:
+            return Response({"error": "Author does not exist."}, status=400)
+        item_list = []
+        author_serializer = AuthorSerializer(author, context={'request':request,'kwargs':{'author_id':author_id}})
+        for item in items:
+            serializer = ActivitySerializer(item.object, context={'request':request,'kwargs':{'author_id':author_id}})
+            item_list.append(serializer.data.get('content_object'))
+        reponse = {
+            'type': 'inbox',
+            'author': author_serializer.data.get('id'),
+            'items': item_list
+        }
+        return Response(reponse)
+
+    # is the post already created or should we create
+    def post(self,request,author_id):
+        try:
+            author = Author.objects.get(id=author_id)
+        except Author.DoesNotExist:
+            return Response({"error": "Author does not exist."}, status=400)
+        return Response("POST not yet done.")
+        serializer = ActivitySerializer(request.data, context={'request':request,'kwargs':{'author_id':author_id}})
+        return Response(serializer.data)
+
+    def delete(self,request,author_id):
+        try:
+            author = Author.objects.get(id=author_id)
+            author.my_inbox.all().delete()
+        except Author.DoesNotExist:
+            return Response({"error": "Author does not exist."}, status=400)
+
+        return Response(status=status.HTTP_204_NO_CONTENT)

@@ -35,9 +35,10 @@ urlpatterns = [
     path('api/authors/<uuid:author_id>/posts/<uuid:post_id>', PostDetailView.as_view(), name ='api-post-detail'),
     path('api/authors/<uuid:author_id>/posts', AuthorPostsView.as_view(), name ='api-author-post'),
     path('api/authors/<uuid:author_id>/liked', LikedView.as_view(), name ='api-author-liked'),
+    path('api/authors/<uuid:author_id>/inbox', InboxView.as_view(), name ='api-author-inbox'),
     path('api/authors/<uuid:author_id>/posts/<uuid:post_id>/comments', CommentsView.as_view(), name ='api-post-comments'),
     path('api/authors/<uuid:author_id>/posts/<uuid:post_id>/likes', LikesPostView.as_view(), name ='api-post-likes'),
-    path('api/authors/<uuid:author_id>/posts/<uuid:post_id>/comments/<uuid:comment_id>', LikesCommentView.as_view(), name ='api-post-comment'),
+    path('api/authors/<uuid:author_id>/posts/<uuid:post_id>/comments/<uuid:comment_id>', CommentView.as_view(), name ='api-post-comment'),
     path('api/authors/<uuid:author_id>/posts/<uuid:post_id>/comments/<uuid:comment_id>/likes', LikesCommentView.as_view(), name ='api-post-comment-likes'),
 
 ]
