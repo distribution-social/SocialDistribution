@@ -16,6 +16,8 @@ from django.http import JsonResponse
 from django.contrib.auth.models import User
 from .helpers import *
 
+from django.db.models import Q
+
 class HttpResponseUnauthorized(HttpResponse):
     status_code = 401
 
@@ -241,8 +243,8 @@ def followers(request, username):
 @require_http_methods(["GET", "POST"])
 def authors(request):
     if request.method == "GET":
-        authors = list(Author.objects.exclude(
-            username=request.user.username).order_by('displayName'))
+        authors = list(Author.objects.exclude(Q(
+            username=request.user.username) | Q(confirmed=False)).order_by('displayName'))
         current_user_followings = Author.objects.get(
             username=request.user.username).following.all()
         current_user_sent_requests = Author.objects.get(
