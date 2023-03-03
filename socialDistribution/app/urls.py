@@ -24,8 +24,8 @@ urlpatterns = [
     path('<str:username>/followers', views.followers, name='followers'),
     path('<str:username>', views.profile, name='profile'),
     path('<str:username>/true-friends', views.true_friends, name='true-friends'),
-    path('<str:username>/received', views.received_requests, name='requests'),
-    path('<str:username>/sent', views.sent_requests, name='sent_requests'),
+    path('authors/<uuid:author_id>/received', views.received_requests, name='requests'),
+    path('authors/<uuid:author_id>/sent', views.sent_requests, name='sent_requests'),
 
     #API urls
     path('api/authors/', AuthorListAPIView.as_view(), name='api-author-list'),

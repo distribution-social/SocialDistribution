@@ -284,7 +284,7 @@ def true_friends(request, username):
 
 @login_required(login_url="/login")
 @require_http_methods(["GET", "POST"])
-def received_requests(request, username):
+def received_requests(request, author_id):
     user = request.user
 
     if request.method == 'GET':
@@ -334,13 +334,13 @@ def received_requests(request, username):
             response = "Declined"
 
         if inbox:
-            return redirect(reverse("inbox", kwargs={'username': user.username}))
-        return redirect(reverse("requests", kwargs={'username': user.username}))
+            return redirect(reverse("inbox", kwargs={'author_id': convert_username_to_id(user.username)}))
+        return redirect(reverse("requests", kwargs={'author_id': convert_username_to_id(user.username)}))
 
 
 @login_required(login_url="/login")
 @require_http_methods(["GET", "POST"])
-def sent_requests(request, username):
+def sent_requests(request, author_id):
     user = request.user
 
     if request.method == 'GET':
@@ -368,7 +368,7 @@ def sent_requests(request, username):
             # Remove it from the receiver side
             receiver_author.follow_requests.remove(current_user_author)
 
-        return redirect(reverse("requests", kwargs={'username': user.username}))
+        return redirect(reverse("sent_requests", kwargs={'author_id': convert_username_to_id(user.username)}))
 
 
 @login_required(login_url="/login")

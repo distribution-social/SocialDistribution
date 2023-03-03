@@ -71,8 +71,8 @@
                   Requests
                 </a>
                 <ul class="dropdown-menu">
-                  <li><a class="dropdown-item" href="{% url 'sent_requests' username=user.username %}">Sent</a></li>
-                  <li><a class="dropdown-item" href="{% url 'requests' username=user.username %}">Received</a></li>
+                  <li><a class="dropdown-item" href="{% url 'sent_requests' author_id=user.username|convert_username_to_id %}">Sent</a></li>
+                  <li><a class="dropdown-item" href="{% url 'requests' author_id=user.username|convert_username_to_id %}">Received</a></li>
                 </ul>
               </li>
 
