@@ -108,7 +108,7 @@ Link: https://www.bootdey.com/snippets/view/bs4-s
       <div class="media">
         <div class="d-flex flex-row">
           <div class="m-2">
-            <a class="d-flex" href="{% url 'profile' username=post.made_by.username %}">
+            <a class="d-flex" href="{% url 'profile' author_id=post.made_by.username|convert_username_to_id %}">
               {% if post.made_by.profileImage %}
               <img src="{{post.made_by.profileImage}}" class="user-avatar-circle rounded-circle my-1" alt=""></img>
               {% else %}
@@ -122,7 +122,7 @@ Link: https://www.bootdey.com/snippets/view/bs4-s
             </h4>
           </div>
         </div>
-        <a class="text-muted m-2" href="{% url 'profile' username=post.made_by.username %}" style="text-decoration: none;">
+        <a class="text-muted m-2" href="{% url 'profile' author_id=post.made_by.username|convert_username_to_id %}" style="text-decoration: none;">
           {{post.made_by.displayName}}
         </a>
         <span class="text-muted m-2" style="text-decoration: none;">
@@ -142,7 +142,7 @@ Link: https://www.bootdey.com/snippets/view/bs4-s
           <i class="bi bi-reply mx-1"></i>
           <strong>Reply</strong>
         </a>
-        {% if request.user.username == post.made_by.username %}
+        {% if request.user.username|convert_username_to_id == post.made_by.id %}
           <a type="button" class="d-inline-flex text-muted mx-2 delete-button" style="text-decoration: none;" id="delete-post-{{post.uuid}}" data-bs-toggle="modal" data-bs-target="#delete-post-modal-{{post.uuid}}">
             <i class="bi bi-trash"></i>
             <strong>Delete</strong>

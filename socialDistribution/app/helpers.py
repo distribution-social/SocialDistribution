@@ -41,3 +41,6 @@ def add_to_inbox(from_author,to,type,object):
         activity = Activity.objects.create(type=type,content_object=object)
         return Inbox.objects.create(from_author=from_author,to=to,object=activity)
     return None
+
+def convert_username_to_id(username):
+    return Author.objects.get(username=username).id
