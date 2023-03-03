@@ -26,7 +26,8 @@ def setup_authors(authors):
       displayName=user.get('username'),
       github=f"https://github.com/{user.get('username')}",
       profileImage=None, email=user.get('email'),
-      username=user.get('username')
+      username=user.get('username'),
+      confirmed=True
     )
   return Author.objects.all()
 
@@ -192,7 +193,7 @@ class Likes(APITestCase):
     self.user =  User.objects.create(
         username='user',
         email='user@user.ca',
-        password='user'
+        password='user',
       )
     self.author_list = create_authors(5)
     self.post_author = self.author_list.first()
