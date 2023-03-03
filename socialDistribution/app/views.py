@@ -58,9 +58,15 @@ def signup(request):
 
             user = authenticate(username=username, password=password)
             if user is not None:
-                login(request, user)
-                return redirect(reverse('home'))
+                if user.is_active:
+                    login(request, user)
+                    return redirect(reverse('home'))
+                else:
+                    messages.warning(
+                        request, "Please contact the admin to get confirmed and be able to login")
+                    return redirect(reverse('login'))
             else:
+                messages.warning(request, "Please contact the admin to get confirmed and be able to login")
                 return redirect(reverse('signup'))
         else:
             return redirect(reverse('signup'))
@@ -148,11 +154,16 @@ def signin(request):
             username = form.cleaned_data.get('username')
             password = form.cleaned_data.get('password')
             user = authenticate(username=username, password=password)
+         
             if user is not None:
-                login(request, user)
-                return redirect(reverse('home'))
+                if user.is_active:
+                    login(request, user)
+                    return redirect(reverse('home'))
+                else:
+                    messages.warning(request, "Your account is not confirmed. Please contact the admin to get their approval.")
+                    return redirect(reverse('login'))
             else:
-                messages.warning(request, "Invalid username or password")
+                messages.warning(request, "Invalid username, invalid password, or unconfirmed user.")
                 return redirect(reverse('login'))
     elif request.method == "GET":
         # No need to sign in again
