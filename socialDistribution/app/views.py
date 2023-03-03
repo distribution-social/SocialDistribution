@@ -99,6 +99,22 @@ def author_search(request):
             return JsonResponse({'search_term': data})
 
 
+def delete_post(request, post_id):
+    post = Post.objects.get(uuid=post_id)
+    
+    if request.method == 'POST':
+        # Verify that the user is allowed to delete the post
+        if post.made_by.username != request.user.username:
+            return JsonResponse({'success': False, 'message': 'You are not authorized to delete this post.'})
+        
+        # Delete the post
+        post.delete()
+        
+        return JsonResponse({'success': True})
+    
+    return JsonResponse({'success': False, 'message': 'Invalid request method.'})
+
+
 @login_required(login_url="/login")
 @require_http_methods(["GET", "POST"])
 def add_post(request):
@@ -369,7 +385,7 @@ def posts(request):
 @require_http_methods(["GET"])
 def post_detail(request, post_id):
     post = Post.objects.get(uuid=post_id)
-    context = {"post": post, "comment_form": CommentForm()}
+    context = {"request": request, "post": post, "comment_form": CommentForm()}
 
     return render(request, 'post_detail.html', context)
 
