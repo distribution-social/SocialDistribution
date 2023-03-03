@@ -120,5 +120,27 @@ class AuthorTest(TestCase):
         with self.assertRaises(Author.DoesNotExist):
             Author.objects.get(displayName="Deleted Author")
 
+    def test_update_author_in_db(self):
+        author = Author(host=self.host, displayName="Jamie Doe",
+                        github=self.github, profileImage=self.profileImage, email=self.email, username=self.username, confirmed=self.confirmed)
+
+        author.full_clean()
+        author.save()
+
+        retrieved_author = Author.objects.get(displayName="Jamie Doe")
+
+        self.assertEqual(retrieved_author.displayName, "Jamie Doe")
+
+        retrieved_author.displayName = "Anna Doe"
+
+        retrieved_author.save()
+
+        retrieved_author = Author.objects.get(displayName="Anna Doe")
+
+        self.assertEqual(retrieved_author.displayName, "Anna Doe")
+
+
+
+
         
         
