@@ -53,7 +53,7 @@ def signup(request):
 
             try:
                 Author.objects.create(host="http://127.0.0.1:8000", displayName=display_name,
-                                      github=f"https://github.com/{github}", profileImage=None, email=email, username=username)
+                                      github=f"https://github.com/{github}", profileImage=None, email=email, username=username, confirmed=False)
             except Exception as e:
                 messages.warning(request, e)
                 return redirect(reverse('signup'))
