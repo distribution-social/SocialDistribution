@@ -5,6 +5,7 @@ from .API.views import *
 
 
 urlpatterns = [
+    path('', views.root, name='root'),
     path('signup', views.signup, name='signup'),
     path('home', views.home, name='home'),
     path('post', views.add_post, name='post-form'),

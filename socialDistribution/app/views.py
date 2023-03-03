@@ -21,6 +21,12 @@ from django.db.models import Q
 class HttpResponseUnauthorized(HttpResponse):
     status_code = 401
 
+@require_http_methods(["GET"])
+def root(request):
+    # redirects to home page
+    return redirect(reverse('home'))
+
+
 @require_http_methods(["GET", "POST"])
 def signup(request):
     if request.method == "POST":
