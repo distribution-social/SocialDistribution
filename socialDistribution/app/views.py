@@ -21,6 +21,12 @@ from django.db.models import Q
 class HttpResponseUnauthorized(HttpResponse):
     status_code = 401
 
+@require_http_methods(["GET"])
+def root(request):
+    # redirects to home page
+    return redirect(reverse('home'))
+
+
 @require_http_methods(["GET", "POST"])
 def signup(request):
     if request.method == "POST":
@@ -182,61 +188,6 @@ def signout(request):
     if request.method == "GET":
         logout(request)
         return redirect(reverse('home'))
-
-
-@login_required(login_url="/login")
-@require_http_methods(["GET", "POST"])
-def following(request, username):
-
-    user = request.user
-
-    if request.method == 'GET':
-        author = Author.objects.get(username=username)
-
-        context = {"follow": author.following.all().order_by('displayName'), "mode": "following",
-                   "user": user, "author": author}
-        return render(request, 'follow.html', context)
-
-    elif request.method == 'POST':
-        # Extract the username of the author to unfollow
-        username_to_unfollow = request.POST.get("unfollow")
-
-        # Get the author object to unfollow
-        author_to_unfollow = Author.objects.get(username=username_to_unfollow)
-
-        # Get the author object of the current user
-        author = Author.objects.get(username=user)
-
-        # Remove the author from the following of the current user
-        author.following.remove(author_to_unfollow)
-
-        return redirect(reverse("following", kwargs={'username': user.username}))
-
-
-@login_required(login_url="/login")
-@require_http_methods(["GET", "POST"])
-def followers(request, username):
-    user = request.user
-    if request.method == 'GET':
-        author = Author.objects.get(username=username)
-        context = {"follow": author.followers.all().order_by('displayName'), "mode": "followers",
-                   "user": user, "author": author}
-        return render(request, 'follow.html', context)
-
-    elif request.method == 'POST':
-        # Extract the username of the author to remove from our followers
-        username_to_remove = request.POST.get("remove")
-
-        # Get the author object
-        author_to_remove = Author.objects.get(username=username_to_remove)
-
-        # Get our author object
-        current_user_author = Author.objects.get(username=user.username)
-
-        # We remove ourself to the author's followings list
-        author_to_remove.following.remove(current_user_author)
-
-        return redirect(reverse("followers", kwargs={'username': user.username}))
 
 
 @login_required(login_url="/login")

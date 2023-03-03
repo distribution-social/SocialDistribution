@@ -26,14 +26,14 @@ schema_view = get_schema_view(
 
 
 urlpatterns = [
-    
+
     re_path(r'^swagger(?P<format>\.json|\.yaml)$',
             schema_view.without_ui(cache_timeout=0), name='schema-json'),
     re_path(r'^swagger/$', schema_view.with_ui('swagger',
             cache_timeout=0), name='schema-swagger-ui'),
     re_path(r'^redoc/$', schema_view.with_ui('redoc',
                                              cache_timeout=0), name='schema-redoc'),
-
+    path('', views.root, name='root'),    
     path('signup', views.signup, name='signup'),
     path('home', views.home, name='home'),
     path('post', views.add_post, name='post-form'),
@@ -49,10 +49,7 @@ urlpatterns = [
 
     path('authors', views.authors, name='authors'),
     path('authors/<uuid:author_id>/inbox', views.inbox, name='inbox'),
-    path('<str:username>/following', views.following, name='following'),
-    path('<str:username>/followers', views.followers, name='followers'),
     path('authors/<str:author_id>', views.profile, name='profile'),
-    #path('authors/<str:author_id>/<active_tab>', views.profile, name='profile'),
     path('unfollow', views.unfollow, name='unfollow'),
     path('removefollower', views.removeFollower, name='removefollower'),
     path('authors/<uuid:author_id>', views.profile, name='profile'),
