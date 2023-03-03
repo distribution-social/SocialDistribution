@@ -11,6 +11,9 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
 from pathlib import Path
+import sys
+
+import sys
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -42,6 +45,8 @@ INSTALLED_APPS = [
     'crispy_bootstrap5',
     'rest_framework',
     'generic_relations',
+    'rest_framework_swagger',
+    'drf_yasg'
 ]
 
 MIDDLEWARE = [
@@ -80,7 +85,6 @@ CRISPY_TEMPLATE_PACK = "bootstrap5"
 
 WSGI_APPLICATION = 'socialDistribution.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
@@ -97,6 +101,12 @@ DATABASES = {
         'HOST': 'ec2-54-160-109-68.compute-1.amazonaws.com',
         'PORT': '5432',
     }
+}
+
+if 'test' in sys.argv:
+    DATABASES['default'] = { 
+       'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': 'testdatabase'
 }
 
 
@@ -140,3 +150,5 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
