@@ -1,18 +1,23 @@
 from django.shortcuts import render, redirect
-from django.http import HttpResponse
-from .forms import SignupForm, SigninForm
+from django.http import *
+from .forms import *
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from .models import Author
+from .models import *
 from django.views.decorators.http import require_http_methods
 from django.urls import reverse
-from django.http import HttpResponseRedirect
 from django.contrib import messages
+from django.core.serializers import *
+
+from django.core import serializers
+from django.http import JsonResponse
 
 from django.contrib.auth.models import User
-from .helpers import is_valid_info
+from .helpers import *
 
+class HttpResponseUnauthorized(HttpResponse):
+    status_code = 401
 
 @require_http_methods(["GET", "POST"])
 def signup(request):
@@ -75,6 +80,61 @@ def home(request):
     author = Author.objects.get(username=user.username)
     context = {"user": user, "author": author}
     return render(request, 'home.html', context)
+
+
+@login_required(login_url="/login")
+@require_http_methods(["GET", "POST"])
+def author_search(request):
+
+    if request.POST.get('action') == 'author-search':
+        search_term = str(request.POST.get('query_term'))
+
+        if search_term:
+            search_term = Author.objects.filter(
+                username__icontains=search_term)[:5]
+
+            data = serializers.serialize('json', list(
+                search_term), fields=('id', 'username'))
+
+            return JsonResponse({'search_term': data})
+
+
+def delete_post(request, post_id):
+    post = Post.objects.get(uuid=post_id)
+    
+    if request.method == 'POST':
+        # Verify that the user is allowed to delete the post
+        if post.made_by.username != request.user.username:
+            return JsonResponse({'success': False, 'message': 'You are not authorized to delete this post.'})
+        
+        # Delete the post
+        post.delete()
+        
+        return JsonResponse({'success': True})
+    
+    return JsonResponse({'success': False, 'message': 'Invalid request method.'})
+
+
+@login_required(login_url="/login")
+@require_http_methods(["GET", "POST"])
+def add_post(request):
+    user = Author.objects.get(username=request.user.username)
+
+    if request.method == "POST":
+        form = PostForm(request.POST)
+        if form.is_valid():
+            # Save the form data to the database
+            if request.POST['visibility'] == 'PRIVATE':
+                post = form.save(user=user, receiver_list = request.POST.getlist('receivers'))
+            else:
+                 post = form.save(user=user)
+            # Do something with the saved data (e.g. redirect to a detail view)
+            # return redirect('post_detail', pk=post.pk)
+
+            return redirect(reverse('home'))
+    elif request.method == "GET":
+        context = {"title": "Create a Post", "form": PostForm()}
+        return render(request, 'post.html', context)
 
 
 @require_http_methods(["GET", "POST"])
@@ -192,6 +252,7 @@ def authors(request):
 
         # Add the author object to our sent_request list (Need to send this to inbox in the future to get approval on the other end)
         current_user_author.sent_requests.add(author_to_follow)
+        add_to_inbox(current_user_author,author_to_follow,Activity.FOLLOW,current_user_author)
 
         return redirect(reverse("authors"))
 
@@ -289,8 +350,16 @@ def received_requests(request, username):
         return render(request, 'requests.html', context)
 
     elif request.method == "POST":
-        action, sender_username = request.POST.get("action").split("_")
-
+        response = ""
+        inbox = None
+        request_action = request.POST.get("action").split("_")
+        if len(request_action) < 2:
+            return HttpResponseBadRequest("Not enough action parameters")
+        action = request_action[0]
+        sender_username = request_action[1]
+        if len(request_action) > 2:
+            inbox = request_action[2]
+        print(action,sender_username,inbox)
         sender_author = Author.objects.get(username=sender_username)
 
         # Get our author object
@@ -306,6 +375,7 @@ def received_requests(request, username):
 
             # Remove this follow request on our side
             current_user_author.follow_requests.remove(sender_author)
+            response = "Accepted"
 
         elif action == "decline":
 
@@ -314,7 +384,10 @@ def received_requests(request, username):
 
             # Remove this follow request on our side
             current_user_author.follow_requests.remove(sender_author)
+            response = "Declined"
 
+        if inbox:
+            return redirect(reverse("inbox", kwargs={'username': user.username}))
         return redirect(reverse("requests", kwargs={'username': user.username}))
 
 
@@ -349,3 +422,100 @@ def sent_requests(request, username):
             receiver_author.follow_requests.remove(current_user_author)
 
         return redirect(reverse("requests", kwargs={'username': user.username}))
+
+
+@login_required(login_url="/login")
+@require_http_methods(["GET"])
+def posts(request):
+    posts = Post.objects.all().order_by('-date_published')
+
+    context = {"posts": posts, "mode": "public", "comment_form": CommentForm()}
+
+    return render(request, 'posts_stream.html', context)
+
+
+@login_required(login_url="/login")
+@require_http_methods(["GET"])
+def post_detail(request, post_id):
+    post = Post.objects.get(uuid=post_id)
+    context = {"request": request, "post": post, "comment_form": CommentForm()}
+
+    return render(request, 'post_detail.html', context)
+
+
+@login_required(login_url="/login")
+@require_http_methods(["GET","POST"])
+def inbox(request,username):
+    author = Author.objects.get(username=request.user.username)
+    if username != author.username:
+        return HttpResponseUnauthorized()
+    context = {"type": "inbox"}
+
+    if request.method == "GET":
+        items = author.my_inbox.all().order_by("-date")
+        context.update({"items": items})
+
+    elif request.method == "POST":
+        author.my_inbox.all().delete()
+
+    return render(request, 'inbox.html', context)
+
+@login_required(login_url="/login")
+@require_http_methods(["POST"])
+def add_comment(request,post_id):
+    user = Author.objects.get(username=request.user.username)
+    post = Post.objects.get(uuid=post_id)
+
+    if request.method == "POST":
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            comment = form.save(user=user,post=post)
+            add_to_inbox(user,post.made_by,Activity.COMMENT,post)
+
+            # Do something with the saved data (e.g. redirect to a detail view)
+            # return redirect('post_detail', pk=post.pk)
+
+            return redirect(reverse('post_detail',kwargs={'post_id': post.uuid}))
+
+@login_required(login_url="/login")
+@require_http_methods(["POST"])
+def add_like_post(request,post_id):
+    user = Author.objects.get(username=request.user.username)
+    post = Post.objects.get(uuid=post_id)
+    response = HttpResponse()
+
+    if request.method == "POST":
+        if post.made_by.username == user.username:
+            response.content = "Can't like your own post."
+            return response
+        found = post.likes.filter(author=user)
+        if not found:
+            post.likes.create(type=Like.POST,author=user,summary=f'{user.displayName} liked your post.')
+            add_to_inbox(user,post.made_by,Activity.LIKE,post)
+            response.content = "Liked"
+        else:
+            response.content = "Already liked this post."
+
+    return response
+
+@login_required(login_url="/login")
+@require_http_methods(["POST"])
+def add_like_comment(request,post_id,comment_id):
+    user = Author.objects.get(username=request.user.username)
+    post = Post.objects.get(uuid=post_id)
+    comment = Comment.objects.get(uuid=comment_id)
+    response = HttpResponse()
+
+    if request.method == "POST":
+        if comment.author.username == user.username:
+            response.content = "Can't like your own comment."
+            return response
+        found = comment.likes.filter(author=user)
+        if not found:
+            comment.likes.create(type=Like.COMMENT,author=user,summary=f'{user.displayName} liked your comment.')
+            add_to_inbox(user,comment.author,Activity.LIKE,comment)
+            response.content = "Liked"
+        else:
+            response.content = "Already liked this comment."
+
+    return response
