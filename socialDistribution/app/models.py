@@ -3,6 +3,7 @@ from django.utils import timezone
 from django.db import models
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey,GenericRelation
+import base64
 
 # Create your models here.
 
@@ -162,6 +163,14 @@ class Comment(models.Model):
     likes = GenericRelation(Like)
     activity = GenericRelation(Activity)
 
+class Node(models.Model):
+    username = models.CharField(max_length=255)
+    password = models.CharField(max_length=255)
+
+    def __str__(self):
+        text = self.username + ":" + self.password
+        encoded_text = base64.b64encode(text.encode('utf-8')).decode('utf-8')   
+        return encoded_text
 
 
 
