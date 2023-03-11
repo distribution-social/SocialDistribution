@@ -8,8 +8,13 @@ from rest_framework import status
 from django.urls import reverse,resolve
 from django.core.exceptions import *
 from http import HTTPStatus
+from .mixins import BasicAuthMixin
+from rest_framework.permissions import AllowAny
 
-class AuthorListAPIView(APIView):
+
+
+
+class AuthorListAPIView(BasicAuthMixin,APIView):
     def get(self, request):
         authors = Author.objects.all()
         paginator = CustomPaginator()
@@ -23,7 +28,7 @@ class AuthorListAPIView(APIView):
 
         return Response(data)
 
-class SingleAuthorAPIView(APIView):
+class SingleAuthorAPIView(BasicAuthMixin,APIView):
     def get(self, request, author_id):
         author = Author.objects.get(id=author_id)
 
@@ -45,7 +50,7 @@ class SingleAuthorAPIView(APIView):
         else:
             return Response(serializer.errors, status=400)
 
-class AuthorFollowersAPIView(APIView):
+class AuthorFollowersAPIView(BasicAuthMixin, APIView):
     def get(self, request, author_id):
         try:
             author = Author.objects.get(id=author_id)
@@ -65,7 +70,7 @@ class AuthorFollowersAPIView(APIView):
 
 
 
-class FollowerAPIView(APIView):
+class FollowerAPIView(BasicAuthMixin,APIView):
 
     def get(self, request, author_id, follower_author_id):
             try:
@@ -115,7 +120,7 @@ class FollowerAPIView(APIView):
 
 
 
-class AuthorPostsView(APIView):
+class AuthorPostsView(BasicAuthMixin,APIView):
     def get(self, request, author_id):
         try:
             author = Author.objects.get(id=author_id)
@@ -131,7 +136,7 @@ class AuthorPostsView(APIView):
         serializer = PostSerializer(result_page, many=True, context={'request':request,'kwargs':{'author_id':author_id}})
         return Response(serializer.data)
 
-class PostDetailView(APIView):
+class PostDetailView(BasicAuthMixin,APIView):
     def get(self, request, author_id, post_id):
         try:
             post = Post.objects.get(uuid=post_id, visibility='PUBLIC')
@@ -188,7 +193,7 @@ class PostDetailView(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-class CommentView(APIView):
+class CommentView(BasicAuthMixin,APIView):
     def get(self,request,author_id,post_id,comment_id):
         try:
             author = Author.objects.get(id=author_id)
@@ -207,7 +212,7 @@ class CommentView(APIView):
 
         return Response(serializer.data)
 
-class CommentsView(APIView):
+class CommentsView(BasicAuthMixin,APIView):
     def get(self,request,author_id,post_id):
         try:
             author = Author.objects.get(id=author_id)
@@ -249,7 +254,7 @@ class CommentsView(APIView):
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-class LikesPostView(APIView):
+class LikesPostView(BasicAuthMixin, APIView):
     def get(self,request,author_id,post_id):
         try:
             post = Post.objects.get(uuid=post_id)
@@ -280,7 +285,7 @@ class LikesPostView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class LikesCommentView(APIView):
+class LikesCommentView(BasicAuthMixin,APIView):
     def get(self,request,author_id,post_id,comment_id):
         try:
             author = Author.objects.get(id=author_id)
@@ -322,7 +327,7 @@ class LikesCommentView(APIView):
             return Response(response)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-class LikedView(APIView):
+class LikedView(BasicAuthMixin,APIView):
     def get(self,request,author_id):
         try:
             author = Author.objects.get(id=author_id)
@@ -339,7 +344,7 @@ class LikedView(APIView):
 
         return Response(response)
 
-class InboxView(APIView):
+class InboxView(BasicAuthMixin,APIView):
     def get(self,request,author_id):
         try:
             author = Author.objects.get(id=author_id)
@@ -359,7 +364,8 @@ class InboxView(APIView):
         return Response(reponse)
 
     # is the post already created or should we create
-    def post(self,request,author_id):
+    def post(
+        self,request,author_id):
         try:
             author = Author.objects.get(id=author_id)
         except Author.DoesNotExist:
