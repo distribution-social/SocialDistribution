@@ -50,12 +50,9 @@
             </div>
         </div>
 
-        <div class="p-2">
-            <div class="card mb-3" style="max-width: 1000px;">
-                <div class="card-header">
-                    <div class="p-2">
+        <div style="max-width: 1000px;">
                         <nav>
-                            <div class="nav nav-tabs justify-content-center" id="nav-tab" role="tablist">
+                            <div class="nav nav-tabs justify-content-center border-bottom-0" id="nav-tab" role="tablist">
                                 <button class="nav-link {% if active_tab == 'posts' %} active{% endif %}"
                                     id="nav-public-posts-tab" data-bs-toggle="tab" href="#"
                                     data-bs-target="#nav-public-posts" type="button" role="tab"
@@ -74,8 +71,7 @@
                                     aria-selected="false">{{friends|length}} True Friend{{friends|pluralize}}</button>
                             </div>
                         </nav>
-                    </div>
-                    <div class="p-2">
+                    <div class="card p-2">
 
                         <div class="tab-content" id="nav-tabContent">
                             <div class="tab-pane fade  {% if active_tab == 'posts' %} show active{% endif %}"
@@ -96,9 +92,7 @@
                                 {% include 'friendstab.html' %}
                             </div>
                         </div>
-                    </div>
                 </div>
-            </div>
 
         </div>
     </div>
