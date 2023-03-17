@@ -28,20 +28,25 @@
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
               <li class="nav-item">
-                <a class="nav-link" aria-current="page" href="{% url 'home' %}">Home</a>
+                <a class="nav-link" aria-current="page" href="{% url 'home' %}">
+                  <i class="bi bi-house-fill">&nbsp;Home</i>
+                </a>
               </li>
               <li class="nav-item">
 
                         <li class="nav-item">
-                <a class="nav-link" href="{% url 'authors' %}">Authors</a>
+                <a class="nav-link" href="{% url 'authors' %}">
+                  <i class="bi bi-people-fill">&nbsp;Authors</i></a>
               </li>
 
                       <li class="nav-item">
-                <a class="nav-link" href="{% url 'posts' %}">Posts</a>
+                <a class="nav-link" href="{% url 'posts' %}">
+                  <i class="bi bi-globe">&nbsp;Posts</i></a>
               </li>
 
               <li class="nav-item">
-                <a class="nav-link" href="{% url 'profile' author_id=user.username|convert_username_to_id %}">Profile</a>
+                <a class="nav-link" href="{% url 'profile' author_id=user.username|convert_username_to_id %}">
+                  <i class="bi bi-person-fill">&nbsp;Profile</i></a>
               </li>
 
               <li class="nav-item dropdown">
@@ -55,11 +60,13 @@
               </li>
 
               <li class="nav-item" style="vertical-align: baseline;">
-                <a class="nav-link" href="{% url 'post-form' %}">Create a post</a>
+                <a class="nav-link" href="{% url 'post-form' %}"><i
+                  class="bi bi-pencil-square">&nbsp;Create a post</i></a>
               </li>
               {% if user %}
               <li class="nav-item" style="vertical-align: baseline;">
-                <a class="nav-link" href="{% url 'inbox' author_id=user.username|convert_username_to_id %}">My Inbox</a>
+                <a class="nav-link" href="{% url 'inbox' author_id=user.username|convert_username_to_id %}"><i
+                  class="bi bi-inbox-fill">&nbsp;My Inbox</i></a>
               </li>
               {% endif %}
             </ul>
