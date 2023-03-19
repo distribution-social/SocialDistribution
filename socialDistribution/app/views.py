@@ -157,10 +157,10 @@ def add_post(request):
 @require_http_methods(["GET", "POST"])
 def signin(request):
     if request.method == "POST":
-        form = SigninForm(request.POST)
-        if form.is_valid():
-            username = form.cleaned_data.get('username')
-            password = form.cleaned_data.get('password')
+        username = request.POST.get("username")
+        password = request.POST.get("password")
+
+        if username and password:
             user = authenticate(username=username, password=password)
          
             if user is not None:
@@ -173,6 +173,12 @@ def signin(request):
             else:
                 messages.warning(request, "Invalid username, invalid password, or unconfirmed user.")
                 return redirect(reverse('login'))
+        
+        # Username and/or password is missing
+        else:
+            messages.warning(request, "Invalid username, invalid password, or unconfirmed user.")
+            return redirect(reverse('login'))
+
     elif request.method == "GET":
         # No need to sign in again
         if request.user.is_authenticated:

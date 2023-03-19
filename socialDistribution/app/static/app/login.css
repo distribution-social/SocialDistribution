@@ -1,0 +1,26 @@
+:root {
+    --gray-blue: #37474F; 
+}
+body{
+    background-color: var(--gray-blue);
+}
+
+.btn-custom {
+    background-color: var(--gray-blue);
+    color: white;
+}
+
+.btn-custom:hover {
+    border: 1px solid var(--gray-blue);
+    background-color: white;
+    color: var(--gray-blue);
+}
+
+a {
+    text-decoration: none;   
+    color: var(--gray-blue);
+}
+
+.messages > p{
+    color: red;
+}
