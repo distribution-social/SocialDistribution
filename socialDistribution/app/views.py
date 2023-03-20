@@ -237,7 +237,7 @@ def profile(request, author_id):
         friends = list(following & followers)
         posts = get_posts_visible_to_user(userAuthor, author, friends)
         context = {"posts": posts, "comment_form": CommentForm()}
-        context.update({"author": author, "following": following, "followers": followers, "friends": friends, "user": user, "active_tab": "posts"})
+        context.update({"author": author, "following": following, "followers": followers, "friends": friends, "user": user, "active_tab": "posts", "edit_profile_form": EditProfileForm(instance=author)})
         try:
             userFollows = userAuthor.following.get(username=username)
             context.update({"user_is_following": "True"})
@@ -453,7 +453,7 @@ def inbox(request, author_id):
 
 @login_required(login_url="/login")
 @require_http_methods(["POST"])
-def add_comment(request,post_id):
+def add_comment(request, post_id):
     user = Author.objects.get(username=request.user.username)
     post = Post.objects.get(uuid=post_id)
 
@@ -467,6 +467,21 @@ def add_comment(request,post_id):
             # return redirect('post_detail', pk=post.pk)
 
             return redirect(reverse('post_detail',kwargs={'post_id': post.uuid}))
+        
+
+@login_required(login_url="/login")
+@require_http_methods(["POST"])
+def edit_profile(request, author_id):
+    user = Author.objects.get(username=request.user.username)
+    if request.method == "POST":
+        form = EditProfileForm(request.POST, instance=user)
+        if form.is_valid():
+            form.save()
+            return redirect(reverse('profile',kwargs={'author_id': author_id}))
+        else:
+            print(form.errors)
+            return HttpResponseBadRequest("Invalid form")
+
 
 @login_required(login_url="/login")
 @require_http_methods(["POST"])
