@@ -24,7 +24,7 @@
 
        {% csrf_token %}
 
-        <img src="https://justinmonteza.s3.us-west-1.amazonaws.com/logo_transparent.png" alt="" width="300" height="300" class="img-fluid">
+        <img src="{% static 'app/logo.png' %}" alt="" width="300" height="300" class="img-fluid">
 
    <div class="form-floating mb-3">
   <input name="username" type="text" class="form-control" id="floatingInput" placeholder="Username" required>
