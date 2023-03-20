@@ -191,9 +191,9 @@ def signin(request):
 
 
 @login_required(login_url="/login")
-@require_http_methods(["GET", "POST"])
+@require_http_methods(["POST"])
 def signout(request):
-    if request.method == "GET":
+    if request.method == "POST":
         logout(request)
         return redirect(reverse('home'))
 
