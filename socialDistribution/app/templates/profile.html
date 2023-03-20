@@ -40,14 +40,9 @@
                                     {% endif %}
                                 </div>
                             </div>
-                            <div class="p-2">
+                            <div>
                                 <a type="button" class="btn btn-secondary" href="{{person.github}}" target="_blank"><i
                                         class="bi bi-github">&nbsp;GitHub</i></a>
-                            </div>
-                            <div class="p-2">
-                                <a type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#edit-profile-{{author.id}}">
-                                    Edit Profile
-                                </a>
                             </div>
                         </div>
                     </div>
@@ -107,8 +102,6 @@
 
         </div>
     </div>
-    <!-- Not sure if it is correct -->
-    {% include "edit_profile_modal.html" %}
 </div>
 
 
