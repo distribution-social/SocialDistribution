@@ -10,6 +10,7 @@ admin.site.register([
   Like,
   Inbox,
   Activity,
+  Node,
   ])
 
 
