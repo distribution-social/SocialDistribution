@@ -143,8 +143,12 @@ def add_post(request):
             # Save the form data to the database
             if request.POST['visibility'] == 'PRIVATE':
                 post = form.save(user=user, receiver_list = request.POST.getlist('receivers'))
+                for reciever in post.recievers.all():
+                    add_to_inbox(user,reciever,Activity.POST,post)
             else:
                  post = form.save(user=user)
+                 for follower in user.followers.all():
+                    add_to_inbox(user,follower,Activity.POST,post)
             # Do something with the saved data (e.g. redirect to a detail view)
             # return redirect('post_detail', pk=post.pk)
 
@@ -443,10 +447,14 @@ def inbox(request, author_id):
     context = {"type": "inbox"}
 
     if request.method == "GET":
-        items = author.my_inbox.all().order_by("-date")
-        context.update({"items": items})
+        all = author.my_inbox.all().order_by("-date")
+        likes = all.filter(object__type="like")
+        comments = all.filter(object__type="comment")
+        posts = all.filter(object__type="post")
+        requests = all.filter(object__type="follow")
+        context.update({"items": all, "likes": likes, "comments": comments, "posts": posts, "requests": requests})
 
-    elif request.method == "POST":
+    elif request.method == "POST" and request.POST.get("action")=="clear_inbox":
         author.my_inbox.all().delete()
 
     return render(request, 'inbox.html', context)
