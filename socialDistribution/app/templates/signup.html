@@ -1,49 +1,77 @@
 {% load static %}
-
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign up</title>
-    <link rel="stylesheet" type="text/css" href="{% static 'app/signup.css' %}">
-</head>
-<body>
-    <div class="sign-up-form-container"> 
-        <form method="POST" action="signup">
-            <h1 id="sign-up-text">Sign up</h1>
-            <div class="form-internal">
-                
-                {% csrf_token %}
-                {{ form }}
-                <!-- <a class='small-signup-btn'>Sign up</a> -->
-                <input type="submit" value="Submit">
-
-                {% if messages %}
-               <ul class="messages">
-                  {% for message in messages %}
-                  <p{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</p>
-                  {% endfor %}
-               </ul>
-               {% endif %}
-
-
-                <a href="/login">Sign in instead</a>
+   <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <title>Sign Up</title>
+      <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
+      <link rel="stylesheet" type="text/css" href="{% static 'app/login.css' %}">
+   </head>
+   <body>
+      <div class="vh-100 d-flex justify-content-center align-items-center">
+      <div class="bg-light col-4 p-5 text-center rounded">
+         <form method="POST" action="signup">
+            {% csrf_token %}
+            <img src="{% static 'app/logo.png' %}" alt="" width="300" height="300" class="img-fluid">
+            <div class="form-floating mb-3">
+               <input name="display_name" type="text" class="form-control" id="floatingDisplayName" placeholder="Display Name" required>
+               <label for="floatingDisplayName">Display Name</label>
             </div>
-        </form>
-    </div>
-</body>
+            <div class="form-floating mb-3">
+               <input name="username" type="text" class="form-control" id="floatingUsername" placeholder="Username" required>
+               <label for="floatingUsername">Username</label>
+            </div>
+            <div class="form-floating mb-3">
+               <input name="email" type="email" class="form-control" id="floatingEmail" placeholder="name@example.com">
+               <label for="floatingEmail">Email address</label>
+            </div>
+            <div class="form-floating mb-3">
+               <input name="github" type="text" class="form-control" id="floatingGitHub" placeholder="GitHub Username" required>
+               <label for="floatingGitHub">GitHub Username</label>
+            </div>
+            <div class="row">
+               <div class="col">
+                  <div class="form-floating mb-3 mt-3">
+                     <input name="password" type="password" class="form-control" id="floatingPassword" placeholder="Password" required>
+                     <label for="floatingPassword">Password</label>
+                  </div>
+               </div>
+               <div class="col">
+                  <div class="form-floating mb-3 mt-3">
+                     <input name="confirm_password" type="password" class="form-control" id="floatingConfirm" placeholder="Confirm Password" required>
+                     <label for="floatingConfirm">Confirm Password</label>
+                  </div>
+               </div>
+            </div>
+            <div class="d-flex justify-content-center mb-3">
+               
+               <button id="signup" type="submit" class="btn btn-custom"><span id="spinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true" hidden></span>
+                  Sign up</button>
+            </div>
+            <div class="d-flex justify-content-center mb-3 mt-3">
+               <a href="{% url 'login' %}">Already have an account? <b>Log in</b></a>
+            </div>
+            {% if messages %}
+            <ul class="messages">
+               {% for message in messages %}
+               <p{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</p>
+               {% endfor %}
+            </ul>
+            {% endif %}
+         </form>
+      </div>
+      <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js" integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous"></script>
+      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js" integrity="sha384-mQ93GR66B00ZXjt0YO5KlohRA5SY2XofN4zfuZxLkoj1gXtW8ANNCe9d5Y3eG5eD" crossorigin="anonymous"></script>
+
+      <script type="text/javascript">
+        const signup = document.getElementById("signup");
+        const spinner = document.getElementById("spinner");
+        signup.addEventListener('click', () => {
+          spinner.removeAttribute("hidden");
+        })
+      </script>
+
+
+   </body>
 </html>
-
-
-<!-- <label for="display-name">Display Name</label>
-<input id="display-name" placeholder='Enter your display name'></input>
-<label for="profile-pic-url">Profile Picture URL</label>
-<input id="profile-pic-url" placeholder='Enter URL for profile picture'></input>
-<label for="github-url">Github URL</label>
-<input id="github-url" placeholder='Enter your URL for github'></input>
-<label for="password">Password</label>
-<input type="password" id="password" placeholder='Enter your password'></input>
-<label for="confirm_pass">Confirm Password</label>
-<input type="password" id="confirm_pass" placeholder='Confirm your password'></input> -->

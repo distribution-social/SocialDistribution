@@ -30,20 +30,23 @@ def root(request):
 @require_http_methods(["GET", "POST"])
 def signup(request):
     if request.method == "POST":
-        form = SignupForm(request.POST)
-        if form.is_valid():
-            display_name = form.cleaned_data.get('display_name')
+
+        form_inputs = request.POST
+        display_name = form_inputs.get('display_name')
+        username = form_inputs.get('username')
+        email = form_inputs.get('email')
+        github = form_inputs.get('github')
+        password = form_inputs.get('password')
+        confirm_password = form_inputs.get('confirm_password')
+
+        if display_name and username and email and github and password and confirm_password:
+            
             try:
                 first_name, last_name = display_name.split()
             except ValueError:
                 first_name = display_name
                 last_name = ""
 
-            username = form.cleaned_data.get('username')
-            email = form.cleaned_data.get('email')
-            github = form.cleaned_data.get('github')
-            password = form.cleaned_data.get('password')
-            confirm_password = form.cleaned_data.get('confirm_password')
 
             if not is_valid_info(request, username, email, github, password, confirm_password):
                 return redirect(reverse('signup'))
@@ -71,10 +74,10 @@ def signup(request):
                     return redirect(reverse('home'))
                 else:
                     messages.warning(
-                        request, "Please contact the admin to get confirmed and be able to login")
+                        request, "Please contact the admin to be confirmed and be able to login")
                     return redirect(reverse('login'))
             else:
-                messages.warning(request, "Please contact the admin to get confirmed and be able to login")
+                messages.warning(request, "Please contact the admin to be confirmed and be able to login")
                 return redirect(reverse('signup'))
         else:
             return redirect(reverse('signup'))
@@ -83,8 +86,7 @@ def signup(request):
         if request.user.is_authenticated:
             return redirect(reverse('home'))
         else:
-            context = {"title": "signup", "form": SignupForm()}
-            return render(request, 'signup.html', context)
+            return render(request, 'signup.html')
 
 
 @require_http_methods(["GET"])
@@ -161,10 +163,10 @@ def add_post(request):
 @require_http_methods(["GET", "POST"])
 def signin(request):
     if request.method == "POST":
-        form = SigninForm(request.POST)
-        if form.is_valid():
-            username = form.cleaned_data.get('username')
-            password = form.cleaned_data.get('password')
+        username = request.POST.get("username")
+        password = request.POST.get("password")
+
+        if username and password:
             user = authenticate(username=username, password=password)
          
             if user is not None:
@@ -177,6 +179,12 @@ def signin(request):
             else:
                 messages.warning(request, "Invalid username, invalid password, or unconfirmed user.")
                 return redirect(reverse('login'))
+        
+        # Username and/or password is missing
+        else:
+            messages.warning(request, "Invalid username, invalid password, or unconfirmed user.")
+            return redirect(reverse('login'))
+
     elif request.method == "GET":
         # No need to sign in again
         if request.user.is_authenticated:
@@ -187,9 +195,9 @@ def signin(request):
 
 
 @login_required(login_url="/login")
-@require_http_methods(["GET", "POST"])
+@require_http_methods(["POST"])
 def signout(request):
-    if request.method == "GET":
+    if request.method == "POST":
         logout(request)
         return redirect(reverse('home'))
 

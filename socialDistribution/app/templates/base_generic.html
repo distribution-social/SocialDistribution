@@ -70,7 +70,7 @@
               </li>
               {% endif %}
             </ul>
-            <form class="d-flex" role="search">
+            <form class="d-flex m-3" role="search">
               <div class="dropdown">
                 {% csrf_token %}
                   <input id="searchq" class="form-control me-2 dropdown-toggle" type="search" placeholder="Search" aria-label="Search" data-toggle="dropdown">
@@ -78,8 +78,23 @@
 
                   </ul>
               </div>
-              <a href="/logout" class="btn btn-outline-success" type="submit">Logout</a>
+             
           </form>
+          
+          <div class="m-3">
+
+         
+          <form name="form" method="post" action="{% url 'logout' %}">
+              {% csrf_token %}
+             <button id="logout" class="btn btn-success" type="submit">
+              <span id="spinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true" hidden></span>
+              Logout</button>
+          </form>
+
+           </div>
+
+          
+
         </div>
       </div>
     </nav>
@@ -182,5 +197,15 @@
       $("#alert-warning").hide()
       $("#alert-error").hide()
     </script>
+
+    <script type="text/javascript">
+        const logout = document.getElementById("logout");
+        const spinner = document.getElementById("spinner");
+        logout.addEventListener('click', () => {
+          spinner.removeAttribute("hidden");
+        })
+    </script>
+
+
   </body>
 </html>
