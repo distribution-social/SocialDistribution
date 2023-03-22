@@ -172,7 +172,7 @@ class Node(models.Model):
         encoded_text = base64.b64encode(text.encode('utf-8')).decode('utf-8')   
         return encoded_text
 
-#The teams we connect to.
+#The teams we connect to (including ourselves).
 class ForeignAPINodes(models.Model):
     base_url = models.URLField(max_length=200, unique=True)
     username = models.CharField(max_length=255)

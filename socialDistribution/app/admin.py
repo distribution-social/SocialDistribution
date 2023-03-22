@@ -11,6 +11,7 @@ admin.site.register([
   Inbox,
   Activity,
   Node,
+  ForeignAPINodes,
   ])
 
 
