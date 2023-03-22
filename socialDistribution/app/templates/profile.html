@@ -44,11 +44,13 @@
                                 <a type="button" class="btn btn-secondary" href="{{person.github}}" target="_blank"><i
                                         class="bi bi-github">&nbsp;GitHub</i></a>
                             </div>
+                            {% if user.username == author.username %}
                             <div class="p-2">
                                 <a type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#edit-profile-{{author.id}}">
                                     Edit Profile
                                 </a>
                             </div>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
