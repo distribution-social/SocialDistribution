@@ -45,12 +45,12 @@ def posts(request):
     }
 
     try:
-        res = requests.get(f'{base_url}/api/authors', headers=headers, params=params)
+        res = requests.get(f'{base_url}api/authors', headers=headers, params=params)
         authors = json.loads(res.text)
 
         for author in authors['items']:
             uuid = str(author['id']).split("/")[-1]
-            res = requests.get(f'{base_url}/api/authors/{uuid}/posts',headers=headers)
+            res = requests.get(f'{base_url}api/authors/{uuid}/posts',headers=headers)
 
             author_posts = json.loads(res.text)
 
@@ -80,7 +80,7 @@ def post_details(request):
     }
 # 'api/authors/<uuid:author_id>/posts/<uuid:post_id>
 
-    res = requests.get(f'{base_url}/api/authors/{author.id}/posts/{post_uuid}', headers=headers)
+    res = requests.get(f'{base_url}api/authors/{author.id}/posts/{post_uuid}', headers=headers)
     
     post = json.loads(res.text)
 
