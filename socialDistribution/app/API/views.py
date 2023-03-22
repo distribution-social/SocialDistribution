@@ -159,7 +159,12 @@ class AuthorPostsView(BasicAuthMixin,APIView):
             data['count'] = len(comments)
             data["comments"] = get_full_uri(request,'api-post-comments',context['kwargs'])
 
-        return Response(serializer.data)
+        result = {
+            "type": "posts",
+            "items": serializer.data,
+        }
+       
+        return Response(result)
 
 class PostDetailView(BasicAuthMixin,APIView):
     def get(self, request, author_id, post_id):
