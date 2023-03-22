@@ -21,6 +21,7 @@ from django.db.models import Q
 @login_required(login_url="/login")
 @require_http_methods(["GET"])
 def posts(request):
+    base_url = request.build_absolute_uri('/')
     user = request.user
     author = Author.objects.get(username=user.username)
     # posts1 = Post.objects.filter(visibility="PUBLIC")
@@ -42,12 +43,12 @@ def posts(request):
         'size': '10'
     }
 
-    res = requests.get('http://127.0.0.1:8000/api/authors', headers=headers, params=params)
+    res = requests.get(f'{base_url}/api/authors', headers=headers, params=params)
     authors = json.loads(res.text)
 
     for author in authors['items']:
         uuid = str(author['id']).split("/")[-1]
-        res = requests.get(f'http://127.0.0.1:8000/api/authors/{uuid}/posts',headers=headers)
+        res = requests.get(f'{base_url}/api/authors/{uuid}/posts',headers=headers)
 
         author_posts = json.loads(res.text)
 
@@ -59,6 +60,7 @@ def posts(request):
 @login_required(login_url="/login")
 @require_http_methods(["GET"])
 def post_details(request):
+    base_url = request.build_absolute_uri('/')
     author = Author.objects.get(username=request.user.username)
     post_uuid = request.GET.get("uuid")
     #TODO: when we get other team stuff we just have to look which host it is, and only call that server.
@@ -73,7 +75,7 @@ def post_details(request):
     }
 # 'api/authors/<uuid:author_id>/posts/<uuid:post_id>
 
-    res = requests.get(f'http://127.0.0.1:8000/api/authors/{author.id}/posts/{post_uuid}', headers=headers)
+    res = requests.get(f'{base_url}/api/authors/{author.id}/posts/{post_uuid}', headers=headers)
     
     post = json.loads(res.text)
 
