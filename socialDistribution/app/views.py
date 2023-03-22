@@ -9,9 +9,10 @@ from django.views.decorators.http import require_http_methods
 from django.urls import reverse
 from django.contrib import messages
 from django.core.serializers import *
-
+import requests
 from django.core import serializers
 from django.http import JsonResponse
+import json
 
 from django.contrib.auth.models import User
 from .helpers import *
@@ -89,13 +90,8 @@ def signup(request):
 
 @require_http_methods(["GET"])
 @login_required(login_url="/login")
-def home(request): 
-    user = request.user
-    author = Author.objects.get(username=user.username)
-    posts1 = Post.objects.filter(visibility="PUBLIC")
-    posts2 = Post.objects.filter(visibility="FRIENDS", made_by__in=author.following.all())
-    posts = (posts1 | posts2).order_by('-date_published')
-    context = {"posts": posts, "comment_form": CommentForm()}
+def home(request):
+    context = {"comment_form": CommentForm()}
     return render(request, 'posts_stream.html', context)
 
 
@@ -413,21 +409,26 @@ def sent_requests(request, author_id):
         return redirect(reverse("sent_requests", kwargs={'author_id': convert_username_to_id(user.username)}))
 
 
-@login_required(login_url="/login")
-@require_http_methods(["GET"])
-def posts(request):
-    posts = Post.objects.all().order_by('-date_published')
+# @login_required(login_url="/login")
+# @require_http_methods(["GET"])
+# def posts(request):
+#     posts = Post.objects.all().order_by('-date_published')
 
-    context = {"posts": posts, "comment_form": CommentForm()}
+#     context = {"posts": posts, "comment_form": CommentForm()}
 
-    return render(request, 'posts_stream.html', context)
+#     return render(request, 'posts_stream.html', context)
+
+
+
 
 
 @login_required(login_url="/login")
 @require_http_methods(["GET"])
 def post_detail(request, post_id):
+    
+    #TODO: Check if post is on different host, if yes, then poll info from that particular hosts endpoint, and then pass that data on.
     post = Post.objects.get(uuid=post_id)
-    context = {"request": request, "post": post, "comment_form": CommentForm()}
+    context = {"request": request, "post": str(post.uuid), "comment_form": CommentForm()}
 
     return render(request, 'post_detail.html', context)
 

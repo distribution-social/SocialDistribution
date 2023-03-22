@@ -49,7 +49,7 @@ class Author(models.Model):
         ]
 
     def __str__(self):
-        return f"{self.username}"
+        return f"{self.username}- {self.id}"
 
 class Activity(models.Model):
     POST = 'post'
@@ -171,6 +171,20 @@ class Node(models.Model):
         text = self.username + ":" + self.password
         encoded_text = base64.b64encode(text.encode('utf-8')).decode('utf-8')   
         return encoded_text
+
+#The teams we connect to.
+class ForeignAPINodes(models.Model):
+    base_url = models.URLField(max_length=200, unique=True)
+    username = models.CharField(max_length=255)
+    password = models.CharField(max_length=255)
+
+    def __str__(self):
+        return self.base_url
+
+    def getToken(self):
+        text = self.username + ":" + self.password
+        encoded_text = base64.b64encode(text.encode('utf-8')).decode('utf-8')
+        return token   
 
 
 

@@ -124,6 +124,7 @@ class AuthorPostsView(BasicAuthMixin,APIView):
     def get(self, request, author_id):
         try:
             author = Author.objects.get(id=author_id)
+  
         except Author.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
@@ -134,20 +135,64 @@ class AuthorPostsView(BasicAuthMixin,APIView):
         result_page = paginator.paginate_queryset(posts, request)
 
         serializer = PostSerializer(result_page, many=True, context={'request':request,'kwargs':{'author_id':author_id}})
+        
+        for i in range(len(serializer.data)):
+            data = serializer.data[i]
+            post = posts[i]
+            comments = post.comments.all()
+     
+            commentResultPage = paginator.paginate_queryset(comments, request)
+            
+            context = {'request':request,'kwargs':{'author_id':author_id,'post_id':data['id'].split("/")[-1]}}
+            comment_serializer = CommentSerializer(commentResultPage, many=True, context=context)
+            # import pdb; pdb.set_trace()
+            response = {
+                "type": "Comments",
+                "page": paginator.page.number,
+                "size": paginator.get_page_size(request),
+                "post": "get_full_uri(request,'api-post-detail',context)",
+                "id": "get_full_uri(request,'api-post-comments',context)",
+                "comments": comment_serializer.data,
+            }
+
+            data["commentSrc"] = response
+            data['count'] = len(comments)
+
         return Response(serializer.data)
 
 class PostDetailView(BasicAuthMixin,APIView):
     def get(self, request, author_id, post_id):
         try:
-            post = Post.objects.get(uuid=post_id, visibility='PUBLIC')
+            post = Post.objects.get(uuid=str(post_id))
+          
         except Post.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
         serializer = PostSerializer(post, context={'request':request,'kwargs':{'author_id':author_id,'post_id':post_id}})
-        return Response(serializer.data)
+        data = serializer.data  
+
+        comments = post.comments.all()
+        paginator = CustomPaginator()
+        commentResultPage = paginator.paginate_queryset(comments, request)
+        context = {'request':request,'kwargs':{'author_id':author_id,'post_id':data['id'].split("/")[-1]}}
+        comment_serializer = CommentSerializer(commentResultPage, many=True, context=context)
+        
+        response = {
+            "type": "Comments",
+            "page": paginator.page.number,
+            "size": paginator.get_page_size(request),
+            "post": "get_full_uri(request,'api-post-detail',context)",
+            "id": "get_full_uri(request,'api-post-comments',context)",
+            "comments": comment_serializer.data,
+        }
+
+        data["commentSrc"] = response
+        data['count'] = len(comments)
+      
+        return Response(data)
 
 
-    # Not sure how creating a post would look like (would the requester also send me the same json.)
+    # Not sure how creating a post would look like (would the requester also send me the same json.) (NO NEED, we dont use it)
 
     def post(self, request, author_id, post_id):
         try:
@@ -225,10 +270,10 @@ class CommentsView(BasicAuthMixin,APIView):
             return Response({"error": "Post does not exist."}, status=400)
 
         paginator = CustomPaginator()
-        result_page = paginator.paginate_queryset(comments, request)
+        commentResultPage = paginator.paginate_queryset(comments, request)
 
         context = {'author_id':author_id,'post_id':post_id}
-        serializer = CommentSerializer(result_page, many=True, context={'request':request,'kwargs':{'author_id':author_id,'post_id':post_id}})
+        serializer = CommentSerializer(commentResultPage, many=True, context={'request':request,'kwargs':{'author_id':author_id,'post_id':post_id}})
 
         response = {
             "type": "Comments",
