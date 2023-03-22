@@ -1,9 +1,13 @@
 import { addLikeEventListener, addDeletePostListener } from "./postCard.js"
 import { extractUUID } from "./utility.js";
-
+const spinner = document.getElementById("spinner2")
 // fetches the post when document loads.
 $(document).ready(function() {
     console.log('{{ csrf_token|length }}');
+    
+   
+    spinner.style.display = 'block'; 
+
     $.ajax({
         url: "/posts",
         type: 'GET',
@@ -31,8 +35,10 @@ $(document).ready(function() {
                         console.log(template)
                   
                         $('#post-stream').append(template);
+                        spinner.style.display = 'none'; 
                         addLikeEventListener(postData.uuid)
                         addDeletePostListener(postData.uuid)
+                       
               
                     },
                     error: function(xhr, status, error) {

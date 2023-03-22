@@ -3,10 +3,13 @@ import { extractUUID } from "./utility.js";
 
 const myDataElement = document.getElementById('my-data');
 const postUUID = myDataElement.dataset.myData;
-
+const spinner = document.getElementById("spinner3")
 $(document).ready(function() {
     $(`#collapse_${postUUID}`).show()
     console.log("IN POST_DETAILS.js")
+        
+   
+    spinner.style.display = 'display'; 
     $.ajax({
         url: "/post-details",
         type: 'GET',
@@ -30,7 +33,9 @@ $(document).ready(function() {
                 },
                 success: function(template) {
                     console.log(template)
+            
                     $('#post-detail').append(template);
+                    spinner.style.display = 'none'; 
                     addLikeEventListener(postData.uuid)
                     addDeletePostListener(postData.uuid)
           
