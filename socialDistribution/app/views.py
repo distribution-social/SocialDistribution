@@ -152,7 +152,7 @@ def add_post(request):
 
             return redirect(reverse('home'))
     elif request.method == "GET":
-        context = {"title": "Create a Post", "form": PostForm()}
+        context = {"title": "Create a Post", "form": PostForm(), "action": "PUBLISH"}
         return render(request, 'post.html', context)
 
 
@@ -439,6 +439,40 @@ def post_detail(request, post_id):
     context = {"request": request, "post": str(post.uuid), "comment_form": CommentForm()}
 
     return render(request, 'post_detail.html', context)
+
+
+@login_required(login_url="/login")
+@require_http_methods(["GET", "POST"])
+def post_edit(request, post_id):
+    post = Post.objects.get(uuid=post_id)
+    user = Author.objects.get(username=request.user.username)
+    if request.method == "POST":
+        if post.made_by.username != request.user.username:
+            return JsonResponse({'success': False, 'message': 'You are not authorized to delete this post.'})
+        form = PostForm(request.POST, instance=post)
+        if form.is_valid():
+            # Save the form data to the database
+            if request.POST['visibility'] == 'PRIVATE':
+                print("saving")
+                post = form.save(user=user, receiver_list = request.POST.getlist('receivers'))
+                print("saved")
+            else:
+                print("saving")
+                post = form.save(user=user)
+                print("saved")
+            # Do something with the saved data (e.g. redirect to a detail view)
+            # return redirect('post_detail', pk=post.pk)
+
+            return redirect(reverse('home'))
+        if form.is_valid():
+            print(form.errors)
+            return HttpResponseBadRequest("Invalid form")
+
+    elif request.method == "GET":
+        context = {"title": "Edit Your Post", "form": PostForm(instance=post), "action": "SAVE", "post": post}
+        if post.made_by.username != request.user.username:
+            return JsonResponse({'success': False, 'message': 'You are not authorized to delete this post.'})
+        return render(request, 'post_edit.html', context)
 
 
 @login_required(login_url="/login")
