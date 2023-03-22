@@ -18,10 +18,10 @@ $(document).ready(function() {
                     ...post
                 }
 
-                console.log(postData)
 
                 postData.author.id = extractUUID(post.author.id)
                 postData.likeCount = 5; // hardcoding for now, since we dont give 
+                console.log(postData)
 
                 $.ajax({
                     url: '/post_card.html',

@@ -175,8 +175,10 @@ class Node(models.Model):
 #The teams we connect to (including ourselves).
 class ForeignAPINodes(models.Model):
     base_url = models.URLField(max_length=200, unique=True)
-    username = models.CharField(max_length=255)
-    password = models.CharField(max_length=255)
+
+    #allowing it to be blank because team yoshi doesnt have auth
+    username = models.CharField(max_length=255, null=True, blank=True)
+    password = models.CharField(max_length=255,null=True,blank=True)
 
     def __str__(self):
         return self.base_url
