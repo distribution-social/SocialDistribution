@@ -159,4 +159,8 @@ REST_FRAMEWORK = {
     ]
 }
 
+#remove it once we make it https
+SECURE_SSL_REDIRECT = False
+
 django_on_heroku.settings(locals())  # bottom of the file
+
