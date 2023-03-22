@@ -145,18 +145,19 @@ class AuthorPostsView(BasicAuthMixin,APIView):
             
             context = {'request':request,'kwargs':{'author_id':author_id,'post_id':data['id'].split("/")[-1]}}
             comment_serializer = CommentSerializer(commentResultPage, many=True, context=context)
-            # import pdb; pdb.set_trace()
+
             response = {
                 "type": "Comments",
                 "page": paginator.page.number,
                 "size": paginator.get_page_size(request),
-                "post": "get_full_uri(request,'api-post-detail',context)",
-                "id": "get_full_uri(request,'api-post-comments',context)",
+                "post": get_full_uri(request,'api-post-detail',context['kwargs']),
+                "id": get_full_uri(request,'api-post-comments',context['kwargs']),
                 "comments": comment_serializer.data,
             }
 
             data["commentSrc"] = response
             data['count'] = len(comments)
+            data["comments"] = get_full_uri(request,'api-post-comments',context['kwargs'])
 
         return Response(serializer.data)
 
@@ -181,8 +182,8 @@ class PostDetailView(BasicAuthMixin,APIView):
             "type": "Comments",
             "page": paginator.page.number,
             "size": paginator.get_page_size(request),
-            "post": "get_full_uri(request,'api-post-detail',context)",
-            "id": "get_full_uri(request,'api-post-comments',context)",
+            "post": get_full_uri(request,'api-post-detail',context['kwargs']),
+            "id": get_full_uri(request,'api-post-comments',context['kwargs']),
             "comments": comment_serializer.data,
         }
 
