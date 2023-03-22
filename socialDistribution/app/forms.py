@@ -69,3 +69,23 @@ class CommentForm(forms.ModelForm):
             comment.save()
 
         return comment
+    
+
+class EditProfileForm(forms.ModelForm):
+     class Meta:
+         model = Author
+         fields = ('displayName', 'email', 'github')
+
+         widgets = {
+             'displayName' : forms.TextInput(attrs={'class': 'form-control'}),
+             'email': forms.EmailInput(attrs={'class': 'form-control'}),
+             'github' : forms.TextInput(attrs={'class': 'form-control'}),
+         }
+
+     def save(self,commit=True):
+         print('save method called')
+         author = super().save(commit=False)
+         if commit:
+             author.save()
+
+         return author
