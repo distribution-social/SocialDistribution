@@ -161,6 +161,7 @@ REST_FRAMEWORK = {
 
 #remove it once we make it https
 SECURE_SSL_REDIRECT = False
+SECURE_CROSS_ORIGIN_OPENER_POLICY = None
 
 django_on_heroku.settings(locals())  # bottom of the file
 
