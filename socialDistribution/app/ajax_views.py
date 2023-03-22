@@ -22,6 +22,7 @@ from django.db.models import Q
 @require_http_methods(["GET"])
 def posts(request):
     base_url = request.build_absolute_uri('/')
+    print(base_url)
     user = request.user
     author = Author.objects.get(username=user.username)
     # posts1 = Post.objects.filter(visibility="PUBLIC")
@@ -43,8 +44,9 @@ def posts(request):
         'size': '10'
     }
 
-    res = requests.get(f'{base_url}/api/authors', headers=headers, params=params)
-    authors = json.loads(res.text)
+    try:
+        res = requests.get(f'{base_url}/api/authors', headers=headers, params=params)
+        authors = json.loads(res.text)
 
     for author in authors['items']:
         uuid = str(author['id']).split("/")[-1]
@@ -54,6 +56,9 @@ def posts(request):
 
         for post in author_posts:
             allPosts.append(post)
+    except:
+        print(res)
+        print(base_url)
 
     return JsonResponse({'posts': allPosts})
 
