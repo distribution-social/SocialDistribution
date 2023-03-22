@@ -54,20 +54,21 @@ export function addDeletePostListener(uuid){
   $(`#delete-post-${uuid}`).on('click', function(event) {
     console.log("Like button cliccked")
     event.preventDefault();
+    const url = `delete-post/${uuid}/`
     var postId = $(this).attr('id').replace('delete-post-', '');
-    $('#delete-post-modal-{{post.uuid}}').modal('show');
-    $('#confirm-delete-post-{{post.uuid}}').on('click', function(event) {
+    $(`#delete-post-modal-${uuid}`).modal('show');
+    $(`#confirm-delete-post-${uuid}`).on('click', function(event) {
       event.preventDefault();
       $.ajax({
             type: 'POST',
-            url: '{% url "delete_post" post_id=post.uuid %}',
+            url:url,
             data: {
                 csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
                 action: 'delete_post'
             },
             success: function (result) {
 
-              $('#delete-post-modal-{{post.uuid}}').hide()
+              $(`#delete-post-modal-${uuid}`).hide()
               showAndDismissAlert("info","Post successfully deleted!");
               setTimeout(function(){
                 location.reload();
@@ -91,7 +92,7 @@ export function addDeletePostListener(uuid){
               showAndDismissAlert("error",error_message)
             }
         });
-      $(`#confirm-delete-post-${post.uuid}`).modal('hide');
+      $(`#confirm-delete-post-${uuid}`).modal('hide');
     });
   });
 }
