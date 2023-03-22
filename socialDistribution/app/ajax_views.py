@@ -48,14 +48,14 @@ def posts(request):
         res = requests.get(f'{base_url}/api/authors', headers=headers, params=params)
         authors = json.loads(res.text)
 
-    for author in authors['items']:
-        uuid = str(author['id']).split("/")[-1]
-        res = requests.get(f'{base_url}/api/authors/{uuid}/posts',headers=headers)
+        for author in authors['items']:
+            uuid = str(author['id']).split("/")[-1]
+            res = requests.get(f'{base_url}/api/authors/{uuid}/posts',headers=headers)
 
-        author_posts = json.loads(res.text)
+            author_posts = json.loads(res.text)
 
-        for post in author_posts:
-            allPosts.append(post)
+            for post in author_posts:
+                allPosts.append(post)
     except:
         print(res)
         print(base_url)
