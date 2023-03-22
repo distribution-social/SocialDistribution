@@ -1,6 +1,6 @@
 from django.urls import path
 
-from . import views
+from . import views, template_views, ajax_views
 from .API.views import *
 
 from django.urls import include, re_path
@@ -40,7 +40,7 @@ urlpatterns = [
     path('author/search', views.author_search, name='author-search'),
     path('login', views.signin, name='login'),
     path('logout', views.signout, name='logout'),
-    path('posts', views.posts, name='posts'),
+
     path('posts/<str:post_id>', views.post_detail, name='post_detail'),
     path('posts/<str:post_id>/comment', views.add_comment, name='comment-form'),
     path('posts/<str:post_id>/like', views.add_like_post, name='add_like_post'),
@@ -56,6 +56,16 @@ urlpatterns = [
     path('<str:username>/true-friends', views.true_friends, name='true-friends'),
     path('authors/<uuid:author_id>/received', views.received_requests, name='requests'),
     path('authors/<uuid:author_id>/sent', views.sent_requests, name='sent_requests'),
+
+
+    #Template Urls (returns HTML)
+    path('post_card.html', template_views.get_post_card_template, name='post_card'),
+    path('post_detail.html', template_views.get_post_details_template, name='post_detail.html'),
+
+    #Ajax Urls (returns JSON response)
+    path('posts', ajax_views.posts, name='posts'),
+    path('post-details', ajax_views.post_details, name='post-details'),
+
 
     #API urls
     path('api/authors', AuthorListAPIView.as_view(), name='api-author-list'),

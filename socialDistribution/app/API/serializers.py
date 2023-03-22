@@ -62,6 +62,12 @@ class PostSerializer(serializers.ModelSerializer):
 
         data['id'] = get_full_uri(request,'api-post-detail',kwargs)
 
+        post_comments = instance.comments.all()
+
+        # comment_serializer = CommentSerializer(post_comments,many=True)
+
+        # data['commentSrc'] = comment_serializer.data
+  
         return data
 
 
