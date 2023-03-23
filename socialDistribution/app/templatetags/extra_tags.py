@@ -29,13 +29,14 @@ def extract_uuid(id):
 
 @register.filter
 def convert_uuid_to_hex(uuid_string):
-  try:
-    # attempt to convert the string to a UUID object
-    my_uuid = uuid.UUID(uuid_string)
+  return uuid_string
+  # try:
+  #   # attempt to convert the string to a UUID object
+  #   my_uuid = uuid.UUID(uuid_string)
     
-    # if the conversion is successful, the string is a UUID in hexadecimal representation
-    return my_uuid
+  #   # if the conversion is successful, the string is a UUID in hexadecimal representation
+  #   return my_uuid
     
-  except:
-    # if the conversion fails, the string is not a UUID in hexadecimal representation
-    return uuid
+  # except:
+  #   # if the conversion fails, the string is not a UUID in hexadecimal representation
+  #   return uuid
