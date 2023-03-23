@@ -3,18 +3,18 @@ import { extractUUID } from "./utility.js";
 const spinner = document.getElementById("spinner2")
 // fetches the post when document loads.
 $(document).ready(function() {
-    console.log('{{ csrf_token|length }}');
-    
-   
-    spinner.style.display = 'block'; 
+    // console.log('{{ csrf_token|length }}');
+
+
+    spinner.style.display = 'block';
 
     $.ajax({
         url: "/posts",
         type: 'GET',
-        success: function(res) {    
-            console.log(res)
+        success: function(res) {
+            // console.log(res)
             $.each(res.posts, function(index, post) {
-                console.log(post)
+                // console.log(post)
                 const postData = {
                     uuid: extractUUID(post.id),
                     ...post
@@ -22,8 +22,8 @@ $(document).ready(function() {
 
 
                 postData.author.id = extractUUID(post.author.id)
-                postData.likeCount = 5; // hardcoding for now, since we dont give 
-                console.log(postData)
+                postData.likeCount = 5; // hardcoding for now, since we dont give
+                // console.log(postData)
 
                 $.ajax({
                     url: '/post_card.html',
@@ -34,20 +34,20 @@ $(document).ready(function() {
                         'X-CSRFToken': '{{ csrf_token }}'
                     },
                     success: function(template) {
-                        console.log(template)
-                  
+                        // console.log(template)
+
                         $('#post-stream').append(template);
-                        spinner.style.display = 'none'; 
+                        spinner.style.display = 'none';
                         addLikeEventListener(postData.uuid)
                         addDeletePostListener(postData.uuid)
-                       
-              
+
+
                     },
                     error: function(xhr, status, error) {
                         console.error(xhr.responseText);
                     }
                 });
-    
+
             });
             $('#post-stream').removeClass('d-none');
         },

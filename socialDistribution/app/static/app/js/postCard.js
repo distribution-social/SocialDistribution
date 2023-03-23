@@ -2,10 +2,10 @@
 //post card scripts
 
 export function addLikeEventListener(uuid){
-    console.log(uuid)
+    // console.log(uuid)
     $(`#like-post-${uuid}`).click(function(e) {
         e.preventDefault();
-        const url = `posts/${uuid}/like`
+        const url = `/posts/${uuid}/like`
         $.ajax({
             type: 'POST',
             url: url,
@@ -15,17 +15,15 @@ export function addLikeEventListener(uuid){
             },
             success: function (result) {
               showAndDismissAlert("info",result)
-              console.log(result)
-              if(result){
+              // console.log(result)
+              if(result.toLowerCase() === "liked"){
                 let value = parseInt($(`#like-count-${uuid}`).html());
                 value++;
                 $(`#like-count-${uuid}`).html(value);
               }
 
-              //TODO: DO unlike
-              if(result.toLowerCase() === "already liked this post."){
-                showAndDismissAlert("info", "Letting you like still because unlike has not been implemented")
-              }
+              showAndDismissAlert("info", result)
+
             },
             error: function (xhr, exception) {
               let error_message = '';
@@ -50,9 +48,9 @@ export function addLikeEventListener(uuid){
 }
 
 export function addDeletePostListener(uuid){
-    console.log(uuid)
+    // console.log(uuid)
   $(`#delete-post-${uuid}`).on('click', function(event) {
-    console.log("Like button cliccked")
+    // console.log("Like button clicked")
     event.preventDefault();
     const url = `delete-post/${uuid}/`
     var postId = $(this).attr('id').replace('delete-post-', '');
