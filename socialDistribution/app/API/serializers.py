@@ -17,10 +17,21 @@ class AuthorSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         data = super().to_representation(instance)
 
-        if (not data['url'] or data['url'] == '' )and data['host']:
-            data['url'] = data['host'] + "/api/authors/" + data['id']
-        if data['id'] is not None and data['host']:
-            data['id'] = data['host'] + "/authors/" + data['id']
+        request = self.context.get('request')
+        kwargs = self.context.get('kwargs')
+        kwargs = {
+            'author_id':instance.id,
+        }
+
+        if not data['url'] or data['url'] == '' :
+            api = ''
+            if str(data['host'] == settings.HOST):
+                api = '/api'
+            if str(data['host']).endswith('/'):
+                data['url'] = str(data['host'])[:-1] + api + "/authors/" + data['id']
+            else:
+                data['url'] = data['host'] + api + "/authors/" + data['id']
+        data['id'] = get_full_uri(request,'api-single_author',kwargs,remove_str='')
 
 
         return data
