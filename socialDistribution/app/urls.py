@@ -36,6 +36,7 @@ urlpatterns = [
     path('', views.root, name='root'),    
     path('signup', views.signup, name='signup'),
     path('home', views.home, name='home'),
+    path('explore', views.explore, name='explore'),
     path('post', views.add_post, name='post-form'),
     path('author/search', views.author_search, name='author-search'),
     path('login', views.signin, name='login'),
@@ -64,7 +65,7 @@ urlpatterns = [
     path('post_detail.html', template_views.get_post_details_template, name='post_detail.html'),
 
     #Ajax Urls (returns JSON response)
-    path('posts', ajax_views.posts, name='posts'),
+    path('posts', ajax_views.explore_posts, name='posts'),
     path('post-details', ajax_views.post_details, name='post-details'),
 
 

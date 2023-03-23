@@ -1,0 +1,18 @@
+{% extends "base_generic.html" %}
+{% csrf_token %}
+{% block title %}
+<title>Home</title>
+{% endblock %}
+
+
+
+{% load static %}
+
+{% block content %}
+<h1>Such empty, much wow..</h1>
+<h2>Waiting for follow implementation to be done, go <a href="{% url 'explore' %}">explore</a> meanwhile!</h2>
+<div id=post-stream class="container-fluid d-flex align-items-center flex-column p-3 d-none" style="max-width: 1000px;">
+
+</div>
+
+{% endblock %}

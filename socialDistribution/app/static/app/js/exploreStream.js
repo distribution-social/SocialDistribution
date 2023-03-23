@@ -9,10 +9,12 @@ $(document).ready(function() {
     spinner.style.display = 'block'; 
 
     $.ajax({
-        url: "/posts",
+        url: "/explore-posts",
         type: 'GET',
         success: function(res) {
+            console.log(res)
             $.each(res.posts, function(index, post) {
+                console.log(post)
                 const postData = {
                     uuid: extractUUID(post.id),
                     ...post

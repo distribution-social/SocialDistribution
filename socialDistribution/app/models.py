@@ -110,7 +110,7 @@ class Post(models.Model):
     #if a private post was sent to a friend(only comes into play, when private, otherwise blank).
     receivers = models.ManyToManyField(Author, blank = True, null = True, related_name = "private_posts")
 
-    title = models.CharField(max_length=50, unique=True)
+    title = models.CharField(max_length=100, unique=False)
     description = models.CharField(max_length=150, blank=True, null=True)
 
     source = models.URLField(max_length=200)
