@@ -56,7 +56,7 @@ class Author(models.Model):
         if self.url == '' or not self.url:
             self.url = settings.HOST+'/api/authors/'+str(self.id)
         if self.host == '' or not self.host:
-            self.host = settings.HOST
+            self.host = settings.HOST + '/api/'
         super(Author, self).save(*args, **kwargs)
 
     def __str__(self):
