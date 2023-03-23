@@ -154,11 +154,11 @@ class Post(models.Model):
 
     def save(self, *args, **kwargs):
         if self.origin == '' or not self.origin:
-            self.origin = 'http://'+settings.HOSTNAME+'/authors/'+str(self.made_by.id)+'/posts/'+str(self.uuid)
+            self.origin = settings.SCHEME+settings.DOMAIN+'/authors/'+str(self.made_by.id)+'/posts/'+str(self.uuid)
         if self.source == '' or not self.source:
-            self.source = 'http://'+settings.HOSTNAME+'/authors/'+str(self.made_by.id)+'/posts/'+str(self.uuid)
+            self.source = settings.SCHEME+settings.DOMAIN+'/authors/'+str(self.made_by.id)+'/posts/'+str(self.uuid)
         if self.comments_url == '' or not self.comments_url:
-            self.comments_url = 'http://'+settings.HOSTNAME+'/authors/'+str(self.made_by.id)+'/posts/'+str(self.uuid)+'/comments'
+            self.comments_url = settings.SCHEME+settings.DOMAIN+'/authors/'+str(self.made_by.id)+'/posts/'+str(self.uuid)+'/comments'
         super(Post, self).save(*args, **kwargs)
 
     def __str__(self) -> str:

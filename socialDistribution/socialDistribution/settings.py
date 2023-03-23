@@ -14,6 +14,18 @@ from pathlib import Path
 import sys
 import os
 import django_on_heroku  # top of the file
+import dotenv
+
+dotenv.load_dotenv(".env")
+DOMAIN = os.getenv('DOMAIN')
+SCHEME = os.getenv('SCHEME')
+if not DOMAIN:
+    import socket
+    DOMAIN = socket.gethostbyname(socket.gethostname())
+
+if not SCHEME:
+    SCHEME = 'http://'
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -30,9 +42,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-DOMAIN = os.environ.get('DOMAIN')
-if not DOMAIN:
-    DOMAIN = '127.0.0.1:8000'
+
 
 # Application definition
 
