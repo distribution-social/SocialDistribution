@@ -28,12 +28,12 @@ def explore_posts(request):
     for foreignNode in foreignNodes:
         base_url = foreignNode.base_url
         print(base_url)
-
-
-        headers = {
-                'Authorization': f"Basic {foreignNode.getToken()}",
-                'Content-Type': 'application/json'
-        }
+        headers={}
+        if foreignNode.username:
+            headers = {
+                    'Authorization': f"Basic {foreignNode.getToken()}",
+                    'Content-Type': 'application/json'
+            }
 
 
         params = {
@@ -44,7 +44,8 @@ def explore_posts(request):
         try:
             res = requests.get(f'{base_url}authors', headers=headers, params=params)
             authors = json.loads(res.text)
-
+            # if base_url == "https://peer2pressure.herokuapp.com/":
+            #         import pdb; pdb.set_trace()
             for author in authors['items']:
                 if author['id']:
                     uuid = author['id'].split("/")[-1]
@@ -66,7 +67,7 @@ def explore_posts(request):
 
                 author_posts = json.loads(res.text)
                 for post in author_posts['items']:
-                    # if base_url == "https://yoshi-connect.herokuapp.com/":
+                    # if base_url == "https://peer2pressure.herokuapp.com/":
                     #     import pdb; pdb.set_trace()
                     uuid = post['id'].split("/")[-1]
 
