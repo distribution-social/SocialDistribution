@@ -17,7 +17,9 @@ def get_values_from_uri(path,add_api=False):
   return kwargs
 
 def parse_values(path):
-  parts = path.split('/')
+  parts =[]
+  if path:
+    parts = path.split('/')
   kwargs = {
     'author_id': None,
     'post_id': None,
