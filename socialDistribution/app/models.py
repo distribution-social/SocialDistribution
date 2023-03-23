@@ -117,7 +117,7 @@ class Post(models.Model):
     made_by = models.ForeignKey(Author, related_name = "my_posts", on_delete=models.CASCADE)
 
     #if a private post was sent to a friend(only comes into play, when private, otherwise blank).
-    receivers = models.ManyToManyField(Author, blank = True, null = True, related_name = "private_posts")
+    receivers = models.ManyToManyField(Author, blank = True, related_name = "private_posts")
 
     title = models.CharField(max_length=50)
     description = models.CharField(max_length=150, blank=True, null=True)

@@ -19,6 +19,7 @@ $(document).ready(function() {
                 ...res.post
             }
             postData.author.id = extractUUID(res.post.author.id)
+            postData.likeCount = 5; // hardcoding for now, since we dont give
 
             $.ajax({
                 url: '/post_detail.html',

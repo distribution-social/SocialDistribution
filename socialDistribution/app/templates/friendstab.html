@@ -12,8 +12,13 @@
         <div class="p-2">
             <div class="card flex-fill" style="width: 700px;">
                 <div class="d-flex">
-                    <img src="{{person.profileImage}}" width="230px" height="230px"
-                        class="object-fit-cover border rounded-start" alt="No profile image available">
+                    {% if person.profileImage %}
+                    <img src="{{person.profileImage}}" width="230px" height="230px" class="object-fit-cover border rounded-start"
+                    alt="No profile image">
+                    {% else %}
+                    <img src="{% static 'app/logo.png' %}" width="230px" height="230px" class="object-fit-cover border rounded-start"
+                    alt="No profile image">
+                    {% endif %}
                     <div class="d-flex flex-fill flex-column ">
                         <div class="card-body">
                             <h5 class="card-title">{{person.displayName}}</h5>
