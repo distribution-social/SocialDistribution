@@ -32,8 +32,12 @@ Link: https://www.bootdey.com/snippets/view/bs4-s
             <h4>
               <a class="card-title" href={% url 'post_detail' post_id=post.uuid|convert_uuid_to_hex %} style="text-decoration: none;">{{post.title}}</a>
             </h4>
+      
+              <span style="border: 1px solid black; background-color: #f5d442; border-radius:10%; color: black;">{{post.tag}}</span>
           </div>
+         
         </div>
+        
         <a class="text-muted m-2" href="{% url 'profile' author_id=post.author.id|convert_uuid_to_hex %}" style="text-decoration: none;">
           {{post.author.displayName}}
         </a>
