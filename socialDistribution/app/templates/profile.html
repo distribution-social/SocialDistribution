@@ -9,6 +9,14 @@
 {% endblock %}
 
 {% block content %}
+<script> 
+var author_id = '{{author.id}}';
+var author_host = '{{author.host}}';
+var user_id = '{{user.id}}'
+</script>
+<script type="module" src="{% static '../static/app/js/profile.js' %}"></script>
+
+
 </style>
 <div class="d-flex justify-content-center">
     <div class="p-2 d-flex flex-column mb-3 flex-fill" style="max-width: 1000px;">
@@ -60,45 +68,47 @@
                 </div>
             </div>
         </div>
-
-        <div style="max-width: 1000px;">
+        
+        <div class="p-2" style="max-width: 1000px;">
                         <nav>
                             <div class="nav nav-tabs justify-content-center border-bottom-0" id="nav-tab" role="tablist">
-                                <button class="nav-link {% if active_tab == 'posts' %} active{% endif %}"
+                                <button class="nav-link active"
                                     id="nav-public-posts-tab" data-bs-toggle="tab" href="#"
                                     data-bs-target="#nav-public-posts" type="button" role="tab"
                                     aria-controls="nav-public-posts" aria-selected="true">Public Posts</button>
-                                <button class="nav-link {% if active_tab == 'followers' %} active{% endif %}"
+                                <button class="nav-link"
                                     id="nav-followers-tab" data-bs-toggle="tab" href="#" data-bs-target="#nav-followers"
                                     type="button" role="tab" aria-controls="nav-followers"
-                                    aria-selected="false">{{followers|length}} Follower{{followers|pluralize}}</button>
-                                <button class="nav-link {% if active_tab == 'following' %} active{% endif %}"
+                                    aria-selected="false">Followers</button>
+                                <button class="nav-link"
                                     id="nav-following-tab" data-bs-toggle="tab" data-bs-target="#nav-following"
                                     type="button" role="tab" href="#" aria-controls="nav-following"
                                     aria-selected="false">{{following|length}} Following</button>
-                                <button class="nav-link {% if active_tab == 'friends' %} active{% endif %}"
+                                <button class="nav-link"
                                     id="nav-friends-tab" data-bs-toggle="tab" data-bs-target="#nav-friends"
                                     type="button" role="tab" href="#" aria-controls="nav-friends"
-                                    aria-selected="false">{{friends|length}} True Friend{{friends|pluralize}}</button>
+                                    aria-selected="false">True Friend</button>
                             </div>
                         </nav>
                     <div class="card p-2">
 
                         <div class="tab-content" id="nav-tabContent">
-                            <div class="tab-pane fade  {% if active_tab == 'posts' %} show active{% endif %}"
+                            <div class="tab-pane fade show active"
                                 id="nav-public-posts" role="tabpanel" aria-labelledby="nav-public-posts-tab"
                                 tabindex="0">
-                                {% include 'posts_tab.html' %}
+                                <!--{% include 'posts_tab.html' %}-->
+                                implement posts
                             </div>
-                            <div class="tab-pane fade {% if active_tab == 'following' %} show active{% endif %}"
+                            <div class="tab-pane fade"
                                 id="nav-followers" role="tabpanel" aria-labelledby="nav-followers-tab" tabindex="1">
-                                {% include 'followerstab.html' %}
+                                <!--{% include 'followerstab.html' %}-->
+                                {% include 'followers_tab_ajax.html' %}
                             </div>
-                            <div class="tab-pane fade {% if active_tab == 'followers' %} show active{% endif %}"
+                            <div class="tab-pane fade"
                                 id="nav-following" role="tabpanel" aria-labelledby="nav-following-tab" tabindex="2">
                                 {% include 'followingtab.html' %}
                             </div>
-                            <div class="tab-pane fade {% if active_tab == 'friends' %} show active{% endif %}"
+                            <div class="tab-pane fade"
                                 id="nav-friends" role="tabpanel" aria-labelledby="nav-friends-tab" tabindex="3">
                                 {% include 'friendstab.html' %}
                             </div>
@@ -107,7 +117,9 @@
 
         </div>
     </div>
+    {% if user.username == author.username %}
     {% include "edit_profile_modal.html" %}
+    {% endif %}
 </div>
 
 

@@ -250,7 +250,7 @@ def profile(request, author_id):
         friends = list(following & followers)
         posts = get_posts_visible_to_user(userAuthor, author, friends)
         context = {"posts": posts, "comment_form": CommentForm()}
-        context.update({"author": author, "following": following, "followers": followers, "friends": friends, "user": user, "active_tab": "posts", "edit_profile_form": EditProfileForm(instance=author)})
+        context.update({"author": author, "following": following, "followers": followers, "friends": friends, "user": userAuthor, "active_tab": "posts", "edit_profile_form": EditProfileForm(instance=author)})
         try:
             userFollows = userAuthor.following.get(username=username)
             context.update({"user_is_following": "True"})
