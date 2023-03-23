@@ -500,7 +500,7 @@ class InboxView(BasicAuthMixin,APIView):
             except Post.DoesNotExist:
                 return Response({'error':f'Post {post_id} does not exist.'},status=status.HTTP_400_BAD_REQUEST)
             except AttributeError:
-                return Response("Bad request: needs origin field.",status=status.HTTP_400_BAD_REQUEST)
+                return Response("Bad request: needs id field.",status=status.HTTP_400_BAD_REQUEST)
 
 
             try:
