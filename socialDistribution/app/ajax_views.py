@@ -104,8 +104,12 @@ def post_details(request):
     
     host =  post_obj.made_by.host
     author = post_obj.made_by
+
     if not host.endswith('/'):
         host += '/'
+
+    if "http" in host:
+        host = host.replace("http", "https")
 
     foreignNode = ForeignAPINodes.objects.get(base_url=host)
     headers={}
