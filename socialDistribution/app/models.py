@@ -110,7 +110,7 @@ class Post(models.Model):
     #if a private post was sent to a friend(only comes into play, when private, otherwise blank).
     receivers = models.ManyToManyField(Author, blank = True, null = True, related_name = "private_posts")
 
-    title = models.CharField(max_length=50, unique=True)
+    title = models.CharField(max_length=100, unique=False)
     description = models.CharField(max_length=150, blank=True, null=True)
 
     source = models.URLField(max_length=200)
@@ -175,13 +175,17 @@ class Node(models.Model):
 #The teams we connect to (including ourselves).
 class ForeignAPINodes(models.Model):
     base_url = models.URLField(max_length=200, unique=True)
-    username = models.CharField(max_length=255)
-    password = models.CharField(max_length=255)
+
+    #allowing it to be blank because team yoshi doesnt have auth
+    username = models.CharField(max_length=255, null=True, blank=True)
+    password = models.CharField(max_length=255,null=True,blank=True)
 
     def __str__(self):
         return self.base_url
 
     def getToken(self):
+        if not self.username:
+            return ""
         text = self.username + ":" + self.password
         encoded_text = base64.b64encode(text.encode('utf-8')).decode('utf-8')
         return encoded_text

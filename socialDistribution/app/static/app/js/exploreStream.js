@@ -11,7 +11,7 @@ $(document).ready(function() {
     $.ajax({
         url: "/posts",
         type: 'GET',
-        success: function(res) {
+        success: function(res) {    
             console.log(res)
             $.each(res.posts, function(index, post) {
                 console.log(post)
@@ -20,10 +20,10 @@ $(document).ready(function() {
                     ...post
                 }
 
-               
 
                 postData.author.id = extractUUID(post.author.id)
                 postData.likeCount = 5; // hardcoding for now, since we dont give 
+                console.log(postData)
 
                 $.ajax({
                     url: '/post_card.html',

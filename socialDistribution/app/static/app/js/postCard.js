@@ -2,7 +2,7 @@
 //post card scripts
 
 export function addLikeEventListener(uuid){
-
+    console.log(uuid)
     $(`#like-post-${uuid}`).click(function(e) {
         e.preventDefault();
         const url = `posts/${uuid}/like`

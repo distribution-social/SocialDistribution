@@ -20,53 +20,93 @@ from django.db.models import Q
 
 @login_required(login_url="/login")
 @require_http_methods(["GET"])
-def posts(request):
-    base_url = request.build_absolute_uri('/')
-    print(base_url)
+def explore_posts(request):
+
+    foreignNodes = ForeignAPINodes.objects.all()
     user = request.user
-    author = Author.objects.get(username=user.username)
-    # posts1 = Post.objects.filter(visibility="PUBLIC")
-    # posts2 = Post.objects.filter(visibility="FRIENDS", made_by__in=author.following.all())
-    # posts = (posts1 | posts2).order_by('-date_published')
-
-
     allPosts = []
-
-    #For now hardcoded, but when we get other nodes we have to look ForeignNodes model and do it for each
-    # we can extract the token because its a attribute on the model.
-    headers = {
-            'Authorization': f"Basic c2VydmVyMzoxMjM=",
-            'Content-Type': 'application/json'
-    }
-
-    params = {
-        'page': '1',
-        'size': '10'
-    }
-
-    try:
-        res = requests.get(f'{base_url}api/authors', headers=headers, params=params)
-        authors = json.loads(res.text)
-
-        for author in authors['items']:
-            uuid = str(author['id']).split("/")[-1]
-            res = requests.get(f'{base_url}api/authors/{uuid}/posts',headers=headers)
-
-            author_posts = json.loads(res.text)
-            for post in author_posts['items']:
-                allPosts.append(post)
-    except:
-        print(res)
+    for foreignNode in foreignNodes:
+        base_url = foreignNode.base_url
         print(base_url)
+      
+
+        headers = {
+                'Authorization': f"Basic {foreignNode.getToken()}",
+                'Content-Type': 'application/json'
+        }
+        
+
+        params = {
+            'page': '1',
+            'size': '20'
+        }
+
+        try:
+            print("YOSHI?")
+            print(base_url)
+            res = requests.get(f'{base_url}authors', headers=headers, params=params)
+            authors = json.loads(res.text)
+
+            for author in authors['items']:
+                if author['id']:
+                    uuid = author['id'].split("/")[-1]
+                    author_exists = Author.objects.filter(id=uuid).exists()
+
+                    if not "displayName" in author:
+                        author['displayName'] = "displayName typo on other team"
+
+                    if not author_exists:
+                        author_obj = standardize_author(author)
+                        author_obj['id'] = uuid
+                        author_obj['confirmed'] = True
+
+
+                        Author.objects.create(**author_obj)
+
+                uuid = str(author['id']).split("/")[-1]
+                res = requests.get(f'{base_url}authors/{uuid}/posts',headers=headers)
+
+                author_posts = json.loads(res.text)
+                for post in author_posts['items']:
+                    # if base_url == "https://yoshi-connect.herokuapp.com/":
+                    #     import pdb; pdb.set_trace()
+                    uuid = post['id'].split("/")[-1]
+
+                    if not "title" in post:
+                        post['title'] = f"title typo on other team {base_url}"
+                   
+                    post_exists = Post.objects.filter(uuid=uuid).exists()
+
+                    if not post_exists:
+                        post_obj = standardize_post(post)
+                        post_obj['uuid'] = uuid
+                        author_id =  post['author']['id'].split("/")[-1]
+                        post_obj['made_by'] = Author.objects.get(id=author_id)
+                       
+                        # import pdb; pdb.set_trace()
+                        try:
+                            Post.objects.create(**post_obj)
+                        except:
+                            print(f"creating post failed in ajax {post_obj['uuid']}")
+                            
+                   
+                    allPosts.append(post)
+        except:
+            print(res)
+            print(base_url)
 
     return JsonResponse({'posts': allPosts})
 
 @login_required(login_url="/login")
 @require_http_methods(["GET"])
 def post_details(request):
+    # import pdb; pdb.set_trace()
     base_url = request.build_absolute_uri('/')
     author = Author.objects.get(username=request.user.username)
     post_uuid = request.GET.get("uuid")
+   
+    post_obj = Post.objects.get(uuid=post_uuid)
+
     #TODO: when we get other team stuff we just have to look which host it is, and only call that server.
     #For now, I am testing using ours by hardcoding it.
     headers = {
@@ -77,10 +117,22 @@ def post_details(request):
     params = {
         
     }
-# 'api/authors/<uuid:author_id>/posts/<uuid:post_id>
 
     res = requests.get(f'{base_url}api/authors/{author.id}/posts/{post_uuid}', headers=headers)
     
     post = json.loads(res.text)
 
     return JsonResponse({'post': post})
+
+
+#utility functions (Refactor to diff file later)
+
+def standardize_author(author):
+    standardized_author = {k: v for k, v in author.items() if k in ['id', 'email', 'host', 'github', 'displayName', 'profileImage']}
+    return standardized_author    
+
+
+def standardize_post(post):
+    standardized_post = {k: v for k, v in post.items() if k in ['uuid', 'title', 'content', 'source', 'origin', 'visibility']}
+    # standardized_post['made_by'] = post['author']['id'].split("/")[-1]
+    return standardized_post 
