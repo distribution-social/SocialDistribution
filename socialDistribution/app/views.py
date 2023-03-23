@@ -41,7 +41,7 @@ def signup(request):
         confirm_password = form_inputs.get('confirm_password')
 
         if display_name and username and email and github and password and confirm_password:
-            
+
             try:
                 first_name, last_name = display_name.split()
             except ValueError:
@@ -93,7 +93,12 @@ def signup(request):
 @require_http_methods(["GET"])
 @login_required(login_url="/login")
 def home(request):
-    context = {"comment_form": CommentForm()}
+    user = request.user
+    author = Author.objects.get(username=user.username)
+    posts1 = Post.objects.filter(visibility="PUBLIC")
+    posts2 = Post.objects.filter(visibility="FRIENDS", made_by__in=author.following.all())
+    posts = (posts1 | posts2).order_by('-date_published')
+    context = {"posts": posts, "comment_form": CommentForm()}
     return render(request, 'posts_stream.html', context)
 
 
@@ -141,16 +146,13 @@ def add_post(request):
             # Save the form data to the database
             if request.POST['visibility'] == 'PRIVATE':
                 post = form.save(user=user, receiver_list = request.POST.getlist('receivers'))
-                for reciever in post.recievers.all():
-                    add_to_inbox(user,reciever,Activity.POST,post)
             else:
-                 post = form.save(user=user)
-                 for follower in user.followers.all():
-                    add_to_inbox(user,follower,Activity.POST,post)
-            # Do something with the saved data (e.g. redirect to a detail view)
-            # return redirect('post_detail', pk=post.pk)
+                post = form.save(user=user)
+            for receiver in post.receivers.all():
 
-            return redirect(reverse('home'))
+                add_to_inbox(user,receiver,Activity.POST,post)
+
+            return redirect(reverse('post_detail',kwargs={'post_id':post.uuid}))
     elif request.method == "GET":
         context = {"title": "Create a Post", "form": PostForm(), "action": "PUBLISH"}
         return render(request, 'post.html', context)
@@ -164,7 +166,7 @@ def signin(request):
 
         if username and password:
             user = authenticate(username=username, password=password)
-         
+
             if user is not None:
                 if user.is_active:
                     login(request, user)
@@ -175,7 +177,7 @@ def signin(request):
             else:
                 messages.warning(request, "Invalid username, invalid password, or unconfirmed user.")
                 return redirect(reverse('login'))
-        
+
         # Username and/or password is missing
         else:
             messages.warning(request, "Invalid username, invalid password, or unconfirmed user.")
@@ -253,7 +255,7 @@ def profile(request, author_id):
             context.update({"user_is_following": "False"})
 
         return render(request, 'profile.html', context)
-    
+
     elif request.method == "POST":
         author_for_action = Author.objects.get(id=author_id)
         if author_for_action in userAuthor.following.all():
@@ -264,7 +266,7 @@ def profile(request, author_id):
             userAuthor.sent_requests.add(author_for_action)
 
         return redirect(reverse("profile", kwargs={"author_id": userAuthor.id}))
-    
+
 
 def get_posts_visible_to_user(userAuthor, author, friends):
     if userAuthor.id==author.id:
@@ -293,7 +295,7 @@ def unfollow(request):
     user_author = Author.objects.get(username=user)
     # Remove the author from the following of the current user
     user_author.following.remove(author_to_unfollow)
-    
+
     return redirect(reverse("profile", kwargs={"author_id": user_author.id}))
 
 @login_required(login_url="/login")
@@ -433,7 +435,7 @@ def sent_requests(request, author_id):
 @login_required(login_url="/login")
 @require_http_methods(["GET"])
 def post_detail(request, post_id):
-    
+
     #TODO: Check if post is on different host, if yes, then poll info from that particular hosts endpoint, and then pass that data on.
     post = Post.objects.get(uuid=post_id)
     context = {"request": request, "post": str(post.uuid), "comment_form": CommentForm()}
@@ -485,7 +487,7 @@ def inbox(request, author_id):
     # Current user's author
     author = Author.objects.get(username=request.user.username)
 
-    if requested_author.username != author.username:
+    if requested_author != author:
         return HttpResponseUnauthorized()
     context = {"type": "inbox"}
 
@@ -518,7 +520,7 @@ def add_comment(request,post_id):
             # return redirect('post_detail', pk=post.pk)
 
             return redirect(reverse('post_detail',kwargs={'post_id': post.uuid}))
-        
+
 
 
 @login_required(login_url="/login")
@@ -533,7 +535,7 @@ def edit_profile(request, author_id):
         else:
             print(form.errors)
             return HttpResponseBadRequest("Invalid form")
-         
+
 
 @login_required(login_url="/login")
 @require_http_methods(["POST"])
@@ -543,7 +545,7 @@ def add_like_post(request,post_id):
     response = HttpResponse()
 
     if request.method == "POST":
-        if post.made_by.username == user.username:
+        if post.made_by == user:
             response.content = "Can't like your own post."
             return response
         found = post.likes.filter(author=user)
@@ -565,7 +567,7 @@ def add_like_comment(request,post_id,comment_id):
     response = HttpResponse()
 
     if request.method == "POST":
-        if comment.author.username == user.username:
+        if comment.author == user:
             response.content = "Can't like your own comment."
             return response
         found = comment.likes.filter(author=user)

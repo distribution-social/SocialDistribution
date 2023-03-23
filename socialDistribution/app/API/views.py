@@ -12,8 +12,6 @@ from .mixins import BasicAuthMixin
 from rest_framework.permissions import AllowAny
 
 
-
-
 class AuthorListAPIView(BasicAuthMixin,APIView):
     def get(self, request):
         authors = Author.objects.all()
@@ -30,7 +28,11 @@ class AuthorListAPIView(BasicAuthMixin,APIView):
 
 class SingleAuthorAPIView(BasicAuthMixin,APIView):
     def get(self, request, author_id):
-        author = Author.objects.get(id=author_id)
+        try:
+            author = Author.objects.get(id=author_id)
+        except Author.DoesNotExist:
+            return Response({"error": "Author does not exist"}, status=404)
+
 
         serializer = AuthorSerializer(author, context={'request':request,'kwargs':{}})
 
@@ -124,7 +126,7 @@ class AuthorPostsView(BasicAuthMixin,APIView):
     def get(self, request, author_id):
         try:
             author = Author.objects.get(id=author_id)
-  
+
         except Author.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
@@ -135,14 +137,14 @@ class AuthorPostsView(BasicAuthMixin,APIView):
         result_page = paginator.paginate_queryset(posts, request)
 
         serializer = PostSerializer(result_page, many=True, context={'request':request,'kwargs':{'author_id':author_id}})
-        
+
         for i in range(len(serializer.data)):
             data = serializer.data[i]
             post = posts[i]
             comments = post.comments.all()
-     
+
             commentResultPage = paginator.paginate_queryset(comments, request)
-            
+
             context = {'request':request,'kwargs':{'author_id':author_id,'post_id':data['id'].split("/")[-1]}}
             comment_serializer = CommentSerializer(commentResultPage, many=True, context=context)
 
@@ -163,26 +165,26 @@ class AuthorPostsView(BasicAuthMixin,APIView):
             "type": "posts",
             "items": serializer.data,
         }
-       
+
         return Response(result)
 
 class PostDetailView(BasicAuthMixin,APIView):
     def get(self, request, author_id, post_id):
         try:
             post = Post.objects.get(uuid=str(post_id))
-          
+
         except Post.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+            return Response({'error': 'Post does not exist'},status=status.HTTP_404_NOT_FOUND)
 
         serializer = PostSerializer(post, context={'request':request,'kwargs':{'author_id':author_id,'post_id':post_id}})
-        data = serializer.data  
+        data = serializer.data
 
         comments = post.comments.all()
         paginator = CustomPaginator()
         commentResultPage = paginator.paginate_queryset(comments, request)
         context = {'request':request,'kwargs':{'author_id':author_id,'post_id':data['id'].split("/")[-1]}}
         comment_serializer = CommentSerializer(commentResultPage, many=True, context=context)
-        
+
         response = {
             "type": "Comments",
             "page": paginator.page.number,
@@ -194,7 +196,7 @@ class PostDetailView(BasicAuthMixin,APIView):
 
         data["commentSrc"] = response
         data['count'] = len(comments)
-      
+
         return Response(data)
 
 
@@ -224,7 +226,7 @@ class PostDetailView(BasicAuthMixin,APIView):
         try:
             post = Post.objects.get(uuid=post_id, made_by=author)
         except Post.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+            return Response({'error': 'Post does not exist'},status=status.HTTP_404_NOT_FOUND)
         post.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -293,8 +295,10 @@ class CommentsView(BasicAuthMixin,APIView):
         return Response(response)
 
     def post(self, request, author_id, post_id):
-        user = Author.objects.get(id=get_values_from_uri(request.data.get('author').get('id'),add_api=True).get('author_id'))
-
+        try:
+            user = Author.objects.get(id=get_values_from_uri(request.data.get('author').get('id'),add_api=True).get('author_id'))
+        except:
+            return Response({"error": "Author does not exist"}, status=400)
         try:
             post = Post.objects.get(uuid=post_id)
         except Post.DoesNotExist:
@@ -414,16 +418,146 @@ class InboxView(BasicAuthMixin,APIView):
         }
         return Response(reponse)
 
-    # is the post already created or should we create
-    def post(
-        self,request,author_id):
+    def post(self,request,author_id):
         try:
             author = Author.objects.get(id=author_id)
         except Author.DoesNotExist:
             return Response({"error": "Author does not exist."}, status=400)
-        return Response("POST not yet done.")
-        serializer = ActivitySerializer(request.data, context={'request':request,'kwargs':{'author_id':author_id}})
-        return Response(serializer.data)
+
+        if request.data.get('type') == 'follow':
+            try:
+                actor_id = parse_values(request.data.get('actor').get('id')).get('author_id')
+                actor = Author.objects.get(id=actor_id)
+            except Author.DoesNotExist:
+                actor = Author(id=actor_id,username=actor_id,confirmed=True)
+                authorSerializer = AuthorSerializer(actor,request.data.get('actor'))
+                if authorSerializer.is_valid():
+                    authorSerializer.save()
+                else:
+                    return Response(authorSerializer.errors,status=400)
+            except AttributeError:
+                return Response("Bad request: needs actor:id field.",status=400)
+
+            try:
+                if actor not in author.followers.all():
+                    actor.sent_requests.add(author)
+                    add_to_inbox(actor,author,Activity.FOLLOW,actor)
+                else:
+                    return Response(f"Already following {author.displayName}",status=200)
+            except:
+                return Response({'error': 'Can not add to inbox.'},status=500)
+        elif request.data.get('type') == 'post':
+            try:
+                actor_id = parse_values(request.data.get('author').get('id')).get('author_id')
+                actor = Author.objects.get(id=actor_id)
+            except Author.DoesNotExist:
+                actor = Author(id=actor_id,username=actor_id,confirmed=True)
+                authorSerializer = AuthorSerializer(actor,request.data.get('author'))
+                if authorSerializer.is_valid():
+                    authorSerializer.save()
+                else:
+                    return Response(authorSerializer.errors,status=400)
+            except AttributeError:
+                return Response("Bad request: needs author:id field.",status=400)
+            try:
+                post_id = parse_values(request.data.get('origin')).get('post_id')
+                comment = Post.objects.get(uuid=post_id)
+            except Post.DoesNotExist:
+                comment = Post(uuid=post_id,made_by=actor)
+                comment_serializer = PostSaveSerializer(comment,data=request.data,context={'request':request,'kwargs':{'author_id':author_id}})
+                if comment_serializer.is_valid():
+                    comment_serializer.save()
+                else:
+                    return Response(comment_serializer.errors,status=400)
+            except AttributeError:
+                return Response("Bad request: needs origin field.",status=400)
+            try:
+                add_to_inbox(actor,author,Activity.POST,comment)
+            except:
+                return Response({'error': 'Can not add to inbox.'},status=500)
+        elif request.data.get('type') == 'comment':
+            try:
+                actor_id = parse_values(request.data.get('author').get('id')).get('author_id')
+                actor = Author.objects.get(id=actor_id)
+            except Author.DoesNotExist:
+                actor = Author(id=actor_id,username=actor_id,confirmed=True)
+                authorSerializer = AuthorSerializer(actor,request.data.get('author'))
+                if authorSerializer.is_valid():
+                    authorSerializer.save()
+                else:
+                    return Response(authorSerializer.errors,status=400)
+            except AttributeError:
+                return Response("Bad request: needs author:id field.",status=400)
+            try:
+                post_id = parse_values(request.data.get('id')).get('post_id')
+                post = Post.objects.get(uuid=post_id)
+            except Post.DoesNotExist:
+                return Response({'error':'Post does not exist.'},status=400)
+            except AttributeError:
+                return Response("Bad request: needs id field.",status=400)
+            try:
+                comment_id = parse_values(request.data.get('id')).get('comment_id')
+                comment = Comment.objects.get(uuid=comment_id)
+            except Comment.DoesNotExist:
+                comment = Comment(uuid=comment_id,author=actor,post=post)
+                comment_serializer = CommentSerializer(comment,data=request.data,context={'request':request,'kwargs':{'author_id':author_id}})
+                if comment_serializer.is_valid():
+                    comment_serializer.save()
+                else:
+                    return Response(comment_serializer.errors,status=400)
+            except AttributeError:
+                return Response("Bad request: needs id field.",status=400)
+            try:
+                add_to_inbox(actor,author,Activity.COMMENT,comment)
+            except:
+                return Response({'error': 'Can not add to inbox.'},status=500)
+        elif request.data.get('type') == 'like':
+            try:
+                kwargs = parse_values(request.data.get('object'))
+                actor_kwargs = parse_values(request.data.get('author').get('id'))
+            except AttributeError:
+                return Response("Bad request: need object and author:id fields.",status=400)
+            try:
+                actor_id = actor_kwargs.get('author_id')
+                actor = Author.objects.get(id=actor_id)
+            except Author.DoesNotExist:
+                actor = Author(id=actor_id,username=actor_id,confirmed=True)
+                authorSerializer = AuthorSerializer(actor,request.data.get('author'))
+                if authorSerializer.is_valid():
+                    authorSerializer.save()
+                else:
+                    return Response(authorSerializer.errors,status=400)
+            try:
+                post_id = kwargs.get('post_id')
+                post = Post.objects.get(uuid=post_id)
+            except Post.DoesNotExist:
+                return Response({'error':'Post does not exist.'},status=400)
+            if kwargs.get('comment_id'):
+                try:
+                    comment_id = kwargs.get('comment_id')
+                    comment = Comment.objects.get(uuid=comment_id)
+                except Comment.DoesNotExist:
+                    return Response({'error':'Comment does not exist.'},status=400)
+                if comment.author.id == actor.id:
+                    return Response('Can\'t like your own comment')
+                found = comment.likes.filter(author=actor)
+                if not found:
+                    comment.likes.create(type=Like.COMMENT,author=actor,summary=f'{actor.displayName} liked your comment.')
+                    add_to_inbox(actor,comment.author,Activity.LIKE,comment)
+                else:
+                    return Response('Already liked comment.')
+            else:
+                if post.made_by.id == actor.id:
+                    return Response('Can\'t like your own post')
+                found = post.likes.filter(author=actor)
+                if not found:
+                    post.likes.create(type=Like.POST,author=actor,summary=f'{actor.displayName} liked your comment.')
+                    add_to_inbox(actor,author,Activity.LIKE,post)
+                else:
+                    return Response('Already liked post.')
+        else:
+            return Response("Type not supported: [\'follow\',\'post\',\'like\',\'comment\']",status=405)
+        return Response("Added to inbox.",status=200)
 
     def delete(self,request,author_id):
         try:

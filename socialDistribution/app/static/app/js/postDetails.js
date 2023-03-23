@@ -6,10 +6,9 @@ const postUUID = myDataElement.dataset.myData;
 const spinner = document.getElementById("spinner3")
 $(document).ready(function() {
     $(`#collapse_${postUUID}`).show()
-    console.log("IN POST_DETAILS.js")
-        
-   
-    spinner.style.display = 'display'; 
+
+
+    spinner.style.display = 'display';
     $.ajax({
         url: "/post-details",
         type: 'GET',
@@ -21,8 +20,6 @@ $(document).ready(function() {
             }
             postData.author.id = extractUUID(res.post.author.id)
 
-            console.log(res)
-
             $.ajax({
                 url: '/post_detail.html',
                 type: 'POST',
@@ -32,13 +29,12 @@ $(document).ready(function() {
                     'X-CSRFToken': '{{ csrf_token }}'
                 },
                 success: function(template) {
-                    console.log(template)
-            
+
                     $('#post-detail').append(template);
-                    spinner.style.display = 'none'; 
+                    spinner.style.display = 'none';
                     addLikeEventListener(postData.uuid)
                     addDeletePostListener(postData.uuid)
-          
+
                 },
                 error: function(xhr, status, error) {
                     console.error(xhr.responseText);

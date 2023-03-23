@@ -4,6 +4,8 @@ from django.db import models
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey,GenericRelation
 import base64
+import os
+from django.conf import settings
 
 # Create your models here.
 
@@ -14,15 +16,17 @@ class Author(models.Model):
     # Server host of the user
     host = models.URLField(max_length=200)
 
+    url = models.URLField(max_length=200,null=True)
+
     # Max Length: 35 (First Name) + 35 (Last Name)
     displayName = models.CharField(max_length=70)
 
-    github = models.URLField(max_length=200, unique=True)
+    github = models.URLField(max_length=200)
 
-    profileImage = models.URLField(max_length=200, unique=True, null=True)
+    profileImage = models.URLField(max_length=200,blank=True, null=True)
 
     # Max Length: 64 (Username) + 255 (Domain)
-    email = models.EmailField(max_length=320, unique=True)
+    email = models.EmailField(max_length=320)
 
     username = models.CharField(max_length=30, unique=True)
 
@@ -48,8 +52,13 @@ class Author(models.Model):
             models.Index(fields=['username'], name='username_idx')
         ]
 
+    def save(self, *args, **kwargs):
+        if self.url == '' or not self.url:
+            self.url = 'http://'+settings.HOSTNAME+'/authors/'+str(self.id)
+        super(Author, self).save(*args, **kwargs)
+
     def __str__(self):
-        return f"{self.username}- {self.id}"
+        return f"{self.displayName}"
 
 class Activity(models.Model):
     POST = 'post'
@@ -110,7 +119,7 @@ class Post(models.Model):
     #if a private post was sent to a friend(only comes into play, when private, otherwise blank).
     receivers = models.ManyToManyField(Author, blank = True, null = True, related_name = "private_posts")
 
-    title = models.CharField(max_length=50, unique=True)
+    title = models.CharField(max_length=50)
     description = models.CharField(max_length=150, blank=True, null=True)
 
     source = models.URLField(max_length=200)
@@ -143,6 +152,15 @@ class Post(models.Model):
     likes = GenericRelation(Like)
     activity = GenericRelation(Activity)
 
+    def save(self, *args, **kwargs):
+        if self.origin == '' or not self.origin:
+            self.origin = 'http://'+settings.HOSTNAME+'/authors/'+str(self.made_by.id)+'/posts/'+str(self.uuid)
+        if self.source == '' or not self.source:
+            self.source = 'http://'+settings.HOSTNAME+'/authors/'+str(self.made_by.id)+'/posts/'+str(self.uuid)
+        if self.comments_url == '' or not self.comments_url:
+            self.comments_url = 'http://'+settings.HOSTNAME+'/authors/'+str(self.made_by.id)+'/posts/'+str(self.uuid)+'/comments'
+        super(Post, self).save(*args, **kwargs)
+
     def __str__(self) -> str:
         return f'{self.made_by.username} - {self.title} - {self.uuid}'
 
@@ -169,7 +187,7 @@ class Node(models.Model):
 
     def __str__(self):
         text = self.username + ":" + self.password
-        encoded_text = base64.b64encode(text.encode('utf-8')).decode('utf-8')   
+        encoded_text = base64.b64encode(text.encode('utf-8')).decode('utf-8')
         return encoded_text
 
 #The teams we connect to (including ourselves).

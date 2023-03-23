@@ -8,28 +8,18 @@ from django.utils import timezone
 
 class AuthorSerializer(serializers.ModelSerializer):
     type = serializers.SerializerMethodField()
-    host = serializers.SerializerMethodField()
-    url = serializers.SerializerMethodField()
-
-    def get_host(self, obj):
-        request = self.context.get('request')
-        kwargs = self.context.get('kwargs')
-        return get_full_uri(request,'api-author-list',{},remove_str='api/authors')
+    host = serializers.URLField()
+    url = serializers.URLField()
 
     def get_type(self, obj):
         return "author"
-
-    def get_url(self,obj):
-        return ""
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
 
         if data['id'] is not None and data['host']:
-            data['id'] = data['host'] + "authors/" + data['id']
+            data['id'] = data['host'] + "/authors/" + data['id']
 
-        if data['url'] is not None:
-            data['url'] = data['id']
         return data
 
     class Meta:
@@ -74,6 +64,16 @@ class PostSerializer(serializers.ModelSerializer):
     class Meta:
         model = Post
         fields = ['type','title', 'id', 'source', 'origin', 'description', 'contentType', 'content', 'author', 'comments', 'published', 'visibility', 'unlisted']
+
+class PostSaveSerializer(serializers.ModelSerializer):
+    author = AuthorSerializer(read_only=True,source='made_by')
+    published = serializers.DateTimeField(source='date_published')
+    contentType = serializers.CharField(source='content_type')
+    comments = serializers.URLField(source='comments_url')
+
+    class Meta:
+        model = Post
+        fields = ['title', 'source', 'origin', 'description', 'contentType', 'content', 'author', 'comments', 'published', 'visibility', 'unlisted']
 
 class CommentSerializer(serializers.ModelSerializer):
     type = serializers.SerializerMethodField()

@@ -35,7 +35,7 @@ def posts(request):
     #For now hardcoded, but when we get other nodes we have to look ForeignNodes model and do it for each
     # we can extract the token because its a attribute on the model.
     headers = {
-            'Authorization': f"Basic c2VydmVyMzoxMjM=",
+            'Authorization': f"Basic TmljazpXaWVsZ3Vz",
             'Content-Type': 'application/json'
     }
 
@@ -56,8 +56,7 @@ def posts(request):
             for post in author_posts['items']:
                 allPosts.append(post)
     except:
-        print(res)
-        print(base_url)
+        pass
 
     return JsonResponse({'posts': allPosts})
 
@@ -70,17 +69,17 @@ def post_details(request):
     #TODO: when we get other team stuff we just have to look which host it is, and only call that server.
     #For now, I am testing using ours by hardcoding it.
     headers = {
-            'Authorization': f"Basic c2VydmVyMzoxMjM=",
+            'Authorization': f"Basic TmljazpXaWVsZ3Vz",
             'Content-Type': 'application/json'
     }
 
     params = {
-        
+
     }
 # 'api/authors/<uuid:author_id>/posts/<uuid:post_id>
 
     res = requests.get(f'{base_url}api/authors/{author.id}/posts/{post_uuid}', headers=headers)
-    
+
     post = json.loads(res.text)
 
     return JsonResponse({'post': post})

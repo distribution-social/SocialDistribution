@@ -16,7 +16,7 @@ export function addLikeEventListener(uuid){
             success: function (result) {
               showAndDismissAlert("info",result)
               console.log(result)
-              if(result){
+              if(result.toLowerCase() === "liked"){
                 let value = parseInt($(`#like-count-${uuid}`).html());
                 value++;
                 $(`#like-count-${uuid}`).html(value);
