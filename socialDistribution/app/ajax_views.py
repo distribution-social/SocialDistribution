@@ -53,8 +53,7 @@ def posts(request):
             res = requests.get(f'{base_url}api/authors/{uuid}/posts',headers=headers)
 
             author_posts = json.loads(res.text)
-
-            for post in author_posts:
+            for post in author_posts['items']:
                 allPosts.append(post)
     except:
         print(res)

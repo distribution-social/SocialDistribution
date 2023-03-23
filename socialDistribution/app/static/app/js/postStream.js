@@ -12,13 +12,15 @@ $(document).ready(function() {
         url: "/posts",
         type: 'GET',
         success: function(res) {
+            console.log(res)
             $.each(res.posts, function(index, post) {
+                console.log(post)
                 const postData = {
                     uuid: extractUUID(post.id),
                     ...post
                 }
 
-                console.log(postData)
+               
 
                 postData.author.id = extractUUID(post.author.id)
                 postData.likeCount = 5; // hardcoding for now, since we dont give 
