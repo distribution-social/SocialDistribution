@@ -4,7 +4,7 @@
 {% block content %}
 
 {% block title %}
-<title>Create a Post</title>
+<title>Edit Your Post</title>
 
 {% endblock %}
 {% block css %}<link rel="stylesheet" type="text/css" href="{% static 'app/signup.css' %}">{% endblock %}
@@ -12,7 +12,7 @@
 <div class="form-group mx-auto w-75">
     <h1 class="mt-3">{{title}}</h1>
     <br>
-    <form method="POST" action="post" >
+    <form method="POST" action="{% url 'post_edit' post_id=post.uuid %}">
 
         {% csrf_token %}
         {{ form|crispy }}

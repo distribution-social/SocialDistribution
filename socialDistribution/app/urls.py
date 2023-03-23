@@ -42,6 +42,7 @@ urlpatterns = [
     path('logout', views.signout, name='logout'),
 
     path('posts/<str:post_id>', views.post_detail, name='post_detail'),
+    path('posts/<str:post_id>/edit', views.post_edit, name='post_edit'),
     path('posts/<str:post_id>/comment', views.add_comment, name='comment-form'),
     path('posts/<str:post_id>/like', views.add_like_post, name='add_like_post'),
     path('posts/<str:post_id>/comments/<str:comment_id>/like', views.add_like_comment, name='add_like_comment'),
@@ -53,6 +54,7 @@ urlpatterns = [
     path('unfollow', views.unfollow, name='unfollow'),
     path('removefollower', views.removeFollower, name='removefollower'),
     path('authors/<str:author_id>', views.profile, name='profile'),
+    path('authors/<str:author_id>/edit', views.edit_profile, name='edit-profile'),
     path('<str:username>/true-friends', views.true_friends, name='true-friends'),
     path('authors/<str:author_id>/received', views.received_requests, name='requests'),
     path('authors/<str:author_id>/sent', views.sent_requests, name='sent_requests'),

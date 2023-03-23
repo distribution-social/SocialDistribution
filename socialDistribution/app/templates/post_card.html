@@ -61,6 +61,10 @@ Link: https://www.bootdey.com/snippets/view/bs4-s
             <i class="bi bi-trash"></i>
             <strong>Delete</strong>
           </a>
+          <a type="button" class="d-inline-flex text-muted mx-2 edit-button" style="text-decoration: none;" id="edit-post-{{post.uuid}}" href="{% url 'post_edit' post_id=post.uuid %}">
+            <i class="bi bi-pencil-square"></i>
+            <strong>Edit</strong>
+          </a>
         {% endif %}
 
         <!--Delete Modal -->
