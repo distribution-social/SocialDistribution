@@ -16,7 +16,7 @@ class Author(models.Model):
     # Server host of the user
     host = models.URLField(max_length=200)
 
-    url = models.URLField(max_length=200,null=True)
+    url = models.URLField(max_length=200,null=True,blank=True)
 
     # Max Length: 35 (First Name) + 35 (Last Name)
     displayName = models.CharField(max_length=70)
