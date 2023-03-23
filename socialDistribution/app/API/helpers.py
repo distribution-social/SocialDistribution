@@ -1,7 +1,7 @@
 from django.urls import reverse, resolve
 from urllib.parse import urlparse
 
-def get_full_uri(request,view_name,kwargs={},remove_str='api/') -> str:
+def get_full_uri(request,view_name,kwargs={},remove_str='') -> str:
   return str(request.build_absolute_uri(reverse(view_name, kwargs=kwargs))).replace(remove_str,'')
 
 def get_values_from_uri(path,add_api=False):

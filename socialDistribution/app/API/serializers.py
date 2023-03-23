@@ -50,14 +50,14 @@ class PostSerializer(serializers.ModelSerializer):
         }
 
 
-        data['id'] = get_full_uri(request,'api-post-detail',kwargs)
+        data['id'] = get_full_uri(request,'api-post-detail',kwargs,remove_str='')
 
         post_comments = instance.comments.all()
 
         # comment_serializer = CommentSerializer(post_comments,many=True)
 
         # data['commentSrc'] = comment_serializer.data
-  
+
         return data
 
 
@@ -96,7 +96,7 @@ class CommentSerializer(serializers.ModelSerializer):
             'post_id':instance.post.uuid,
             'comment_id': instance.uuid
         }
-        data['id'] = get_full_uri(request,'api-post-comment',kwargs)
+        data['id'] = get_full_uri(request,'api-post-comment',kwargs,remove_str='')
 
         return data
 
@@ -135,13 +135,13 @@ class LikeSerializer(serializers.ModelSerializer):
                 'author_id': kwargs.get('author_id'),
                 'post_id': instance.content_object.uuid
             }
-            new_data.update({'object': get_full_uri(request,'api-post-detail',kwargs)})
+            new_data.update({'object': get_full_uri(request,'api-post-detail',kwargs,remove_str='')})
 
         elif isinstance(instance.content_object,Comment):
 
             kwargs.update({'post_id': instance.content_object.post.uuid})
             kwargs.update({'comment_id': instance.content_object.uuid})
-            new_data.update({'object': get_full_uri(request,'api-post-comment',kwargs)})
+            new_data.update({'object': get_full_uri(request,'api-post-comment',kwargs,remove_str='')})
 
 
         new_data.pop('content_object')
