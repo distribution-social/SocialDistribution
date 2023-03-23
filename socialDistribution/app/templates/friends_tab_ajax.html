@@ -1,0 +1,42 @@
+{% load static %}
+
+{% block css %}
+<link rel="stylesheet" type="text/css" href="{% static 'app/following.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid d-flex align-items-center flex-column mb-3">
+<ul id="friends_tab_list"></ul>
+
+
+<template id="friends-card">
+    <div class="p-2 d-flex flex-column mb-3 flex-fill" style="max-width: 700px;">
+        <div class="p-2">
+            <div class="card flex-fill" style="width: 700px;">
+                <div class="d-flex">
+                    <img src="" width="230px" height="230px"
+                        class="friends_image object-fit-cover border rounded-start" alt="No profile image available">
+                    <div class="d-flex flex-fill flex-column ">
+                        <div class="card-body">
+                            <h3 class="card-title friend_display_name"></h3>
+
+                            <div class="btn-group" role="group" aria-label="Basic example">
+                                <a type="button" class="btn btn-primary friend_profile_link" href="">
+                                    <i class="bi bi-person-fill">&nbsp;Profile</i></a>
+                                <a type="button" href="" target="_blank" class="btn btn-secondary friends_github"><i
+                                        class="bi bi-github">&nbsp;GitHub</i></a>
+                            </div>
+                        </div>
+                        <div class="card-footer"><a class="friend_host" href="" class="text-decoration-none"></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+</div>
+
+
+{% endblock %}
