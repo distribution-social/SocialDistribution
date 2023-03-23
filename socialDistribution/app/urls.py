@@ -45,17 +45,17 @@ urlpatterns = [
     path('posts/<str:post_id>/comment', views.add_comment, name='comment-form'),
     path('posts/<str:post_id>/like', views.add_like_post, name='add_like_post'),
     path('posts/<str:post_id>/comments/<str:comment_id>/like', views.add_like_comment, name='add_like_comment'),
-    path('delete-post/<uuid:post_id>/', views.delete_post, name='delete_post'),
+    path('delete-post/<str:post_id>/', views.delete_post, name='delete_post'),
 
     path('authors', views.authors, name='authors'),
-    path('authors/<uuid:author_id>/inbox', views.inbox, name='inbox'),
+    path('authors/<str:author_id>/inbox', views.inbox, name='inbox'),
     path('authors/<str:author_id>', views.profile, name='profile'),
     path('unfollow', views.unfollow, name='unfollow'),
     path('removefollower', views.removeFollower, name='removefollower'),
-    path('authors/<uuid:author_id>', views.profile, name='profile'),
+    path('authors/<str:author_id>', views.profile, name='profile'),
     path('<str:username>/true-friends', views.true_friends, name='true-friends'),
-    path('authors/<uuid:author_id>/received', views.received_requests, name='requests'),
-    path('authors/<uuid:author_id>/sent', views.sent_requests, name='sent_requests'),
+    path('authors/<str:author_id>/received', views.received_requests, name='requests'),
+    path('authors/<str:author_id>/sent', views.sent_requests, name='sent_requests'),
 
 
     #Template Urls (returns HTML)
