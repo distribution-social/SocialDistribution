@@ -26,7 +26,7 @@ if not DOMAIN:
 if not SCHEME:
     SCHEME = 'http://'
 
-HOST = SCHEME + DOMAIN
+HOST = SCHEME + DOMAIN + "/api/"
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.

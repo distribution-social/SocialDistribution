@@ -43,9 +43,11 @@ def explore_posts(request):
 
         try:
             res = requests.get(f'{base_url}authors', headers=headers, params=params)
+            
             authors = json.loads(res.text)
             # if base_url == "https://peer2pressure.herokuapp.com/":
             #         import pdb; pdb.set_trace()
+            print(authors['items'])
             for author in authors['items']:
                 if author['id']:
                     uuid = author['id'].split("/")[-1]
