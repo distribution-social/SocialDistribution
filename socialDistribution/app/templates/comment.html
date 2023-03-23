@@ -9,7 +9,7 @@
     <div class="card-header">
       <a class="d-inline-flex align-middle" href="{% url 'profile' author_id=comment.author.id|extract_uuid|convert_uuid_to_hex %}">
         {% if comment.author.profileImage %}
-        <img src="{{comment.author.profileImage}}" class="user-avatar-circle rounded-circle my-1" alt=""></img>
+        <img src="{{comment.author.profileImage}}" class="object-fit-cover user-avatar-circle rounded-circle my-1" alt=""></img>
         {% else %}
         <i class="bi bi-person text-muted" style="font-size: 40px; text-align: center;" alt=""></i>
         {% endif %}

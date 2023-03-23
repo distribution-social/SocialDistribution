@@ -14,6 +14,20 @@ from pathlib import Path
 import sys
 import os
 import django_on_heroku  # top of the file
+import dotenv
+
+dotenv.load_dotenv(".env")
+DOMAIN = os.getenv('DOMAIN')
+SCHEME = os.getenv('SCHEME')
+if not DOMAIN:
+    import socket
+    DOMAIN = socket.gethostbyname(socket.gethostname())
+
+if not SCHEME:
+    SCHEME = 'http://'
+
+HOST = SCHEME + DOMAIN
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -29,6 +43,7 @@ SECRET_KEY = 'django-insecure-&bydo(ekh0rml7q&$nja39m&9s@z--ec7cewky8aldy*d=eq90
 DEBUG = True
 
 ALLOWED_HOSTS = []
+
 
 
 # Application definition
@@ -104,7 +119,7 @@ DATABASES = {
 }
 
 if 'test' in sys.argv:
-    DATABASES['default'] = { 
+    DATABASES['default'] = {
        'ENGINE': 'django.db.backends.sqlite3',
         'NAME': 'testdatabase'
 }
@@ -134,7 +149,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'America/Edmonton'
 
 USE_I18N = True
 
@@ -154,7 +169,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 REST_FRAMEWORK = {
-    "DEFAULT_AUTHENTICATION_CLASSES": [ 
+    "DEFAULT_AUTHENTICATION_CLASSES": [
 
     ]
 }
