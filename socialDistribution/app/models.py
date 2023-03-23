@@ -28,7 +28,7 @@ class Author(models.Model):
     # Max Length: 64 (Username) + 255 (Domain)
     email = models.EmailField(max_length=320)
 
-    username = models.CharField(max_length=30, unique=True)
+    username = models.CharField(max_length=50, unique=True)
 
     created = models.DateTimeField(auto_now_add=True)
 
@@ -54,7 +54,9 @@ class Author(models.Model):
 
     def save(self, *args, **kwargs):
         if self.url == '' or not self.url:
-            self.url = 'http://'+settings.HOSTNAME+'/authors/'+str(self.id)
+            self.url = settings.HOST+'/authors/'+str(self.id)
+        if self.host == '' or not self.url:
+            self.host = settings.HOST
         super(Author, self).save(*args, **kwargs)
 
     def __str__(self):

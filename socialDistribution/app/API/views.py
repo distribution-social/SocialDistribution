@@ -14,7 +14,7 @@ from django.conf import settings
 
 class AuthorListAPIView(BasicAuthMixin,APIView):
     def get(self, request):
-        authors = Author.objects.filter(host=settings.HOST).order_by('displayName')
+        authors = Author.objects.filter(host=settings.HOST,confirmed=True).order_by('displayName')
         paginator = CustomPaginator()
         result_page = paginator.paginate_queryset(authors, request)
         serializer = AuthorSerializer(result_page, many=True,context={'request':request,'kwargs':{}})
@@ -149,7 +149,7 @@ class AuthorPostsView(BasicAuthMixin,APIView):
             comment_serializer = CommentSerializer(commentResultPage, many=True, context=context)
 
             response = {
-                "type": "Comments",
+                "type": "comments",
                 "page": paginator.page.number,
                 "size": paginator.get_page_size(request),
                 "post": get_full_uri(request,'api-post-detail',context['kwargs']),
@@ -186,7 +186,7 @@ class PostDetailView(BasicAuthMixin,APIView):
         comment_serializer = CommentSerializer(commentResultPage, many=True, context=context)
 
         response = {
-            "type": "Comments",
+            "type": "comments",
             "page": paginator.page.number,
             "size": paginator.get_page_size(request),
             "post": get_full_uri(request,'api-post-detail',context['kwargs']),
@@ -284,7 +284,7 @@ class CommentsView(BasicAuthMixin,APIView):
         serializer = CommentSerializer(commentResultPage, many=True, context={'request':request,'kwargs':{'author_id':author_id,'post_id':post_id}})
 
         response = {
-            "type": "Comments",
+            "type": "comments",
             "page": paginator.page.number,
             "size": paginator.get_page_size(request),
             "post": get_full_uri(request,'api-post-detail',context),
@@ -461,14 +461,14 @@ class InboxView(BasicAuthMixin,APIView):
                 return Response("Bad request: needs author:url field.",status=status.HTTP_400_BAD_REQUEST)
             try:
                 post_id = parse_values(request.data.get('origin')).get('post_id')
-                comment = Post.objects.get(uuid=post_id)
+                post = Post.objects.get(uuid=post_id)
             except Post.DoesNotExist:
-                comment = Post(uuid=post_id,made_by=actor)
-                comment_serializer = PostSaveSerializer(comment,data=request.data,context={'request':request,'kwargs':{'author_id':author_id}})
-                if comment_serializer.is_valid():
-                    comment_serializer.save()
+                post = Post(uuid=post_id,made_by=actor)
+                post_serializer = PostSaveSerializer(post,data=request.data,context={'request':request,'kwargs':{'author_id':author_id}})
+                if post_serializer.is_valid():
+                    post_serializer.save()
                 else:
-                    return Response(comment_serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+                    return Response(post_serializer.errors,status=status.HTTP_400_BAD_REQUEST)
             except AttributeError:
                 return Response("Bad request: needs origin field.",status=status.HTTP_400_BAD_REQUEST)
             try:

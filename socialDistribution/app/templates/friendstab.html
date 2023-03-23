@@ -12,7 +12,7 @@
         <div class="p-2">
             <div class="card flex-fill" style="width: 700px;">
                 <div class="d-flex">
-                    {% if person.profileImage %}
+                    {% if person.profileImage and person.profileImage != '' %}
                     <img src="{{person.profileImage}}" width="230px" height="230px" class="object-fit-cover border rounded-start"
                     alt="No profile image">
                     {% else %}

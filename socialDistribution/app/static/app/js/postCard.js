@@ -2,7 +2,7 @@
 //post card scripts
 
 export function addLikeEventListener(uuid){
-    console.log(uuid)
+    // console.log(uuid)
     $(`#like-post-${uuid}`).click(function(e) {
         e.preventDefault();
         const url = `/posts/${uuid}/like`
@@ -15,7 +15,7 @@ export function addLikeEventListener(uuid){
             },
             success: function (result) {
               showAndDismissAlert("info",result)
-              console.log(result)
+              // console.log(result)
               if(result.toLowerCase() === "liked"){
                 let value = parseInt($(`#like-count-${uuid}`).html());
                 value++;
@@ -48,9 +48,9 @@ export function addLikeEventListener(uuid){
 }
 
 export function addDeletePostListener(uuid){
-    console.log(uuid)
+    // console.log(uuid)
   $(`#delete-post-${uuid}`).on('click', function(event) {
-    console.log("Like button clicked")
+    // console.log("Like button clicked")
     event.preventDefault();
     const url = `delete-post/${uuid}/`
     var postId = $(this).attr('id').replace('delete-post-', '');

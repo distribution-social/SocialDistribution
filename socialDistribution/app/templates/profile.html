@@ -15,7 +15,7 @@
         <div class="p-2">
             <div class="card mb-3 flex-fill" style="max-width: 1000px;">
                 <div class="d-flex justify-content-start flex-fill">
-                    {% if author.profileImage %}
+                    {% if author.profileImage and author.profileImage != '' %}
                     <img src="{{author.profileImage}}" width="230px" height="230px" class="object-fit-cover border rounded-start"
                     alt="No profile image">
                     {% else %}
