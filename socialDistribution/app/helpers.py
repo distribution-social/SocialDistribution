@@ -24,9 +24,9 @@ def is_valid_info(request, username, email, github, password, confirm_password):
         messages.warning(request, "Email address is already in use.")
         return False
 
-    elif github_exists(github):
-        messages.warning(request, "Github username is already in use.")
-        return False
+    # elif github_exists(github):
+    #     messages.warning(request, "Github username is already in use.")
+    #     return False
 
     elif password != confirm_password:
         messages.warning(request, "Passwords do not match.")
