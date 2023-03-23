@@ -94,7 +94,13 @@ def signup(request):
 @login_required(login_url="/login")
 def home(request):
     context = {"comment_form": CommentForm()}
-    return render(request, 'posts_stream.html', context)
+    return render(request, 'home_stream.html', context)
+
+@require_http_methods(["GET"])
+@login_required(login_url="/login")
+def explore(request):
+    context = {"comment_form": CommentForm()}
+    return render(request, 'explore_stream.html', context)
 
 
 @login_required(login_url="/login")
