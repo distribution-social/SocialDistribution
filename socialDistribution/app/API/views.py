@@ -345,16 +345,16 @@ class LikesCommentView(BasicAuthMixin,APIView):
         try:
             author = Author.objects.get(id=author_id)
         except Author.DoesNotExist:
-            return Response({"error": "Author does not exist."}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"error": f"Author {author_id} does not exist."}, status=status.HTTP_404_NOT_FOUND)
         try:
             post = Post.objects.get(uuid=post_id)
         except Post.DoesNotExist:
-            return Response({"error": "Post does not exist."}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"error": f"Post {post_id} does not exist."}, status=status.HTTP_404_NOT_FOUND)
         try:
             comment = post.comments.get(uuid=comment_id)
             likes = comment.likes.all()
         except Comment.DoesNotExist:
-            return Response({"error": "Comment does not exist."}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"error": f"Comment {comment_id} does not exist."}, status=status.HTTP_404_NOT_FOUND)
 
         serializer = LikeSerializer(likes, many=True, context={'request':request,'kwargs':{'author_id':author_id,'post_id':post_id,'comment_id':comment_id}})
         return Response(serializer.data,status=status.HTTP_200_OK)
@@ -365,11 +365,11 @@ class LikesCommentView(BasicAuthMixin,APIView):
         try:
             post = Post.objects.get(uuid=post_id)
         except Post.DoesNotExist:
-            return Response({"error": "Post does not exist."}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"error": f"Post {post_id} does not exist."}, status=status.HTTP_404_NOT_FOUND)
         try:
             comment = post.comments.get(uuid=comment_id)
         except Comment.DoesNotExist:
-            return Response({"error": "Comment does not exist."}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"error": f"Comment {comment_id} does not exist."}, status=status.HTTP_404_NOT_FOUND)
         if user == comment.author:
             return Response({"error": "Can't like your own comment"}, status=status.HTTP_400_BAD_REQUEST)
         found = comment.likes.filter(author=user)
@@ -388,7 +388,7 @@ class LikedView(BasicAuthMixin,APIView):
             author = Author.objects.get(id=author_id)
             liked = author.liked.all()
         except Author.DoesNotExist:
-            return Response({"error": "Author does not exist."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": f"Author {author_id} does not exist."}, status=status.HTTP_400_BAD_REQUEST)
 
         serializer = LikeSerializer(liked, many=True, context={'request':request,'kwargs':{'author_id':author_id}})
 
@@ -405,7 +405,7 @@ class InboxView(BasicAuthMixin,APIView):
             author = Author.objects.get(id=author_id)
             items = author.my_inbox.all().order_by("-date")
         except Author.DoesNotExist:
-            return Response({"error": "Author does not exist."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": f"Author {author_id} does not exist."}, status=status.HTTP_400_BAD_REQUEST)
         item_list = []
         author_serializer = AuthorSerializer(author, context={'request':request,'kwargs':{'author_id':author_id}})
         for item in items:
@@ -422,14 +422,14 @@ class InboxView(BasicAuthMixin,APIView):
         try:
             author = Author.objects.get(id=author_id)
         except Author.DoesNotExist:
-            return Response({"error": "Author does not exist."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": f"Author {author_id} does not exist."}, status=status.HTTP_400_BAD_REQUEST)
 
         if request.data.get('type') == 'follow':
             try:
-                actor_id = parse_values(request.data.get('actor').get('url')).get('author_id')
-                actor = Author.objects.get(id=actor_id)
+                actor_id = request.data.get('actor').get('url')
+                actor = Author.objects.get(url=actor_id)
             except Author.DoesNotExist:
-                actor = Author(id=actor_id,username=actor_id,confirmed=True)
+                actor = Author(username=parse_values(actor_id).get('author_id'),confirmed=True)
                 authorSerializer = AuthorSerializer(actor,request.data.get('actor'))
                 if authorSerializer.is_valid():
                     authorSerializer.save()
@@ -444,14 +444,14 @@ class InboxView(BasicAuthMixin,APIView):
                     add_to_inbox(actor,author,Activity.FOLLOW,actor)
                 else:
                     return Response(f"Already following {author.displayName}",status=status.HTTP_400_BAD_REQUEST)
-            except:
-                return Response({'error': 'Can not add to inbox.'},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            except Exception as e:
+                return Response({'error': str(e)},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         elif request.data.get('type') == 'post':
             try:
-                actor_id = parse_values(request.data.get('author').get('url')).get('author_id')
-                actor = Author.objects.get(id=actor_id)
+                actor_id = request.data.get('author').get('url')
+                actor = Author.objects.get(url=actor_id)
             except Author.DoesNotExist:
-                actor = Author(id=actor_id,username=actor_id,confirmed=True)
+                actor = Author(username=parse_values(actor_id).get('author_id'),confirmed=True)
                 authorSerializer = AuthorSerializer(actor,request.data.get('author'))
                 if authorSerializer.is_valid():
                     authorSerializer.save()
@@ -459,11 +459,13 @@ class InboxView(BasicAuthMixin,APIView):
                     return Response(authorSerializer.errors,status=status.HTTP_400_BAD_REQUEST)
             except AttributeError:
                 return Response("Bad request: needs author:url field.",status=status.HTTP_400_BAD_REQUEST)
+
+
             try:
-                post_id = parse_values(request.data.get('origin')).get('post_id')
-                post = Post.objects.get(uuid=post_id)
+                post_id = request.data.get('origin')
+                post = Post.objects.get(origin=post_id)
             except Post.DoesNotExist:
-                post = Post(uuid=post_id,made_by=actor)
+                post = Post(made_by=actor)
                 post_serializer = PostSaveSerializer(post,data=request.data,context={'request':request,'kwargs':{'author_id':author_id}})
                 if post_serializer.is_valid():
                     post_serializer.save()
@@ -472,15 +474,17 @@ class InboxView(BasicAuthMixin,APIView):
             except AttributeError:
                 return Response("Bad request: needs origin field.",status=status.HTTP_400_BAD_REQUEST)
             try:
-                add_to_inbox(actor,author,Activity.POST,comment)
-            except:
-                return Response({'error': 'Can not add to inbox.'},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                add_to_inbox(actor,author,Activity.POST,post)
+            except Exception as e:
+                return Response({'error': str(e)},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
         elif request.data.get('type') == 'comment':
             try:
-                actor_id = parse_values(request.data.get('author').get('url')).get('author_id')
-                actor = Author.objects.get(id=actor_id)
+                actor_id = request.data.get('author').get('url')
+                actor = Author.objects.get(url=actor_id)
             except Author.DoesNotExist:
-                actor = Author(id=actor_id,username=actor_id,confirmed=True)
+                actor = Author(username=parse_values(actor_id).get('author_id'),confirmed=True)
                 authorSerializer = AuthorSerializer(actor,request.data.get('author'))
                 if authorSerializer.is_valid():
                     authorSerializer.save()
@@ -488,18 +492,26 @@ class InboxView(BasicAuthMixin,APIView):
                     return Response(authorSerializer.errors,status=status.HTTP_400_BAD_REQUEST)
             except AttributeError:
                 return Response("Bad request: needs author:url field.",status=status.HTTP_400_BAD_REQUEST)
+
+
             try:
                 post_id = parse_values(request.data.get('id')).get('post_id')
                 post = Post.objects.get(uuid=post_id)
             except Post.DoesNotExist:
-                return Response({'error':'Post does not exist.'},status=status.HTTP_400_BAD_REQUEST)
+                return Response({'error':f'Post {post_id} does not exist.'},status=status.HTTP_400_BAD_REQUEST)
             except AttributeError:
                 return Response("Bad request: needs id field.",status=status.HTTP_400_BAD_REQUEST)
+
+
             try:
                 comment_id = parse_values(request.data.get('id')).get('comment_id')
                 comment = Comment.objects.get(uuid=comment_id)
             except Comment.DoesNotExist:
-                comment = Comment(uuid=comment_id,author=actor,post=post)
+                comment = Comment(author=actor,post=post)
+                try:
+                    request.data.pop('id')
+                except:
+                    pass
                 comment_serializer = CommentSerializer(comment,data=request.data,context={'request':request,'kwargs':{'author_id':author_id}})
                 if comment_serializer.is_valid():
                     comment_serializer.save()
@@ -507,37 +519,51 @@ class InboxView(BasicAuthMixin,APIView):
                     return Response(comment_serializer.errors,status=status.HTTP_400_BAD_REQUEST)
             except AttributeError:
                 return Response("Bad request: needs id field.",status=status.HTTP_400_BAD_REQUEST)
+
+
             try:
                 add_to_inbox(actor,author,Activity.COMMENT,comment)
-            except:
-                return Response({'error': 'Can not add to inbox.'},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            except Exception as e:
+                return Response({'error': str(e)},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
         elif request.data.get('type') == 'like':
             try:
                 kwargs = parse_values(request.data.get('object'))
                 actor_kwargs = parse_values(request.data.get('author').get('url'))
             except AttributeError:
-                return Response("Bad request: need object and author:id fields.",status=status.HTTP_400_BAD_REQUEST)
+                return Response("Bad request: need object and author:url fields.",status=status.HTTP_400_BAD_REQUEST)
+
+
             try:
-                actor_id = actor_kwargs.get('author_id')
-                actor = Author.objects.get(id=actor_id)
+                actor_id = request.data.get('author').get('url')
+                actor = Author.objects.get(url=actor_id)
             except Author.DoesNotExist:
-                actor = Author(id=actor_id,username=actor_id,confirmed=True)
+                actor = Author(username=parse_values(actor_id).get('author_id'),confirmed=True)
                 authorSerializer = AuthorSerializer(actor,request.data.get('author'))
                 if authorSerializer.is_valid():
                     authorSerializer.save()
                 else:
                     return Response(authorSerializer.errors,status=status.HTTP_400_BAD_REQUEST)
+            except AttributeError:
+                return Response("Bad request: need author:url field.",status=status.HTTP_400_BAD_REQUEST)
+
+
             try:
                 post_id = kwargs.get('post_id')
                 post = Post.objects.get(uuid=post_id)
             except Post.DoesNotExist:
-                return Response({'error':'Post does not exist.'},status=status.HTTP_404_NOT_FOUND)
+                return Response({'error':f'Post {post_id} does not exist.'},status=status.HTTP_404_NOT_FOUND)
             if kwargs.get('comment_id'):
                 try:
                     comment_id = kwargs.get('comment_id')
                     comment = Comment.objects.get(uuid=comment_id)
                 except Comment.DoesNotExist:
-                    return Response({'error':'Comment does not exist.'},status=status.HTTP_404_NOT_FOUND)
+                    return Response({'error':f'Comment {comment_id} does not exist.'},status=status.HTTP_404_NOT_FOUND)
+                except AttributeError:
+                    return Response('Bad rquest: need comment_id field.',status=status.HTTP_400_BAD_REQUEST)
+
+
                 if comment.author.id == actor.id:
                     return Response('Can\'t like your own comment',status=status.HTTP_400_BAD_REQUEST)
                 found = comment.likes.filter(author=actor)
@@ -547,16 +573,21 @@ class InboxView(BasicAuthMixin,APIView):
                 else:
                     return Response('Already liked comment.',status=status.HTTP_400_BAD_REQUEST)
             else:
+
                 if post.made_by.id == actor.id:
                     return Response('Can\'t like your own post')
                 found = post.likes.filter(author=actor)
                 if not found:
                     post.likes.create(type=Like.POST,author=actor,summary=f'{actor.displayName} liked your comment.')
-                    add_to_inbox(actor,author,Activity.LIKE,post)
+                    try:
+                        add_to_inbox(actor,author,Activity.LIKE,post)
+                    except Exception as e:
+                        return Response({'error': str(e)},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
                 else:
                     return Response('Already liked post.',status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response("Type not supported: [\'follow\',\'post\',\'like\',\'comment\']",status=status.HTTP_400_BAD_REQUEST)
+
         return Response("Added to inbox.",status=status.HTTP_201_CREATED)
 
     def delete(self,request,author_id):
@@ -564,6 +595,6 @@ class InboxView(BasicAuthMixin,APIView):
             author = Author.objects.get(id=author_id)
             author.my_inbox.all().delete()
         except Author.DoesNotExist:
-            return Response({"error": "Author does not exist."}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"error": f"Author {author_id} does not exist."}, status=status.HTTP_404_NOT_FOUND)
 
         return Response(status=status.HTTP_204_NO_CONTENT)
