@@ -36,13 +36,12 @@ def posts(request):
 
 
         allPosts = []
-        headers = {}
 
-        if foreignNode.username:
-            headers = {
-                    'Authorization': f"Basic {foreignNode.getToken()}",
-                    'Content-Type': 'application/json'
-            }
+
+        headers = {
+                'Authorization': f"Basic {foreignNode.getToken()}",
+                'Content-Type': 'application/json'
+        }
         
 
         params = {
@@ -51,6 +50,8 @@ def posts(request):
         }
 
         try:
+            print("YOSHI?")
+            print(base_url)
             res = requests.get(f'{base_url}authors', headers=headers, params=params)
             authors = json.loads(res.text)
 
@@ -59,12 +60,7 @@ def posts(request):
                 res = requests.get(f'{base_url}authors/{uuid}/posts',headers=headers)
 
                 author_posts = json.loads(res.text)
-                import pdb; pdb.set_trace()
-                for post in author_posts:
-             
-                    import pdb; pdb.set_trace()
-                    
-
+                for post in author_posts['items']:
                     allPosts.append(post)
         except:
             print(res)

@@ -184,6 +184,8 @@ class ForeignAPINodes(models.Model):
         return self.base_url
 
     def getToken(self):
+        if not self.username:
+            return ""
         text = self.username + ":" + self.password
         encoded_text = base64.b64encode(text.encode('utf-8')).decode('utf-8')
         return encoded_text
