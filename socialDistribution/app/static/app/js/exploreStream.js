@@ -9,9 +9,9 @@ $(document).ready(function() {
     spinner.style.display = 'block'; 
 
     $.ajax({
-        url: "/explore-posts",
+        url: "/posts",
         type: 'GET',
-        success: function(res) {
+        success: function(res) {    
             console.log(res)
             $.each(res.posts, function(index, post) {
                 console.log(post)
