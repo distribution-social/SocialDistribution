@@ -88,7 +88,7 @@ def explore_posts(request):
                         except Exception as e:
                             print(f"creating post failed in ajax {post_obj['uuid']}: {e}")
 
-
+                    post['tag'] = foreignNode.nickname
                     allPosts.append(post)
         except Exception as e:
             print(base_url,e)
@@ -98,27 +98,32 @@ def explore_posts(request):
 @login_required(login_url="/login")
 @require_http_methods(["GET"])
 def post_details(request):
-    # import pdb; pdb.set_trace()
-    base_url = request.build_absolute_uri('/')
-    author = Author.objects.get(username=request.user.username)
+
     post_uuid = request.GET.get("uuid")
-
     post_obj = Post.objects.get(uuid=post_uuid)
+    
+    host =  post_obj.made_by.host
+    author = post_obj.made_by
+    if not host.endswith('/'):
+        host += '/'
 
-    #TODO: when we get other team stuff we just have to look which host it is, and only call that server.
-    #For now, I am testing using ours by hardcoding it.
-    headers = {
-            'Authorization': f"Basic TmljazpXaWVsZ3Vz",
-            'Content-Type': 'application/json'
-    }
+    foreignNode = ForeignAPINodes.objects.get(base_url=host)
+    headers={}
+    if foreignNode.username:
+        headers = {
+                'Authorization': f"Basic {foreignNode.getToken()}",
+                'Content-Type': 'application/json'
+        }
 
     params = {
 
     }
-
-    res = requests.get(f'{base_url}api/authors/{author.id}/posts/{post_uuid}', headers=headers)
-
+   
+    res = requests.get(post_obj.origin, headers=headers)
+   
     post = json.loads(res.text)
+
+    post['tag'] = foreignNode.nickname
 
     return JsonResponse({'post': post})
 

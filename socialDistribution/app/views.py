@@ -40,6 +40,7 @@ def signup(request):
         github = form_inputs.get('github')
         password = form_inputs.get('password')
         confirm_password = form_inputs.get('confirm_password')
+       
 
         if display_name and username and email and github and password and confirm_password:
 

@@ -14,6 +14,7 @@ $(document).ready(function() {
         type: 'GET',
         data: {uuid: postUUID},
         success: function(res) {
+            console.log(res)
             const postData = {
                 uuid: extractUUID(res.post.id),
                 ...res.post

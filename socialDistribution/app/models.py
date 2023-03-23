@@ -194,6 +194,7 @@ class Node(models.Model):
 
 #The teams we connect to (including ourselves).
 class ForeignAPINodes(models.Model):
+    nickname = models.CharField(max_length=255, null=True, blank=True)
     base_url = models.URLField(max_length=200, unique=True)
 
     #allowing it to be blank because team yoshi doesnt have auth
@@ -201,7 +202,7 @@ class ForeignAPINodes(models.Model):
     password = models.CharField(max_length=255,null=True,blank=True)
 
     def __str__(self):
-        return self.base_url
+        return f'{self.base_url} - {self.nickname}'
 
     def getToken(self):
         if not self.username:
