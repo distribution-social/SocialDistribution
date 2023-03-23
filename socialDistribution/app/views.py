@@ -17,6 +17,7 @@ import json
 from django.contrib.auth.models import User
 from .helpers import *
 from django.db.models import Q
+from django.conf import settings
 
 
 class HttpResponseUnauthorized(HttpResponse):
@@ -62,7 +63,7 @@ def signup(request):
                 u.save()
 
             try:
-                Author.objects.create(host="http://127.0.0.1:8000", displayName=display_name,
+                Author.objects.create(host=settings.HOST, displayName=display_name,
                                       github=f"https://github.com/{github}", profileImage=None, email=email, username=username, confirmed=False)
             except Exception as e:
                 messages.warning(request, e)
