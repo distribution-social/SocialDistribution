@@ -17,8 +17,11 @@ class AuthorSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         data = super().to_representation(instance)
 
+        if (not data['url'] or data['url'] == '' )and data['host']:
+            data['url'] = data['host'] + "/api/authors/" + data['id']
         if data['id'] is not None and data['host']:
             data['id'] = data['host'] + "/authors/" + data['id']
+
 
         return data
 
