@@ -45,6 +45,10 @@ var author_display_name = '{{author.displayName}}';
                                             {% elif user_is_following == "False" and user_pending_following == "True" %}
                                              <button id="" type="submit" name="" value=""
                                                 class="btn btn-outline-primary btn-lg" disabled>Pending Follow Request</button>
+                                            {% elif user_is_following == "True" and user_pending_following == "False" %}
+                                               <button id="" type="submit" name="" value=""
+                                                class="btn btn-outline-primary btn-lg" disabled>Following</button>
+
                                             {% endif %}
                                                 <!--<i class="bi bi-person-fill-add">&nbsp;</i></button>-->
                                     {% endif %}
