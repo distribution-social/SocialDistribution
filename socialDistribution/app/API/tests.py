@@ -4,8 +4,12 @@ from .views import *
 from django.urls import reverse
 from ..models import *
 from django.contrib.auth import get_user_model
+from django.conf import settings
 
 User = get_user_model()
+
+def create_api_creds():
+  return Node.objects.create(username='test',password='test')
 
 def create_authors(length):
   user_list = []
@@ -22,7 +26,7 @@ def setup_authors(authors):
       password=user.get('password')
     )
     Author.objects.create(
-      host="http://127.0.0.1:8000",
+      host=settings.HOST+'/api/',
       displayName=user.get('username'),
       github=f"https://github.com/{user.get('username')}",
       profileImage=None, email=user.get('email'),
@@ -41,13 +45,17 @@ class Authors(APITestCase):
         password='user'
       )
     self.author_list = create_authors(5)
+    self.token = create_api_creds()
 
 
   def testAuthorList(self):
     kwargs = {
 
     }
-    response = self.client.get(reverse('api-author-list',kwargs=kwargs))
+    header = {
+      'HTTP_AUTHORIZATION': f'Basic {self.token}'
+    }
+    response = self.client.get(reverse('api-author-list',kwargs=kwargs),**header)
     self.assertEquals(len(response.data.get('items')),len(self.author_list))
 
   def testAuthorSingle(self):
@@ -55,7 +63,10 @@ class Authors(APITestCase):
     kwargs = {
       'author_id': author.id,
     }
-    response = self.client.get(reverse('api-single_author',kwargs=kwargs))
+    header = {
+      'HTTP_AUTHORIZATION': f'Basic {self.token}'
+    }
+    response = self.client.get(reverse('api-single_author',kwargs=kwargs),**header)
     self.assertEquals(response.data.get('displayName'),author.displayName)
 
   def testAuthorFollowers(self):
@@ -65,7 +76,10 @@ class Authors(APITestCase):
     kwargs = {
       'author_id': author.id,
     }
-    response = self.client.get(reverse('api-author-followers',kwargs=kwargs))
+    header = {
+      'HTTP_AUTHORIZATION': f'Basic {self.token}'
+    }
+    response = self.client.get(reverse('api-author-followers',kwargs=kwargs),**header)
     self.assertEquals(len(response.data.get('items')),len(author.followers.all()))
     self.assertEquals(response.data.get('items')[0].get('displayName'),author_follow.displayName)
 
@@ -77,7 +91,10 @@ class Authors(APITestCase):
       'author_id': author.id,
       'follower_author_id': author_follow.id
     }
-    response = self.client.get(reverse('api-followers',kwargs=kwargs))
+    header = {
+      'HTTP_AUTHORIZATION': f'Basic {self.token}'
+    }
+    response = self.client.get(reverse('api-followers',kwargs=kwargs),**header)
     self.assertEquals(response.data.get('is_following'),True)
 
   def testAuthorDeleteFollow(self):
@@ -88,10 +105,13 @@ class Authors(APITestCase):
       'author_id': author.id,
       'follower_author_id': author_follow.id
     }
-    response = self.client.delete(reverse('api-followers',kwargs=kwargs))
+    header = {
+      'HTTP_AUTHORIZATION': f'Basic {self.token}'
+    }
+    response = self.client.delete(reverse('api-followers',kwargs=kwargs),**header)
     self.assertEquals(response.status_code,status.HTTP_204_NO_CONTENT)
 
-    response = self.client.delete(reverse('api-followers',kwargs=kwargs))
+    response = self.client.delete(reverse('api-followers',kwargs=kwargs),**header)
     self.assertEquals(response.status_code,status.HTTP_404_NOT_FOUND)
 
   def testAuthorNotFollow(self):
@@ -101,7 +121,10 @@ class Authors(APITestCase):
       'author_id': author.id,
       'follower_author_id': author_follow.id
     }
-    response = self.client.get(reverse('api-followers',kwargs=kwargs))
+    header = {
+      'HTTP_AUTHORIZATION': f'Basic {self.token}'
+    }
+    response = self.client.get(reverse('api-followers',kwargs=kwargs),**header)
     self.assertEquals(response.data.get('is_following'),False)
 
 
@@ -114,6 +137,8 @@ class Posts(APITestCase):
         password='user'
       )
     self.author_list = create_authors(5)
+    self.token = create_api_creds()
+
 
   def testGetAuthorPosts(self):
     author = self.author_list.first()
@@ -121,20 +146,26 @@ class Posts(APITestCase):
     author.my_posts.create(title="Test 2")
     author.my_posts.create(title="Test 3")
     kwargs = {
-      'author_id': author.id,
+      'author_id': author.id
     }
-    response = self.client.get(reverse('api-author-post',kwargs=kwargs))
+    header = {
+      'HTTP_AUTHORIZATION': f'Basic {self.token}'
+    }
+    response = self.client.get(reverse('api-author-post',kwargs=kwargs),**header)
 
-    self.assertEquals(len(response.data),len(author.my_posts.all()))
+    self.assertEquals(len(response.data.get('items')),len(author.my_posts.all()))
 
-  def testGetAuthorPostPublic(self):
+  def testGetAuthorPostDetail(self):
     author = self.author_list.first()
     post = author.my_posts.create(title="Test",visibility="PUBLIC")
     kwargs = {
       'author_id': author.id,
       'post_id': post.uuid
     }
-    response = self.client.get(reverse('api-post-detail',kwargs=kwargs))
+    header = {
+      'HTTP_AUTHORIZATION': f'Basic {self.token}'
+    }
+    response = self.client.get(reverse('api-post-detail',kwargs=kwargs),**header)
 
     self.assertEquals(response.data.get('title'),post.title)
 
@@ -146,10 +177,13 @@ class Posts(APITestCase):
       'author_id': author.id,
       'post_id': post.uuid
     }
-    response = self.client.delete(reverse('api-post-detail',kwargs=kwargs))
+    header = {
+      'HTTP_AUTHORIZATION': f'Basic {self.token}'
+    }
+    response = self.client.delete(reverse('api-post-detail',kwargs=kwargs),**header)
     self.assertEquals(response.status_code,status.HTTP_204_NO_CONTENT)
 
-    response = self.client.delete(reverse('api-post-detail',kwargs=kwargs))
+    response = self.client.delete(reverse('api-post-detail',kwargs=kwargs),**header)
     self.assertEquals(response.status_code,status.HTTP_404_NOT_FOUND)
 
 class Comments(APITestCase):
@@ -161,6 +195,8 @@ class Comments(APITestCase):
         password='user'
       )
     self.author_list = create_authors(5)
+    self.token = create_api_creds()
+
     self.post_author = self.author_list.first()
     self.post = self.post_author.my_posts.create(title="Test",visibility="PUBLIC")
 
@@ -172,7 +208,10 @@ class Comments(APITestCase):
       'post_id': self.post.uuid,
       'comment_id': comment.uuid
     }
-    response = self.client.get(reverse('api-post-comment',kwargs=kwargs))
+    header = {
+      'HTTP_AUTHORIZATION': f'Basic {self.token}'
+    }
+    response = self.client.get(reverse('api-post-comment',kwargs=kwargs),**header)
     self.assertEquals(response.data.get('comment'),"New comment")
 
   def testGetPostComments(self):
@@ -183,7 +222,10 @@ class Comments(APITestCase):
       'author_id': self.post_author.id,
       'post_id': self.post.uuid
     }
-    response = self.client.get(reverse('api-post-comments',kwargs=kwargs))
+    header = {
+      'HTTP_AUTHORIZATION': f'Basic {self.token}'
+    }
+    response = self.client.get(reverse('api-post-comments',kwargs=kwargs),**header)
     self.assertEquals(len(response.data.get('comments')),len(self.post.comments.all()))
 
 
@@ -196,6 +238,8 @@ class Likes(APITestCase):
         password='user',
       )
     self.author_list = create_authors(5)
+    self.token = create_api_creds()
+
     self.post_author = self.author_list.first()
     self.comment_author = self.author_list.last()
     self.post = self.post_author.my_posts.create(title="Test",visibility="PUBLIC")
@@ -207,11 +251,14 @@ class Likes(APITestCase):
       'author_id': self.post_author.id,
       'post_id': self.post.uuid
     }
-    response = self.client.get(reverse('api-post-likes',kwargs=kwargs))
+    header = {
+      'HTTP_AUTHORIZATION': f'Basic {self.token}'
+    }
+    response = self.client.get(reverse('api-post-likes',kwargs=kwargs),**header)
     self.assertEquals(response.data[0].get('summary'),"liked post")
 
     self.post.likes.create(author=self.comment_author,summary="liked post")
-    response = self.client.get(reverse('api-post-likes',kwargs=kwargs))
+    response = self.client.get(reverse('api-post-likes',kwargs=kwargs),**header)
     self.assertEquals(len(response.data),2)
 
   def testGetCommentLikes(self):
@@ -222,11 +269,14 @@ class Likes(APITestCase):
       'post_id': self.post.uuid,
       'comment_id': self.comment.uuid
     }
-    response = self.client.get(reverse('api-post-comment-likes',kwargs=kwargs))
+    header = {
+      'HTTP_AUTHORIZATION': f'Basic {self.token}'
+    }
+    response = self.client.get(reverse('api-post-comment-likes',kwargs=kwargs),**header)
     self.assertEquals(response.data[0].get('summary'),"liked comment")
 
     self.comment.likes.create(author=self.comment_author,summary="liked comment")
-    response = self.client.get(reverse('api-post-comment-likes',kwargs=kwargs))
+    response = self.client.get(reverse('api-post-comment-likes',kwargs=kwargs),**header)
     self.assertEquals(len(response.data),2)
 
   def testGetAuthorLiked(self):
@@ -236,7 +286,10 @@ class Likes(APITestCase):
     kwargs = {
       'author_id': self.post_author.id,
     }
-    response = self.client.get(reverse('api-author-liked',kwargs=kwargs))
+    header = {
+      'HTTP_AUTHORIZATION': f'Basic {self.token}'
+    }
+    response = self.client.get(reverse('api-author-liked',kwargs=kwargs),**header)
     self.assertEquals(len(response.data),2)
 
 class Inbox(APITestCase):
@@ -248,4 +301,6 @@ class Inbox(APITestCase):
         password='user'
       )
     self.author_list = create_authors(5)
+    self.token = create_api_creds()
+
 
