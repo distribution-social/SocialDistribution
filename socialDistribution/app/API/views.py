@@ -14,7 +14,7 @@ from django.conf import settings
 
 class AuthorListAPIView(BasicAuthMixin,APIView):
     def get(self, request):
-        authors = Author.objects.filter(host=settings.HOST,confirmed=True).order_by('displayName')
+        authors = Author.objects.filter(host=settings.HOST + "/api/",confirmed=True).order_by('displayName')
         paginator = CustomPaginator()
         result_page = paginator.paginate_queryset(authors, request)
         serializer = AuthorSerializer(result_page, many=True,context={'request':request,'kwargs':{}})
