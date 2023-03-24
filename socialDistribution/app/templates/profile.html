@@ -1,3 +1,10 @@
+<!--
+    References:
+        Title: How to pass data to javascript in Django Framework ?
+        https://www.geeksforgeeks.org/how-to-pass-data-to-javascript-in-django-framework/
+        Author: deekshant149 https://auth.geeksforgeeks.org/user/deekshant149/articles
+-->
+
 {% extends "base_generic.html" %}
 
 {% load static %}
@@ -15,9 +22,13 @@
 var author_id = '{{author.id}}';
 var author_host = '{{author.host}}';
 var user_id = '{{user.id}}'
+/*var foreign_host = '{{foreign_host}}'
+var token_needed = '{{token_needed}}'
+var foreign_token = '{{foreign_token}}'
+*/
+var auth_headers = JSON.parse("{{auth_headers|escapejs}}")
 </script>
 <script type="module" src="{% static '../static/app/js/profile.js' %}"></script>
-
 
 </style>
 <div class="d-flex justify-content-center">
