@@ -101,7 +101,7 @@ function sendFollowRequestToInbox(e){
 
         getSingleAuthorInfo(author_url, foreign_node_token).then(foreignUserData => {
             foreignUserObject = foreignUserData;
-            follow_object.author = foreignUserObject
+            follow_object.object = foreignUserObject
             // console.log(follow_object);
 
             // const foreignAuthorURL = new URL("api/authors/" + author_id + "/inbox", "http://127.0.0.1:8000");
@@ -155,11 +155,21 @@ async function getSingleAuthorInfo(url, token){
 
     // const currentAuthorURL = new URL("api/authors/" + author_id, "http://127.0.0.1:8000");
 
-    const currentAuthorResponse = await fetch(currentAuthorURL, {
-        headers: new Headers({
+    var headers;
+
+    if (token){
+        headers = new Headers({
                 'Authorization': 'Basic '+token, 
                 'Content-Type': 'application/json'
-    })});
+        })
+    } else {
+        headers = new Headers({
+                'Content-Type': 'application/json'
+        })
+    }
+
+    const currentAuthorResponse = await fetch(currentAuthorURL, {
+        headers: headers});
 
     const currentAuthorResponseJSON = await currentAuthorResponse.json();
 
