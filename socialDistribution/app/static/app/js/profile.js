@@ -43,16 +43,24 @@ function getAndSetProfileCard() {
     // handle follow unfollow button
     const authorIsFollowingUrl = new URL("api/authors/" + author_id + "/followers/" + user_id, "http://127.0.0.1:8000");
     fetch(authorIsFollowingUrl, {method: "GET"}).then((response) => {
+        // console.log(response.json().is_following);
         if (response.status === 200) { // OK
             // following
-            $("#follow_unfollow_button").attr("name", "unfollow").val(author_id).text("Unfollow");
-            return;
+            // $("#follow_unfollow_button").attr("name", "unfollow").val(author_id).text("Unfollow");
+            return response.json();
         } else if (response.status === 404) {
             // not following
-            $("#follow_unfollow_button").attr("name", "follow").val(author_id).text("Request to Follow");
-            return;
+            // $("#follow_unfollow_button").attr("name", "follow").val(author_id).text("Request to Follow");
+            return response.json();
         } else {
-            alert("Something went wrong: " + response.status);
+            alert("Something went wrong: " + response.statusText);
+        }
+    }).then((result) => {
+        // console.log(result.is_following);
+        if (result.is_following === true){
+            $("#follow_unfollow_button").attr("name", "unfollow").val(author_id).text("Unfollow");
+        } else {
+            $("#follow_unfollow_button").attr("name", "follow").val(author_id).text("Request to Follow");
         }
     })
 }
