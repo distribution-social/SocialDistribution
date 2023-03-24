@@ -105,6 +105,8 @@ function sendFollowRequestToInbox(e){
             // const foreignAuthorURL = new URL("api/authors/" + author_id + "/inbox", "http://127.0.0.1:8000");
             const foreignAuthorURL = author_url + "/inbox"
 
+            console.log("*******************************", foreignAuthorURL);
+
             fetch(foreignAuthorURL, {
                 method: "POST",
                 headers: new Headers({
@@ -112,6 +114,8 @@ function sendFollowRequestToInbox(e){
                 'Content-Type': 'application/json'
             }), 
                 body: JSON.stringify(follow_object)
+            }).then(response => {
+                console.log("-------------Response: ", response.status);
             })
 
             const addToSentRequestURL = new URL("add-to-sent", "http://127.0.0.1:8000");
