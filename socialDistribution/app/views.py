@@ -280,6 +280,21 @@ def profile(request, author_id):
         except:
             context.update({"user_is_following": "False"})
 
+        id_to_follow = author_id
+
+        # Get the author object
+        author_to_follow = Author.objects.get(id=id_to_follow)
+
+        # Get our author object
+        current_user_author = Author.objects.get(
+            username=request.user.username)
+
+        # Add the author object to our sent_request list (Need to send this to inbox in the future to get approval on the other end)
+        if current_user_author.sent_requests.filter(id=author_to_follow.id).exists():
+            context.update({"user_pending_following": "True"})
+        else:
+            context.update({"user_pending_following": "False"})
+
         return render(request, 'profile.html', context)
 
     elif request.method == "POST":
