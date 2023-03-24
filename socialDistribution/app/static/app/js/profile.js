@@ -57,12 +57,47 @@ function getAndSetProfileCard() {
         }
     }).then((result) => {
         // console.log(result.is_following);
+        console.log(author_id, user_id);
         if (result.is_following === true){
             $("#follow_unfollow_button").attr("name", "unfollow").val(author_id).text("Unfollow");
         } else {
             $("#follow_unfollow_button").attr("name", "follow").val(author_id).text("Request to Follow");
         }
+    });
+
+
+    getSingleAuthorInfo(user_id).then(currentUserData => {
+        var currentUserObject = currentUserData;
+        var foreignUserObject;
+        var follow_object = {
+            type: "follow",      
+            summary:"Justin wants to follow admin",
+        }
+        
+        follow_object.actor = currentUserObject;
+
+        getSingleAuthorInfo(author_id).then(foreignUserData => {
+            foreignUserObject = foreignUserData;
+            follow_object.author = foreignUserObject
+            console.log(follow_object);
+        })
+
+
     })
+
+}
+
+
+async function getSingleAuthorInfo(author_id){
+
+    const currentAuthorURL = new URL("api/authors/" + author_id, "http://127.0.0.1:8000");
+
+    const currentAuthorResponse = await fetch(currentAuthorURL);
+
+    const currentAuthorResponseJSON = await currentAuthorResponse.json();
+
+    return currentAuthorResponseJSON;
+  
 }
 
 function setFollowers(followers, user_id, author_id) {
