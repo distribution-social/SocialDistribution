@@ -1,6 +1,15 @@
+<!--
+    References:
+        Title: How to pass data to javascript in Django Framework ?
+        https://www.geeksforgeeks.org/how-to-pass-data-to-javascript-in-django-framework/
+        Author: deekshant149 https://auth.geeksforgeeks.org/user/deekshant149/articles
+-->
+
 {% extends "base_generic.html" %}
+
 {% load static %}
-{% block title %}
+
+{% block title %} 
 {% if user.username == author.username %}
 <title>Profile</title>
 {% else %}
@@ -13,6 +22,9 @@
 var author_id = '{{author.id}}';
 var author_host = '{{author.host}}';
 var user_id = '{{user.id}}';
+var auth_headers = JSON.parse("{{auth_headers|escapejs}}");
+var serialized_followings = JSON.parse("{{serialized_followings|escapejs}}");
+var server_host = "{{server_host}}";
 var user_url = '{{user.url}}';
 var author_url = '{{author.url}}';
 var user_display_name = '{{user.displayName}}';
@@ -30,7 +42,7 @@ var local_node_token = '{{local_node_token}}';
         <div class="p-2">
             <div id="profile_card" class="card mb-3 flex-fill" style="max-width: 1000px;">
                 <div class="d-flex justify-content-start flex-fill">
-                    <img src="" width="250px" height="250px"
+                    <img src="{% static 'app/logo.png' %}" width="250px" height="250px"
                         class="profile_image object-fit-cover border rounded-start" alt="profile picture">
                     <div class="p-2 flex-fill">
                         <div class="card-body">
@@ -42,17 +54,8 @@ var local_node_token = '{{local_node_token}}';
                                     {% if user.id != author.id %}
                                     <form class="mt-3" action="{% url 'profile' author_id=author.id %}" method="post">
                                         {% csrf_token %}
-                                            {% if user_is_following == "False" and user_pending_following == "False" %}
                                             <button id="follow_unfollow_button" type="submit" name="" value=""
-                                                class="btn btn-outline-primary btn-lg"></button>
-                                            {% elif user_is_following == "False" and user_pending_following == "True" %}
-                                             <button id="" type="submit" name="" value=""
-                                                class="btn btn-outline-primary btn-lg" disabled>Pending Follow Request</button>
-                                            {% elif user_is_following == "True" and user_pending_following == "False" %}
-                                               <button id="" type="submit" name="" value=""
-                                                class="btn btn-outline-primary btn-lg" disabled>Following</button>
-
-                                            {% endif %}
+                                                class="btn btn-outline-primary btn-lg">
                                                 <!--<i class="bi bi-person-fill-add">&nbsp;</i></button>-->
                                     {% endif %}
                                 </div>
@@ -109,7 +112,8 @@ var local_node_token = '{{local_node_token}}';
                             </div>
                             <div class="tab-pane fade"
                                 id="nav-following" role="tabpanel" aria-labelledby="nav-following-tab" tabindex="2">
-                                {% include 'followingtab.html' %}
+                                <!--{% include 'followingtab.html' %}-->
+                                {% include 'following_tab_ajax.html' %}
                             </div>
                             <div class="tab-pane fade"
                                 id="nav-friends" role="tabpanel" aria-labelledby="nav-friends-tab" tabindex="3">

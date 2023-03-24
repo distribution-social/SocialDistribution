@@ -19,6 +19,9 @@ from .helpers import *
 from django.db.models import Q
 from django.conf import settings
 
+import urllib.parse
+from .API.serializers import AuthorSerializer
+
 
 class HttpResponseUnauthorized(HttpResponse):
     status_code = 401
@@ -275,6 +278,9 @@ def profile(request, author_id):
         posts = get_posts_visible_to_user(userAuthor, author, friends)
         context = {"posts": posts, "comment_form": CommentForm()}
         context.update({"author": author, "following": following, "followers": followers, "friends": friends, "user": userAuthor, "active_tab": "posts", "edit_profile_form": EditProfileForm(instance=author)})
+        context.update({"auth_headers": getAuthHeadersJson(author.host), "server_host": request.get_host()})
+        serializedFollowings = AuthorSerializer(following, many=True, context={'request':request,'kwargs':{}}).data
+        context.update({"serialized_followings": json.dumps(serializedFollowings)})
         try:
             userFollows = userAuthor.following.get(username=username)
             context.update({"user_is_following": "True"})
@@ -333,6 +339,18 @@ def profile(request, author_id):
 
         return redirect(reverse("profile", kwargs={"author_id": userAuthor.id}))
 
+def getAuthHeadersJson(author_host):
+    parsedAuthorHost = urllib.parse.urlparse(author_host)
+    httpsVersion = urllib.parse.urlunparse(parsedAuthorHost._replace(scheme='https'))
+    httpVersion = urllib.parse.urlunparse(parsedAuthorHost._replace(scheme='http'))
+    try:
+        node = ForeignAPINodes.objects.get(base_url=httpsVersion)
+    except:
+        node = ForeignAPINodes.objects.get(base_url=httpVersion)
+    headers={}
+    if node.username:
+        headers = {'Authorization': f"Basic {node.getToken()}", 'Content-Type': 'application/json'}
+    return json.dumps(headers)
 
 def get_posts_visible_to_user(userAuthor, author, friends):
     if userAuthor.id==author.id:
