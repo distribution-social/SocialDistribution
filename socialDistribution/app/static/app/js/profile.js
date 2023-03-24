@@ -87,6 +87,8 @@ function sendFollowRequestToInbox(e){
 
         var author_first_name = author_name_list[0];
 
+        // console.log("||||||||||||||||||||||", foreign_node_token);
+
         console.log(user_first_name, author_first_name);
 
         getSingleAuthorInfo(user_url).then(currentUserData => {
@@ -108,19 +110,34 @@ function sendFollowRequestToInbox(e){
             const foreignAuthorURL = author_url + "/inbox"
 
             console.log("*******************************", foreignAuthorURL);
+            
+   
+            var headers;
 
+            if (foreign_node_token){
+                headers = new Headers({
+                'Authorization': 'Basic '+foreign_node_token, 
+                'Content-Type': 'application/json'
+                })
+            } else {
+                headers = new Headers({
+                'Content-Type': 'application/json'
+                })
+            }
+            
             fetch(foreignAuthorURL, {
                 method: "POST",
-                headers: new Headers({
-                'Authorization': 'Basic '+btoa('server1:123'), 
-                'Content-Type': 'application/json'
-            }), 
+                headers: headers, 
                 body: JSON.stringify(follow_object)
             }).then(response => {
                 console.log("-------------Response: ", response.status);
             })
+
+            // console.log("$$$$$$$$$$$$$$$$", window.location.host);
             
-            const addToSentRequestURL = new URL("add-to-sent", window.location.host);
+            const addToSentRequestURL = new URL("add-to-sent", "http://" + window.location.host);
+
+   
             
             const sentRequestObject = {user_id:user_id, author_id:author_id};
 

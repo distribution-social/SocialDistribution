@@ -266,6 +266,7 @@ def profile(request, author_id):
     user = request.user
     userAuthor = Author.objects.get(username=request.user.username)
     if request.method == 'GET':
+
         author = Author.objects.get(id=author_id)
         username = author.username
         following = author.following.all().order_by('displayName')
@@ -294,6 +295,18 @@ def profile(request, author_id):
             context.update({"user_pending_following": "True"})
         else:
             context.update({"user_pending_following": "False"})
+
+        host = author.host
+
+        if not host.endswith('/'):
+            host += '/'
+
+        if not "https" in host:
+            host = host.replace("http", "https")
+
+        foreignNode = ForeignAPINodes.objects.get(base_url=host)
+
+        context.update({'foreign_node_token': foreignNode.getToken()})
 
         return render(request, 'profile.html', context)
 
