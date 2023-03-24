@@ -87,11 +87,9 @@ function sendFollowRequestToInbox(e){
 
         var author_first_name = author_name_list[0];
 
-        // console.log("||||||||||||||||||||||", foreign_node_token);
-
         console.log(user_first_name, author_first_name);
 
-        getSingleAuthorInfo(user_url).then(currentUserData => {
+        getSingleAuthorInfo(user_url, local_node_token).then(currentUserData => {
         var currentUserObject = currentUserData;
         var foreignUserObject;
         var follow_object = {
@@ -101,7 +99,7 @@ function sendFollowRequestToInbox(e){
 
         follow_object.actor = currentUserObject;
 
-        getSingleAuthorInfo(author_url).then(foreignUserData => {
+        getSingleAuthorInfo(author_url, foreign_node_token).then(foreignUserData => {
             foreignUserObject = foreignUserData;
             follow_object.author = foreignUserObject
             // console.log(follow_object);
@@ -109,9 +107,6 @@ function sendFollowRequestToInbox(e){
             // const foreignAuthorURL = new URL("api/authors/" + author_id + "/inbox", "http://127.0.0.1:8000");
             const foreignAuthorURL = author_url + "/inbox"
 
-            console.log("*******************************", foreignAuthorURL);
-            
-   
             var headers;
 
             if (foreign_node_token){
@@ -132,8 +127,6 @@ function sendFollowRequestToInbox(e){
             }).then(response => {
                 console.log("-------------Response: ", response.status);
             })
-
-            // console.log("$$$$$$$$$$$$$$$$", window.location.host);
             
             const addToSentRequestURL = new URL("add-to-sent", `${window.location.protocol}//` + window.location.host);
             
@@ -154,7 +147,7 @@ function sendFollowRequestToInbox(e){
     });
 }
 
-async function getSingleAuthorInfo(url){
+async function getSingleAuthorInfo(url, token){
 
     const currentAuthorURL = url;
 
@@ -164,7 +157,7 @@ async function getSingleAuthorInfo(url){
 
     const currentAuthorResponse = await fetch(currentAuthorURL, {
         headers: new Headers({
-                'Authorization': 'Basic '+btoa('server1:123'), 
+                'Authorization': 'Basic '+token, 
                 'Content-Type': 'application/json'
     })});
 

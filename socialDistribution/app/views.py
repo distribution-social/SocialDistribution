@@ -308,6 +308,18 @@ def profile(request, author_id):
 
         context.update({'foreign_node_token': foreignNode.getToken()})
 
+        local_host = userAuthor.host
+
+        if not local_host.endswith('/'):
+            local_host += '/'
+
+        if not "https" in local_host:
+            local_host = local_host.replace("http", "https")
+
+        localNode = ForeignAPINodes.objects.get(base_url=local_host)
+
+        context.update({'local_node_token': localNode.getToken()})
+
         return render(request, 'profile.html', context)
 
     elif request.method == "POST":
