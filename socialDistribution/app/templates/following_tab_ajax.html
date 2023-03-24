@@ -1,0 +1,76 @@
+{% load static %}
+
+{% block css %}
+<link rel="stylesheet" type="text/css" href="{% static 'app/following.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid d-flex align-items-center flex-column">
+<ul id="followings_tab_stream"></ul>
+
+<template id="following-card">
+    <div class="d-flex flex-column mb-3 mt-3 flex-fill" style="max-width: 700px;">
+        <div class="card flex-fill" style="width: 700px;">
+            <div class="d-flex">
+                    <img src="{% static 'app/logo.png' %}" width="230px" height="230px"
+                        class="following_image object-fit-cover border rounded-start" alt="No profile image available">
+                    <div class="d-flex flex-fill flex-column ">
+                        <div class="card-body">
+                            <h3 class="card-title following_display_name"></h3>
+
+                            <div class="btn-group" role="group" aria-label="Basic example">
+                                <a type="button" class="btn btn-primary following_profile_link" href="">
+                                    <i class="bi bi-person-fill">&nbsp;Profile</i></a>
+                                <a type="button" href="" target="_blank" class="btn btn-secondary following_github"><i
+                                        class="bi bi-github">&nbsp;GitHub</i></a>
+                            </div>
+                        </div>
+                        <div class="card-footer"><a class="following_host" href="" class="text-decoration-none"></a>
+                        </div>
+                    </div>
+            </div>
+        </div>
+    </div>
+</template>
+
+<template id="my-following-card">
+    <div class="d-flex flex-column mb-3 mt-3 flex-fill" style="max-width: 700px;">
+        <div class="card flex-fill" style="width: 700px;">
+            <div class="d-flex">
+                    <img src="{% static 'app/logo.png' %}" width="230px" height="230px"
+                        class="following_image object-fit-cover border rounded-start" alt="No profile image available">
+                    <div class="d-flex flex-fill flex-column ">
+                        <div class="card-body">
+                            <h3 class="card-title following_display_name"></h3>
+
+                            <div class="btn-group" role="group" aria-label="Basic example">
+                                <a type="button" class="btn btn-primary following_profile_link" href="">
+                                    <i class="bi bi-person-fill">&nbsp;Profile</i></a>
+                                <a type="button" href="" target="_blank" class="btn btn-secondary following_github"><i
+                                        class="bi bi-github">&nbsp;GitHub</i></a>
+                            </div>
+
+                            <form class="mt-3" action="{% url 'unfollow' %}" method="post">
+                                {% csrf_token %}
+
+                                <button type="submit" name="unfollow" value=""
+                                    class="btn btn-danger unfollow"><i
+                                        class="bi bi-x-circle-fill">&nbsp;Unfollow</i></button>
+                            </form>
+
+                        </div>
+                        <div class="card-footer"><a class="following_host" href="" class="text-decoration-none"></a>
+                        </div>
+                    </div>
+            </div>
+        </div>
+    </div>
+
+
+</template>
+
+</div>
+
+
+{% endblock %}

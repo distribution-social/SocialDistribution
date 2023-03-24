@@ -9,6 +9,7 @@ $(document).ready(function() {
     console.log(auth_headers);
 
     getAndSetProfileCard();
+    setFollowing(serialized_followings, user_id, author_id, author_host);
 
     // get followers from server and use data to set followers and true friends
     const followersUrl = new URL("authors/" + author_id + "/followers", author_host);
@@ -21,7 +22,7 @@ $(document).ready(function() {
     }).then((data) => {
         console.log(data);
         const followers = data.items;
-        setFollowers(followers, user_id, author_id);
+        setFollowers(followers, user_id, author_id, author_host);
         setFriends(followers, author_id);
         return;
     })
@@ -61,8 +62,9 @@ function getAndSetProfileCard() {
     })
 }
 
-function setFollowers(followers, user_id, author_id) {
+function setFollowers(followers, user_id, author_id, author_host) {
     let num = 0;
+    console.log("user: "+user_id+"    author: "+ author_id);
     if (user_id === author_id) {
         var cardTemplate = document.getElementById('my-followers-card');
     } else {
@@ -73,11 +75,11 @@ function setFollowers(followers, user_id, author_id) {
         const instance = document.importNode(cardTemplate.content, true);
         let uuid = extractUUID(follower.id);
         let host = follower.host;
-        $(instance).find(".follower_image").attr("src", follower.profileImage);
+        if (follower.profileImage !== null) {$(instance).find(".follower_image").attr("src", follower.profileImage);}
         $(instance).find(".follower_profile_link").attr("href", author_host+"/authors/"+uuid);
         $(instance).find(".follower_github").attr("href", follower.github);
         $(instance).find(".follower_display_name").text(follower.displayName);
-        $(instance).find(".follower_host").attr("href", host).text(host.replace("http://",'').replace("/",''));
+        $(instance).find(".follower_host").attr("href", host).text(host.replace("http://",''));
         $(instance).find(".removefollower").val(uuid);
         $("#followers_tab_stream").append(instance);
     }
@@ -109,11 +111,11 @@ function setFriends(followers, author_id) {
                 const instance = document.importNode(cardTemplate.content, true);
                 let uuid = extractUUID(follower.id);
                 let host = follower.host;
-                $(instance).find(".friend_image").attr("src", follower.profileImage);
+                if (follower.profileImage !== null) {$(instance).find(".friend_image").attr("src", follower.profileImage);}
                 $(instance).find(".friend_profile_link").attr("href", author_host + "/authors/" + uuid);
                 $(instance).find(".friend_github").attr("href", follower.github);
                 $(instance).find(".friend_display_name").text(follower.displayName);
-                $(instance).find(".friend_host").attr("href", host).text(host.replace("http://", '').replace("/", ''));
+                $(instance).find(".friend_host").attr("href", host).text(host.replace("http://", ''));
                 $("#friends_tab_stream").append(instance);
 
                 if (num2 === 0) {
@@ -127,5 +129,35 @@ function setFriends(followers, author_id) {
             }
             return;
         })
+    }
+}
+
+function setFollowing(following, user_id, author_id, author_host) {
+    let num = 0;
+    if (user_id === author_id) {
+        var cardTemplate = document.getElementById('my-following-card');
+    } else {
+        var cardTemplate = document.getElementById('following-card');
+    }
+    for (let follow of following) {
+        num++;
+        const instance = document.importNode(cardTemplate.content, true);
+        let host = follow.host;
+        let uuid = extractUUID(follow.id);
+        if (follow.profileImage !== null) {$(instance).find(".following_image").attr("src", follow.profileImage);}
+        $(instance).find(".following_profile_link").attr("href", follow.host+"/authors/"+uuid); // TODO: switch to server host
+        $(instance).find(".following_github").attr("href", follow.github);
+        $(instance).find(".following_display_name").text(follow.displayName);
+        $(instance).find(".following_host").attr("href", host).text(host.replace("http://",''));
+        $(instance).find(".unfollow").val(uuid);
+        $("#followings_tab_stream").append(instance);
+    }
+    if (num === 0) {
+        $("#followings_tab_stream").text("Not following anyone")
+    }
+    if (num === 1) {
+        $("#nav-following-tab").text(num + " Following");
+    } else {
+        $("#nav-following-tab").text(num + " Followings");
     }
 }

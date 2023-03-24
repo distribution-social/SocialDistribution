@@ -18,7 +18,9 @@ from django.contrib.auth.models import User
 from .helpers import *
 from django.db.models import Q
 from django.conf import settings
+
 import urllib.parse
+from .API.serializers import AuthorSerializer
 
 
 class HttpResponseUnauthorized(HttpResponse):
@@ -255,6 +257,8 @@ def profile(request, author_id):
         foreignHost, tokenNeeded, token = obtainForeignApi(author.host)
         #context.update({"foreign_host": foreignHost, "token_needed": tokenNeeded, "foreign_token": token})
         context.update({"auth_headers": getAuthHeadersJson(author.host)})
+        serializedFollowings = AuthorSerializer(following, many=True, context={'request':request,'kwargs':{}}).data
+        context.update({"serialized_followings": json.dumps(serializedFollowings)})
         try:
             userFollows = userAuthor.following.get(username=username)
             context.update({"user_is_following": "True"})

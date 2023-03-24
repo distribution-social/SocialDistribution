@@ -21,12 +21,10 @@
 <script> 
 var author_id = '{{author.id}}';
 var author_host = '{{author.host}}';
-var user_id = '{{user.id}}'
-/*var foreign_host = '{{foreign_host}}'
-var token_needed = '{{token_needed}}'
-var foreign_token = '{{foreign_token}}'
-*/
-var auth_headers = JSON.parse("{{auth_headers|escapejs}}")
+var user_id = '{{user.id}}';
+var auth_headers = JSON.parse("{{auth_headers|escapejs}}");
+var serialized_followings = JSON.parse("{{serialized_followings|escapejs}}");
+console.log(serialized_followings);
 </script>
 <script type="module" src="{% static '../static/app/js/profile.js' %}"></script>
 
@@ -106,7 +104,8 @@ var auth_headers = JSON.parse("{{auth_headers|escapejs}}")
                             </div>
                             <div class="tab-pane fade"
                                 id="nav-following" role="tabpanel" aria-labelledby="nav-following-tab" tabindex="2">
-                                {% include 'followingtab.html' %}
+                                <!--{% include 'followingtab.html' %}-->
+                                {% include 'following_tab_ajax.html' %}
                             </div>
                             <div class="tab-pane fade"
                                 id="nav-friends" role="tabpanel" aria-labelledby="nav-friends-tab" tabindex="3">
