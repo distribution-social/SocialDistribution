@@ -77,22 +77,33 @@ function sendFollowRequestToInbox(e){
 
         element.style.visibility = "hidden";
 
-        getSingleAuthorInfo(user_id).then(currentUserData => {
+        const user_name_list = user_display_name.split(" ");
+
+        const author_name_list = author_display_name.split(" ");
+
+        var user_first_name = user_name_list[0];
+
+        var author_first_name = author_name_list[0];
+
+        console.log(user_first_name, author_first_name);
+
+        getSingleAuthorInfo(user_url).then(currentUserData => {
         var currentUserObject = currentUserData;
         var foreignUserObject;
         var follow_object = {
             type: "follow",      
-            summary:"Justin wants to follow admin",
+            summary: `${user_first_name} wants to follow ${author_first_name}`,
         }
-        
+
         follow_object.actor = currentUserObject;
 
-        getSingleAuthorInfo(author_id).then(foreignUserData => {
+        getSingleAuthorInfo(author_url).then(foreignUserData => {
             foreignUserObject = foreignUserData;
             follow_object.author = foreignUserObject
             // console.log(follow_object);
 
-            const foreignAuthorURL = new URL("api/authors/" + author_id + "/inbox", "http://127.0.0.1:8000");
+            // const foreignAuthorURL = new URL("api/authors/" + author_id + "/inbox", "http://127.0.0.1:8000");
+            const foreignAuthorURL = author_url + "/inbox"
 
             fetch(foreignAuthorURL, {
                 method: "POST",
@@ -122,11 +133,19 @@ function sendFollowRequestToInbox(e){
     });
 }
 
-async function getSingleAuthorInfo(author_id){
+async function getSingleAuthorInfo(url){
 
-    const currentAuthorURL = new URL("api/authors/" + author_id, "http://127.0.0.1:8000");
+    const currentAuthorURL = url;
 
-    const currentAuthorResponse = await fetch(currentAuthorURL);
+    // console.log(currentAuthorURL);
+
+    // const currentAuthorURL = new URL("api/authors/" + author_id, "http://127.0.0.1:8000");
+
+    const currentAuthorResponse = await fetch(currentAuthorURL, {
+        headers: new Headers({
+                'Authorization': 'Basic '+btoa('server1:123'), 
+                'Content-Type': 'application/json'
+    })});
 
     const currentAuthorResponseJSON = await currentAuthorResponse.json();
 
