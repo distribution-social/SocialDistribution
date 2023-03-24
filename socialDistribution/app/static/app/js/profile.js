@@ -75,7 +75,9 @@ function sendFollowRequestToInbox(e){
 
         const element = document.getElementById("follow_unfollow_button");
 
-        element.style.visibility = "hidden";
+        element.innerText = "Pending Follow Request";
+
+        element.setAttribute('disabled', '');
 
         const user_name_list = user_display_name.split(" ");
 
