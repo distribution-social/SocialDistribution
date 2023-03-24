@@ -254,9 +254,7 @@ def profile(request, author_id):
         posts = get_posts_visible_to_user(userAuthor, author, friends)
         context = {"posts": posts, "comment_form": CommentForm()}
         context.update({"author": author, "following": following, "followers": followers, "friends": friends, "user": userAuthor, "active_tab": "posts", "edit_profile_form": EditProfileForm(instance=author)})
-        foreignHost, tokenNeeded, token = obtainForeignApi(author.host)
-        #context.update({"foreign_host": foreignHost, "token_needed": tokenNeeded, "foreign_token": token})
-        context.update({"auth_headers": getAuthHeadersJson(author.host)})
+        context.update({"auth_headers": getAuthHeadersJson(author.host), "server_host": request.get_host()})
         serializedFollowings = AuthorSerializer(following, many=True, context={'request':request,'kwargs':{}}).data
         context.update({"serialized_followings": json.dumps(serializedFollowings)})
         try:
@@ -277,26 +275,6 @@ def profile(request, author_id):
             userAuthor.sent_requests.add(author_for_action)
 
         return redirect(reverse("profile", kwargs={"author_id": userAuthor.id}))
-
-def obtainForeignApi(author_host):
-    parsedAuthorHost = urllib.parse.urlparse(author_host)
-    httpsVersion = urllib.parse.urlunparse(parsedAuthorHost._replace(scheme='https'))
-    httpVersion = urllib.parse.urlunparse(parsedAuthorHost._replace(scheme='http'))
-    try:
-        node = ForeignAPINodes.objects.get(base_url=httpsVersion)
-    except:
-        node = ForeignAPINodes.objects.get(base_url=httpVersion)
-    if node.username:
-        tokenNeeded = True
-    else:
-        tokenNeeded = False
-    return node.base_url, tokenNeeded, node.getToken()
-    '''foreignNodes = ForeignAPINodes.objects.all()
-    for foreignNode in foreignNodes:
-        base_url = foreignNode.base_url
-        if urllib.parse.urlparse(base_url).netloc == urllib.parse.urlparse(author.host).netloc:
-            context.update({"foreign_host": base_url, "foreign_token": foreignNode.getToken()})
-    '''
 
 def getAuthHeadersJson(author_host):
     parsedAuthorHost = urllib.parse.urlparse(author_host)

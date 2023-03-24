@@ -76,7 +76,7 @@ function setFollowers(followers, user_id, author_id, author_host) {
         let uuid = extractUUID(follower.id);
         let host = follower.host;
         if (follower.profileImage !== null) {$(instance).find(".follower_image").attr("src", follower.profileImage);}
-        $(instance).find(".follower_profile_link").attr("href", author_host+"/authors/"+uuid);
+        $(instance).find(".follower_profile_link").attr("href", "http://"+server_host+"/authors/"+uuid);
         $(instance).find(".follower_github").attr("href", follower.github);
         $(instance).find(".follower_display_name").text(follower.displayName);
         $(instance).find(".follower_host").attr("href", host).text(host.replace("http://",''));
@@ -112,7 +112,7 @@ function setFriends(followers, author_id) {
                 let uuid = extractUUID(follower.id);
                 let host = follower.host;
                 if (follower.profileImage !== null) {$(instance).find(".friend_image").attr("src", follower.profileImage);}
-                $(instance).find(".friend_profile_link").attr("href", author_host + "/authors/" + uuid);
+                $(instance).find(".friend_profile_link").attr("href", "http://"+server_host+"/authors/" + uuid);
                 $(instance).find(".friend_github").attr("href", follower.github);
                 $(instance).find(".friend_display_name").text(follower.displayName);
                 $(instance).find(".friend_host").attr("href", host).text(host.replace("http://", ''));
@@ -145,7 +145,7 @@ function setFollowing(following, user_id, author_id, author_host) {
         let host = follow.host;
         let uuid = extractUUID(follow.id);
         if (follow.profileImage !== null) {$(instance).find(".following_image").attr("src", follow.profileImage);}
-        $(instance).find(".following_profile_link").attr("href", follow.host+"/authors/"+uuid); // TODO: switch to server host
+        $(instance).find(".following_profile_link").attr("href", "http://"+server_host+"/authors/"+uuid); // TODO: switch to server host
         $(instance).find(".following_github").attr("href", follow.github);
         $(instance).find(".following_display_name").text(follow.displayName);
         $(instance).find(".following_host").attr("href", host).text(host.replace("http://",''));
