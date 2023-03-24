@@ -61,12 +61,23 @@ function getAndSetProfileCard() {
         if (result.is_following === true){
             $("#follow_unfollow_button").attr("name", "unfollow").val(author_id).text("Unfollow");
         } else {
+            const element = document.getElementById("follow_unfollow_button");
+            element.addEventListener("click", sendFollowRequestToInbox);
             $("#follow_unfollow_button").attr("name", "follow").val(author_id).text("Request to Follow");
         }
     });
 
+}
 
-    getSingleAuthorInfo(user_id).then(currentUserData => {
+function sendFollowRequestToInbox(e){
+
+        e.preventDefault();
+
+        const element = document.getElementById("follow_unfollow_button");
+
+        element.style.visibility = "hidden";
+
+        getSingleAuthorInfo(user_id).then(currentUserData => {
         var currentUserObject = currentUserData;
         var foreignUserObject;
         var follow_object = {
@@ -79,14 +90,24 @@ function getAndSetProfileCard() {
         getSingleAuthorInfo(author_id).then(foreignUserData => {
             foreignUserObject = foreignUserData;
             follow_object.author = foreignUserObject
-            console.log(follow_object);
+            // console.log(follow_object);
+
+            const foreignAuthorURL = new URL("api/authors/" + author_id + "/inbox", "http://127.0.0.1:8000");
+
+            fetch(foreignAuthorURL, {
+                method: "POST",
+                headers: new Headers({
+                'Authorization': 'Basic '+btoa('server1:123'), 
+                'Content-Type': 'application/json'
+            }), 
+                body: JSON.stringify(follow_object)
+            })
+
         })
 
 
-    })
-
+    });
 }
-
 
 async function getSingleAuthorInfo(author_id){
 
