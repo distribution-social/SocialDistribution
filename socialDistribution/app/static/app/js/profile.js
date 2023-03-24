@@ -191,7 +191,7 @@ function setFollowers(followers, user_id, author_id, author_host) {
         const instance = document.importNode(cardTemplate.content, true);
         let uuid = extractUUID(follower.id);
         let host = follower.host;
-        if (follower.profileImage !== null) {$(instance).find(".follower_image").attr("src", follower.profileImage);}
+        if (follower.profileImage !== null && follower.profileImage !== "") {$(instance).find(".follower_image").attr("src", follower.profileImage);}
         $(instance).find(".follower_profile_link").attr("href", "http://"+server_host+"/authors/"+uuid);
         $(instance).find(".follower_github").attr("href", follower.github);
         $(instance).find(".follower_display_name").text(follower.displayName);
@@ -227,7 +227,7 @@ function setFriends(followers, author_id) {
                 const instance = document.importNode(cardTemplate.content, true);
                 let uuid = extractUUID(follower.id);
                 let host = follower.host;
-                if (follower.profileImage !== null) {$(instance).find(".friend_image").attr("src", follower.profileImage);}
+                if (follower.profileImage !== null && follower.profileImage !== "") {$(instance).find(".friend_image").attr("src", follower.profileImage);}
                 $(instance).find(".friend_profile_link").attr("href", "http://"+server_host+"/authors/" + uuid);
                 $(instance).find(".friend_github").attr("href", follower.github);
                 $(instance).find(".friend_display_name").text(follower.displayName);
@@ -260,7 +260,7 @@ function setFollowing(following, user_id, author_id, author_host) {
         const instance = document.importNode(cardTemplate.content, true);
         let host = follow.host;
         let uuid = extractUUID(follow.id);
-        if (follow.profileImage !== null) {$(instance).find(".following_image").attr("src", follow.profileImage);}
+        if (follow.profileImage !== null && follow.profileImage !== "") {$(instance).find(".following_image").attr("src", follow.profileImage);}
         $(instance).find(".following_profile_link").attr("href", "http://"+server_host+"/authors/"+uuid); // TODO: switch to server host
         $(instance).find(".following_github").attr("href", follow.github);
         $(instance).find(".following_display_name").text(follow.displayName);
