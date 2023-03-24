@@ -41,6 +41,7 @@ urlpatterns = [
     path('author/search', views.author_search, name='author-search'),
     path('login', views.signin, name='login'),
     path('logout', views.signout, name='logout'),
+    path('add-to-sent', views.add_to_sent_request, name='add-to-sent'),
 
     path('posts/<str:post_id>', views.post_detail, name='post_detail'),
     path('posts/<str:post_id>/edit', views.post_edit, name='post_edit'),

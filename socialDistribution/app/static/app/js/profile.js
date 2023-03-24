@@ -103,6 +103,19 @@ function sendFollowRequestToInbox(e){
                 body: JSON.stringify(follow_object)
             })
 
+            const addToSentRequestURL = new URL("add-to-sent", "http://127.0.0.1:8000");
+            
+            const sentRequestObject = {user_id:user_id, author_id:author_id};
+
+            fetch(addToSentRequestURL, {
+                method: "POST",
+                headers: new Headers({
+                'Authorization': 'Basic '+btoa('server1:123'), 
+                'Content-Type': 'application/json'
+            }),
+                body: JSON.stringify(sentRequestObject)
+            });
+
         })
 
 

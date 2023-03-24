@@ -236,7 +236,30 @@ def authors(request):
 
         return redirect(reverse("authors"))
 
+@login_required(login_url="/login")
+@require_http_methods(["GET", "POST"])
+def add_to_sent_request(request):
+    if request.method == "POST":
+        # print("********************")
+        body_dict = json.loads(request.body)
+        id_to_follow = body_dict.get('author_id')
 
+        # Get the author object
+        author_to_follow = Author.objects.get(id=id_to_follow)
+
+        # Get our author object
+        current_user_author = Author.objects.get(
+            username=request.user.username)
+
+        # Add the author object to our sent_request list (Need to send this to inbox in the future to get approval on the other end)
+        current_user_author.sent_requests.add(author_to_follow)
+
+
+
+        return HttpResponse("Success")
+    else:
+        return HttpResponse("Method Not Allowed")
+    
 @login_required(login_url="/login")
 @require_http_methods(["GET", "POST"])
 def profile(request, author_id):
