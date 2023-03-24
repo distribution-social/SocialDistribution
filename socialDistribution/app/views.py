@@ -64,7 +64,7 @@ def signup(request):
                 u.save()
 
             try:
-                Author.objects.create(host=settings.HOST, displayName=display_name,
+                Author.objects.create(displayName=display_name,
                                       github=f"https://github.com/{github}", profileImage=None, email=email, username=username, confirmed=False)
             except Exception as e:
                 messages.warning(request, e)
