@@ -9,46 +9,59 @@
 {% endblock %}
 
 {% block content %}
+<script> 
+var author_id = '{{author.id}}';
+var author_host = '{{author.host}}';
+var user_id = '{{user.id}}';
+var user_url = '{{user.url}}';
+var author_url = '{{author.url}}';
+var user_display_name = '{{user.displayName}}';
+var author_display_name = '{{author.displayName}}';
+var foreign_node_token = '{{foreign_node_token}}';
+var local_node_token = '{{local_node_token}}';
+
+</script>
+<script type="module" src="{% static '../static/app/js/profile.js' %}"></script>
+
+
 </style>
 <div class="d-flex justify-content-center">
     <div class="p-2 d-flex flex-column mb-3 flex-fill" style="max-width: 1000px;">
         <div class="p-2">
-            <div class="card mb-3 flex-fill" style="max-width: 1000px;">
+            <div id="profile_card" class="card mb-3 flex-fill" style="max-width: 1000px;">
                 <div class="d-flex justify-content-start flex-fill">
-                    {% if author.profileImage and author.profileImage != '' %}
-                    <img src="{{author.profileImage}}" width="230px" height="230px" class="object-fit-cover border rounded-start"
-                    alt="No profile image">
-                    {% else %}
-                    <img src="{% static 'app/logo.png' %}" width="230px" height="230px" class="object-fit-cover border rounded-start" alt="No profile image">
-                    {% endif %}
+                    <img src="" width="250px" height="250px"
+                        class="profile_image object-fit-cover border rounded-start" alt="profile picture">
                     <div class="p-2 flex-fill">
                         <div class="card-body">
                             <div class="d-flex flex-md-row justify-content-between">
                                 <div class="">
-                                    <h1 class="card-title">{{author.displayName}}</h1>
+                                    <h1 class="profile_display_name card-title"></h1>
                                 </div>
                                 <div class="p-2">
-                                    {% if user.username != author.username %}
+                                    {% if user.id != author.id %}
                                     <form class="mt-3" action="{% url 'profile' author_id=author.id %}" method="post">
                                         {% csrf_token %}
-                                    {% if user_is_following == "True" %}
-                                    <button type="submit" name="unfollow" value="{{author.id}}"
-                                        class="btn btn-outline-primary btn-lg">
-                                        <i class="bi bi-person-fill-add">&nbsp;Unfollow</i></button>
-                                    {% else %}
-                                    <button type="submit" name="follow" value="{{author.id}}"
-                                        class="btn btn-primary btn-lg">
-                                        <i class="bi bi-person-fill-add">&nbsp;Request to Follow</i></button>
-                                    {% endif %}
-                                    </form>
+                                            {% if user_is_following == "False" and user_pending_following == "False" %}
+                                            <button id="follow_unfollow_button" type="submit" name="" value=""
+                                                class="btn btn-outline-primary btn-lg"></button>
+                                            {% elif user_is_following == "False" and user_pending_following == "True" %}
+                                             <button id="" type="submit" name="" value=""
+                                                class="btn btn-outline-primary btn-lg" disabled>Pending Follow Request</button>
+                                            {% elif user_is_following == "True" and user_pending_following == "False" %}
+                                               <button id="" type="submit" name="" value=""
+                                                class="btn btn-outline-primary btn-lg" disabled>Following</button>
+
+                                            {% endif %}
+                                                <!--<i class="bi bi-person-fill-add">&nbsp;</i></button>-->
                                     {% endif %}
                                 </div>
                             </div>
                             <div class="p-2">
-                                <a type="button" class="btn btn-secondary" href="{{person.github}}" target="_blank"><i
+                                <a type="button" class="profile_github btn btn-secondary" href="" target="_blank"><i
                                         class="bi bi-github">&nbsp;GitHub</i></a>
                             </div>
-                            {% if user.username == author.username %}
+                            {% if user.id == author.id %}
                             <div class="p-2">
                                 <a type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#edit-profile-{{author.id}}">
                                     Edit Profile
@@ -60,54 +73,57 @@
                 </div>
             </div>
         </div>
-
-        <div style="max-width: 1000px;">
+        
+        <div class="p-2" style="max-width: 1000px;">
                         <nav>
                             <div class="nav nav-tabs justify-content-center border-bottom-0" id="nav-tab" role="tablist">
-                                <button class="nav-link {% if active_tab == 'posts' %} active{% endif %}"
+                                <button class="nav-link active"
                                     id="nav-public-posts-tab" data-bs-toggle="tab" href="#"
                                     data-bs-target="#nav-public-posts" type="button" role="tab"
                                     aria-controls="nav-public-posts" aria-selected="true">Public Posts</button>
-                                <button class="nav-link {% if active_tab == 'followers' %} active{% endif %}"
+                                <button class="nav-link"
                                     id="nav-followers-tab" data-bs-toggle="tab" href="#" data-bs-target="#nav-followers"
                                     type="button" role="tab" aria-controls="nav-followers"
-                                    aria-selected="false">{{followers|length}} Follower{{followers|pluralize}}</button>
-                                <button class="nav-link {% if active_tab == 'following' %} active{% endif %}"
+                                    aria-selected="false">Followers</button>
+                                <button class="nav-link"
                                     id="nav-following-tab" data-bs-toggle="tab" data-bs-target="#nav-following"
                                     type="button" role="tab" href="#" aria-controls="nav-following"
                                     aria-selected="false">{{following|length}} Following</button>
-                                <button class="nav-link {% if active_tab == 'friends' %} active{% endif %}"
+                                <button class="nav-link"
                                     id="nav-friends-tab" data-bs-toggle="tab" data-bs-target="#nav-friends"
                                     type="button" role="tab" href="#" aria-controls="nav-friends"
-                                    aria-selected="false">{{friends|length}} True Friend{{friends|pluralize}}</button>
+                                    aria-selected="false">True Friends</button>
                             </div>
                         </nav>
                     <div class="card p-2">
 
                         <div class="tab-content" id="nav-tabContent">
-                            <div class="tab-pane fade  {% if active_tab == 'posts' %} show active{% endif %}"
-                                id="nav-public-posts" role="tabpanel" aria-labelledby="nav-public-posts-tab"
-                                tabindex="0">
+                            <div class="tab-pane fade show active"
+                                id="nav-public-posts" role="tabpanel" aria-labelledby="nav-public-posts-tab" tabindex="0">
                                 {% include 'posts_tab.html' %}
                             </div>
-                            <div class="tab-pane fade {% if active_tab == 'following' %} show active{% endif %}"
+                            <div class="tab-pane fade"
                                 id="nav-followers" role="tabpanel" aria-labelledby="nav-followers-tab" tabindex="1">
-                                {% include 'followerstab.html' %}
+                                <!--{% include 'followerstab.html' %}-->
+                                {% include 'followers_tab_ajax.html' %}
                             </div>
-                            <div class="tab-pane fade {% if active_tab == 'followers' %} show active{% endif %}"
+                            <div class="tab-pane fade"
                                 id="nav-following" role="tabpanel" aria-labelledby="nav-following-tab" tabindex="2">
                                 {% include 'followingtab.html' %}
                             </div>
-                            <div class="tab-pane fade {% if active_tab == 'friends' %} show active{% endif %}"
+                            <div class="tab-pane fade"
                                 id="nav-friends" role="tabpanel" aria-labelledby="nav-friends-tab" tabindex="3">
-                                {% include 'friendstab.html' %}
+                                <!--{% include 'friendstab.html' %}-->
+                                {% include 'friends_tab_ajax.html' %}
                             </div>
                         </div>
                 </div>
 
         </div>
     </div>
+    {% if user.id == author.id %}
     {% include "edit_profile_modal.html" %}
+    {% endif %}
 </div>
 
 
