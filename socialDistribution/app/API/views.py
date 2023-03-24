@@ -13,7 +13,10 @@ from rest_framework.permissions import AllowAny
 from django.conf import settings
 
 class AuthorListAPIView(BasicAuthMixin,APIView):
+    """ Used for Author based actions."""
     def get(self, request):
+        """Returns a list of local authors on the node.
+        """
         authors = Author.objects.filter(host=settings.HOST + "/api/",confirmed=True).order_by('displayName')
         paginator = CustomPaginator()
         result_page = paginator.paginate_queryset(authors, request)
@@ -23,11 +26,13 @@ class AuthorListAPIView(BasicAuthMixin,APIView):
             "type": "authors",
             "items": serializer.data
         }
-
         return Response(data)
 
+
 class SingleAuthorAPIView(BasicAuthMixin,APIView):
+
     def get(self, request, author_id):
+        """Returns an author profile"""
         try:
             author = Author.objects.get(id=author_id)
         except Author.DoesNotExist:
@@ -54,6 +59,7 @@ class SingleAuthorAPIView(BasicAuthMixin,APIView):
 
 class AuthorFollowersAPIView(BasicAuthMixin, APIView):
     def get(self, request, author_id):
+        """Returns a list of all followers of the given """
         try:
             author = Author.objects.get(id=author_id)
         except Author.DoesNotExist:
@@ -75,18 +81,19 @@ class AuthorFollowersAPIView(BasicAuthMixin, APIView):
 class FollowerAPIView(BasicAuthMixin,APIView):
 
     def get(self, request, author_id, follower_author_id):
-            try:
-                author = Author.objects.get(id=author_id)
-                foreign_author = Author.objects.get(id=follower_author_id)
-            except Author.DoesNotExist:
-                return Response(status=status.HTTP_404_NOT_FOUND)
+        """Returns boolean for if the {follower_author_id} is a follower of {author_id}."""
+        try:
+            author = Author.objects.get(id=author_id)
+            foreign_author = Author.objects.get(id=follower_author_id)
+        except Author.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
 
-            is_following = foreign_author in author.followers.all()
-            data = {
-                "type": "followers",
-                "is_following": is_following
-            }
-            return Response(data)
+        is_following = foreign_author in author.followers.all()
+        data = {
+            "type": "followers",
+            "is_following": is_following
+        }
+        return Response(data)
 
     #How to authenticate, do we need to set up like for example JWT tokens?
     def put(self, request, author_id, follower_author_id):
@@ -104,6 +111,7 @@ class FollowerAPIView(BasicAuthMixin,APIView):
         return Response(status=status.HTTP_201_CREATED)
 
     def delete(self, request, author_id, follower_author_id):
+        """Unfollows {follower_author_id} from {author_id.}"""
         try:
             author = Author.objects.get(id=author_id)
             foreign_author = Author.objects.get(id=follower_author_id)
@@ -124,6 +132,7 @@ class FollowerAPIView(BasicAuthMixin,APIView):
 
 class AuthorPostsView(BasicAuthMixin,APIView):
     def get(self, request, author_id):
+        """Gets all posts made by {author_id}."""
         try:
             author = Author.objects.get(id=author_id)
 
@@ -170,6 +179,7 @@ class AuthorPostsView(BasicAuthMixin,APIView):
 
 class PostDetailView(BasicAuthMixin,APIView):
     def get(self, request, author_id, post_id):
+        """Gets details of a singular post, {post_id}"""
         try:
             post = Post.objects.get(uuid=str(post_id))
 
@@ -203,6 +213,7 @@ class PostDetailView(BasicAuthMixin,APIView):
     # Not sure how creating a post would look like (would the requester also send me the same json.) (NO NEED, we dont use it)
 
     def post(self, request, author_id, post_id):
+        """Creates a post objects for the author {post_id}"""
         try:
             author = Author.objects.get(id=author_id)
         except Author.DoesNotExist:
@@ -219,6 +230,7 @@ class PostDetailView(BasicAuthMixin,APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, author_id, post_id):
+        """Deletes a post object {post_id}."""
         try:
             author = Author.objects.get(id=author_id)
         except Author.DoesNotExist:
@@ -248,6 +260,7 @@ class PostDetailView(BasicAuthMixin,APIView):
 
 class CommentView(BasicAuthMixin,APIView):
     def get(self,request,author_id,post_id,comment_id):
+        """Gets a comment from an authors post {comment_id}."""
         try:
             author = Author.objects.get(id=author_id)
         except Author.DoesNotExist:
@@ -266,6 +279,7 @@ class CommentView(BasicAuthMixin,APIView):
         return Response(serializer.data)
 
 class CommentsView(BasicAuthMixin,APIView):
+    """Gets a list of comments for {post_id}."""
     def get(self,request,author_id,post_id):
         try:
             author = Author.objects.get(id=author_id)
@@ -295,8 +309,9 @@ class CommentsView(BasicAuthMixin,APIView):
         return Response(response,status=status.HTTP_200_OK)
 
     def post(self, request, author_id, post_id):
+        """Adds a comment to {post_id}"""
         try:
-            user = Author.objects.get(id=get_values_from_uri(request.data.get('author').get('id'),add_api=True).get('author_id'))
+            user = Author.objects.get(id=parse_values(request.data.get('author').get('id')).get('author_id'))
         except:
             return Response({"error": "Comment Author does not exist"}, status=status.HTTP_404_NOT_FOUND)
         try:
@@ -310,6 +325,7 @@ class CommentsView(BasicAuthMixin,APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class LikesPostView(BasicAuthMixin, APIView):
+    """Gets all the likes for a post {post_id}"""
     def get(self,request,author_id,post_id):
         try:
             post = Post.objects.get(uuid=post_id)
@@ -321,12 +337,13 @@ class LikesPostView(BasicAuthMixin, APIView):
         return Response(serializer.data,status=status.HTTP_200_OK)
 
     def post(self, request, author_id, post_id):
-        user = Author.objects.get(id=get_values_from_uri(request.data.get('author').get('id'),add_api=True).get('author_id'))
+        """Adds a like to the {post_id}"""
+        user = Author.objects.get(id=parse_values(request.data.get('author').get('id')).get('author_id'))
 
         try:
             post = Post.objects.get(uuid=post_id)
         except Post.DoesNotExist:
-            return Response({"error": "Post does not exist"}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"error": f"Post {post_id} does not exist"}, status=status.HTTP_404_NOT_FOUND)
         if user == post.made_by:
             return Response({"error": "Can't like your own post"}, status=400)
         found = post.likes.filter(author=user)
@@ -341,6 +358,7 @@ class LikesPostView(BasicAuthMixin, APIView):
 
 
 class LikesCommentView(BasicAuthMixin,APIView):
+    """Gets the comment for a post {post_id}"""
     def get(self,request,author_id,post_id,comment_id):
         try:
             author = Author.objects.get(id=author_id)
@@ -360,6 +378,7 @@ class LikesCommentView(BasicAuthMixin,APIView):
         return Response(serializer.data,status=status.HTTP_200_OK)
 
     def post(self, request, author_id, post_id, comment_id):
+        "Adds a like to the comment {comment_id}"
         user = Author.objects.get(id=get_values_from_uri(request.data.get('author').get('id'),add_api=True).get('author_id'))
 
         try:
@@ -384,6 +403,7 @@ class LikesCommentView(BasicAuthMixin,APIView):
 
 class LikedView(BasicAuthMixin,APIView):
     def get(self,request,author_id):
+        """Gets all things the author {author_id} likes"""
         try:
             author = Author.objects.get(id=author_id)
             liked = author.liked.all()
@@ -401,6 +421,7 @@ class LikedView(BasicAuthMixin,APIView):
 
 class InboxView(BasicAuthMixin,APIView):
     def get(self,request,author_id):
+        """Retrieves the inbox of the author {author_id}"""
         try:
             author = Author.objects.get(id=author_id)
             items = author.my_inbox.all().order_by("-date")
@@ -419,6 +440,8 @@ class InboxView(BasicAuthMixin,APIView):
         return Response(reponse,status=status.HTTP_200_OK)
 
     def post(self,request,author_id):
+        """Adds the given object to the author\'s {author_id} inbox.
+        Objects can be of type \'post\', \'follow\', \'comment\' or \'like\'"""
         try:
             author = Author.objects.get(id=author_id)
         except Author.DoesNotExist:
@@ -591,6 +614,7 @@ class InboxView(BasicAuthMixin,APIView):
         return Response("Added to inbox.",status=status.HTTP_201_CREATED)
 
     def delete(self,request,author_id):
+        """Clears the author\'s {author_id} inbox"""
         try:
             author = Author.objects.get(id=author_id)
             author.my_inbox.all().delete()

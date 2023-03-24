@@ -24,10 +24,17 @@ var author_host = '{{author.host}}';
 var user_id = '{{user.id}}';
 var auth_headers = JSON.parse("{{auth_headers|escapejs}}");
 var serialized_followings = JSON.parse("{{serialized_followings|escapejs}}");
-console.log(serialized_followings);
 var server_host = "{{server_host}}";
+var user_url = '{{user.url}}';
+var author_url = '{{author.url}}';
+var user_display_name = '{{user.displayName}}';
+var author_display_name = '{{author.displayName}}';
+var foreign_node_token = '{{foreign_node_token}}';
+var local_node_token = '{{local_node_token}}';
+
 </script>
 <script type="module" src="{% static '../static/app/js/profile.js' %}"></script>
+
 
 </style>
 <div class="d-flex justify-content-center">

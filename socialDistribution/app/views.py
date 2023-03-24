@@ -239,13 +239,37 @@ def authors(request):
 
         return redirect(reverse("authors"))
 
+@login_required(login_url="/login")
+@require_http_methods(["GET", "POST"])
+def add_to_sent_request(request):
+    if request.method == "POST":
+        # print("********************")
+        body_dict = json.loads(request.body)
+        id_to_follow = body_dict.get('author_id')
 
+        # Get the author object
+        author_to_follow = Author.objects.get(id=id_to_follow)
+
+        # Get our author object
+        current_user_author = Author.objects.get(
+            username=request.user.username)
+
+        # Add the author object to our sent_request list (Need to send this to inbox in the future to get approval on the other end)
+        current_user_author.sent_requests.add(author_to_follow)
+
+
+
+        return HttpResponse("Success")
+    else:
+        return HttpResponse("Method Not Allowed")
+    
 @login_required(login_url="/login")
 @require_http_methods(["GET", "POST"])
 def profile(request, author_id):
     user = request.user
     userAuthor = Author.objects.get(username=request.user.username)
     if request.method == 'GET':
+
         author = Author.objects.get(id=author_id)
         username = author.username
         following = author.following.all().order_by('displayName')
@@ -262,6 +286,45 @@ def profile(request, author_id):
             context.update({"user_is_following": "True"})
         except:
             context.update({"user_is_following": "False"})
+
+        id_to_follow = author_id
+
+        # Get the author object
+        author_to_follow = Author.objects.get(id=id_to_follow)
+
+        # Get our author object
+        current_user_author = Author.objects.get(
+            username=request.user.username)
+
+        # Add the author object to our sent_request list (Need to send this to inbox in the future to get approval on the other end)
+        if current_user_author.sent_requests.filter(id=author_to_follow.id).exists():
+            context.update({"user_pending_following": "True"})
+        else:
+            context.update({"user_pending_following": "False"})
+
+        host = author.host
+
+        if not host.endswith('/'):
+            host += '/'
+
+        if not "https" in host:
+            host = host.replace("http", "https")
+
+        foreignNode = ForeignAPINodes.objects.get(base_url=host)
+
+        context.update({'foreign_node_token': foreignNode.getToken()})
+
+        local_host = userAuthor.host
+
+        if not local_host.endswith('/'):
+            local_host += '/'
+
+        if not "https" in local_host:
+            local_host = local_host.replace("http", "https")
+
+        localNode = ForeignAPINodes.objects.get(base_url=local_host)
+
+        context.update({'local_node_token': localNode.getToken()})
 
         return render(request, 'profile.html', context)
 

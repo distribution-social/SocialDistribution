@@ -64,7 +64,8 @@ CORS_ALLOWED_ORIGINS = [
 "https://yoshi-connect.herokuapp.com",
 "http://localhost:8000",
 "http://127.0.0.1:8000",
-"http://0.0.0.0:8000"
+"http://0.0.0.0:8000",
+"https://p2psd.herokuapp.com"
 ]
 
 # Application definition

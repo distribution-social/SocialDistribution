@@ -6,7 +6,6 @@ import { extractUUID } from "./utility.js";
 
 $(document).ready(function() {
     console.log("host:"+author_host);
-    console.log(auth_headers);
 
     getAndSetProfileCard();
     setFollowing(serialized_followings, user_id, author_id, author_host);
@@ -20,7 +19,6 @@ $(document).ready(function() {
             alert("Something went wrong: " + response.status);
         }
     }).then((data) => {
-        console.log(data);
         const followers = data.items;
         setFollowers(followers, user_id, author_id, author_host);
         setFriends(followers, author_id);
@@ -39,7 +37,6 @@ function getAndSetProfileCard() {
         }
     }).then((data) => {
         let profileCard = document.getElementById("profile_card");
-        console.log("img: "+ data.profileImage);
         if (data.profileImage !== null) {$(profileCard).find(".profile_image").attr("src", data.profileImage);}
         $(profileCard).find(".profile_github").attr("href", data.github);
         $(profileCard).find(".profile_display_name").text(data.displayName);
@@ -48,23 +45,142 @@ function getAndSetProfileCard() {
     // handle follow unfollow button
     const authorIsFollowingUrl = new URL("authors/" + author_id + "/followers/" + user_id, author_host);
     fetch(authorIsFollowingUrl, {method: "GET", headers: auth_headers}).then((response) => {
+        // console.log(response.json().is_following);
         if (response.status === 200) { // OK
             // following
-            $("#follow_unfollow_button").attr("name", "unfollow").val(author_id).text("Unfollow");
-            return;
+            // $("#follow_unfollow_button").attr("name", "unfollow").val(author_id).text("Unfollow");
+            return response.json();
         } else if (response.status === 404) {
             // not following
-            $("#follow_unfollow_button").attr("name", "follow").val(author_id).text("Request to Follow");
-            return;
+            // $("#follow_unfollow_button").attr("name", "follow").val(author_id).text("Request to Follow");
+            return response.json();
         } else {
-            alert("Something went wrong: " + response.status);
+            alert("Something went wrong: " + response.statusText);
         }
-    })
+    }).then((result) => {
+        // console.log(result.is_following);
+        console.log(author_id, user_id);
+        if (result.is_following === true){
+            $("#follow_unfollow_button").attr("name", "unfollow").val(author_id).text("Unfollow");
+        } else {
+            $("#follow_unfollow_button").attr("name", "follow").val(author_id).text("Request to Follow");
+            const element = document.getElementById("follow_unfollow_button");
+            element.addEventListener("click", sendFollowRequestToInbox);
+        }
+    });
+
+}
+
+function sendFollowRequestToInbox(e){
+
+        e.preventDefault();
+
+        const element = document.getElementById("follow_unfollow_button");
+
+        element.innerText = "Pending Follow Request";
+
+        element.setAttribute('disabled', '');
+
+        const user_name_list = user_display_name.split(" ");
+
+        const author_name_list = author_display_name.split(" ");
+
+        var user_first_name = user_name_list[0];
+
+        var author_first_name = author_name_list[0];
+
+        console.log(user_first_name, author_first_name);
+
+        getSingleAuthorInfo(user_url, local_node_token).then(currentUserData => {
+        var currentUserObject = currentUserData;
+        var foreignUserObject;
+        var follow_object = {
+            type: "follow",      
+            summary: `${user_first_name} wants to follow ${author_first_name}`,
+        }
+
+        follow_object.actor = currentUserObject;
+
+        getSingleAuthorInfo(author_url, foreign_node_token).then(foreignUserData => {
+            foreignUserObject = foreignUserData;
+            follow_object.object = foreignUserObject
+            // console.log(follow_object);
+
+            // const foreignAuthorURL = new URL("api/authors/" + author_id + "/inbox", "http://127.0.0.1:8000");
+            const foreignAuthorURL = author_url + "/inbox"
+
+            var headers;
+
+            if (foreign_node_token){
+                headers = new Headers({
+                'Authorization': 'Basic '+foreign_node_token, 
+                'Content-Type': 'application/json'
+                })
+            } else {
+                headers = new Headers({
+                'Content-Type': 'application/json'
+                })
+            }
+            
+            fetch(foreignAuthorURL, {
+                method: "POST",
+                headers: headers, 
+                body: JSON.stringify(follow_object)
+            }).then(response => {
+                console.log("-------------Response: ", response.status);
+            })
+            
+            const addToSentRequestURL = new URL("add-to-sent", `${window.location.protocol}//` + window.location.host);
+            
+            const sentRequestObject = {user_id:user_id, author_id:author_id};
+
+            fetch(addToSentRequestURL, {
+                method: "POST",
+                headers: new Headers({
+                'Authorization': 'Basic '+btoa('server1:123'), 
+                'Content-Type': 'application/json'
+            }),
+                body: JSON.stringify(sentRequestObject)
+            });
+
+        })
+
+
+    });
+}
+
+async function getSingleAuthorInfo(url, token){
+
+    const currentAuthorURL = url;
+
+    // console.log(currentAuthorURL);
+
+    // const currentAuthorURL = new URL("api/authors/" + author_id, "http://127.0.0.1:8000");
+
+    var headers;
+
+    if (token){
+        headers = new Headers({
+                'Authorization': 'Basic '+token, 
+                'Content-Type': 'application/json'
+        })
+    } else {
+        headers = new Headers({
+                'Content-Type': 'application/json'
+        })
+    }
+
+    const currentAuthorResponse = await fetch(currentAuthorURL, {
+        headers: headers});
+
+    const currentAuthorResponseJSON = await currentAuthorResponse.json();
+
+    return currentAuthorResponseJSON;
+  
 }
 
 function setFollowers(followers, user_id, author_id, author_host) {
     let num = 0;
-    console.log("user: "+user_id+"    author: "+ author_id);
     if (user_id === author_id) {
         var cardTemplate = document.getElementById('my-followers-card');
     } else {
