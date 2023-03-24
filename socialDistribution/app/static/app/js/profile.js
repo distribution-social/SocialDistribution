@@ -119,8 +119,8 @@ function sendFollowRequestToInbox(e){
             }).then(response => {
                 console.log("-------------Response: ", response.status);
             })
-
-            const addToSentRequestURL = new URL("add-to-sent", "http://127.0.0.1:8000");
+            
+            const addToSentRequestURL = new URL("add-to-sent", window.location.host);
             
             const sentRequestObject = {user_id:user_id, author_id:author_id};
 
