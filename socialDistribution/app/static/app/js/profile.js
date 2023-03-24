@@ -135,9 +135,7 @@ function sendFollowRequestToInbox(e){
 
             // console.log("$$$$$$$$$$$$$$$$", window.location.host);
             
-            const addToSentRequestURL = new URL("add-to-sent", "http://" + window.location.host);
-
-   
+            const addToSentRequestURL = new URL("add-to-sent", `${window.location.protocol}//` + window.location.host);
             
             const sentRequestObject = {user_id:user_id, author_id:author_id};
 
