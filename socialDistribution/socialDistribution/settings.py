@@ -17,8 +17,18 @@ import django_on_heroku  # top of the file
 import dotenv
 
 dotenv.load_dotenv(".env")
+
+DATABASE=os.getenv('DATABASE')
+DB_USER=os.getenv('DB_USER')
+DB_PASSWORD=os.getenv('DB_PASSWORD')
+DB_HOST=os.getenv('DB_HOST')
+if not DATABASE or not DB_USER or not DB_PASSWORD or not DB_HOST:
+    raise ValueError('Database creds are missing in environment.')
+
 DOMAIN = os.getenv('DOMAIN')
 SCHEME = os.getenv('SCHEME')
+
+
 if not DOMAIN:
     import socket
     DOMAIN = socket.gethostbyname(socket.gethostname())
@@ -108,20 +118,12 @@ DATABASES = {
     #     'ENGINE': 'django.db.backends.sqlite3',
     #     'NAME': BASE_DIR / 'db.sqlite3',
     # }
-    # 'default': {
-    #     'ENGINE': 'django.db.backends.postgresql',
-    #     'NAME': 'df4fj8louh1vja',
-    #     'USER': 'mxsbfgthsrlphp',
-    #     'PASSWORD': 'e5ef20b4e5a19a11132658a17d4a3e924a2eef43669ed6f832671410c7916e65',
-    #     'HOST': 'ec2-54-160-109-68.compute-1.amazonaws.com',
-    #     'PORT': '5432',
-    # }
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'cmput404',
-        'USER': 'cmput404',
-        'PASSWORD': 'cmput404',
-        'HOST': 'nicksnfk.dynns.com',
+        'NAME': DATABASE,
+        'USER': DB_USER,
+        'PASSWORD': DB_PASSWORD,
+        'HOST': DB_HOST,
         'PORT': '5432',
     }
 }
