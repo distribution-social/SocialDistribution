@@ -1,6 +1,7 @@
 # https://docs.djangoproject.com/en/4.1/howto/custom-template-tags/
 from django import template
 from ..models import *
+import uuid
 
 register = template.Library()
 
@@ -24,4 +25,18 @@ def convert_username_to_id(value):
     
 @register.filter
 def extract_uuid(id):
-    return id.split("/")[-1]  
+    return id.split("/")[-1] 
+
+@register.filter
+def convert_uuid_to_hex(uuid_string):
+  return uuid_string
+  # try:
+  #   # attempt to convert the string to a UUID object
+  #   my_uuid = uuid.UUID(uuid_string)
+    
+  #   # if the conversion is successful, the string is a UUID in hexadecimal representation
+  #   return my_uuid
+    
+  # except:
+  #   # if the conversion fails, the string is not a UUID in hexadecimal representation
+  #   return uuid

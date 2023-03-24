@@ -8,28 +8,32 @@ from django.utils import timezone
 
 class AuthorSerializer(serializers.ModelSerializer):
     type = serializers.SerializerMethodField()
-    host = serializers.SerializerMethodField()
-    url = serializers.SerializerMethodField()
-
-    def get_host(self, obj):
-        request = self.context.get('request')
-        kwargs = self.context.get('kwargs')
-        return get_full_uri(request,'api-author-list',{},remove_str='api/authors')
+    host = serializers.URLField()
+    url = serializers.URLField()
 
     def get_type(self, obj):
         return "author"
 
-    def get_url(self,obj):
-        return ""
-
     def to_representation(self, instance):
         data = super().to_representation(instance)
 
-        if data['id'] is not None and data['host']:
-            data['id'] = data['host'] + "authors/" + data['id']
+        request = self.context.get('request')
+        kwargs = self.context.get('kwargs')
+        kwargs = {
+            'author_id':instance.id,
+        }
 
-        if data['url'] is not None:
-            data['url'] = data['id']
+        if not data['url'] or data['url'] == '' :
+            api = ''
+            if str(data['host'] == settings.HOST):
+                api = '/api'
+            if str(data['host']).endswith('/'):
+                data['url'] = str(data['host'])[:-1] + api + "/authors/" + data['id']
+            else:
+                data['url'] = data['host'] + api + "/authors/" + data['id']
+        data['id'] = get_full_uri(request,'api-single_author',kwargs,remove_str='')
+
+
         return data
 
     class Meta:
@@ -60,20 +64,30 @@ class PostSerializer(serializers.ModelSerializer):
         }
 
 
-        data['id'] = get_full_uri(request,'api-post-detail',kwargs)
+        data['id'] = get_full_uri(request,'api-post-detail',kwargs,remove_str='')
 
         post_comments = instance.comments.all()
 
         # comment_serializer = CommentSerializer(post_comments,many=True)
 
         # data['commentSrc'] = comment_serializer.data
-  
+
         return data
 
 
     class Meta:
         model = Post
         fields = ['type','title', 'id', 'source', 'origin', 'description', 'contentType', 'content', 'author', 'comments', 'published', 'visibility', 'unlisted']
+
+class PostSaveSerializer(serializers.ModelSerializer):
+    author = AuthorSerializer(read_only=True,source='made_by')
+    published = serializers.DateTimeField(source='date_published')
+    contentType = serializers.CharField(source='content_type')
+    comments = serializers.URLField(source='comments_url')
+
+    class Meta:
+        model = Post
+        fields = ['title', 'source', 'origin', 'description', 'contentType', 'content', 'author', 'comments', 'published', 'visibility', 'unlisted']
 
 class CommentSerializer(serializers.ModelSerializer):
     type = serializers.SerializerMethodField()
@@ -96,7 +110,7 @@ class CommentSerializer(serializers.ModelSerializer):
             'post_id':instance.post.uuid,
             'comment_id': instance.uuid
         }
-        data['id'] = get_full_uri(request,'api-post-comment',kwargs)
+        data['id'] = get_full_uri(request,'api-post-comment',kwargs,remove_str='')
 
         return data
 
@@ -135,13 +149,13 @@ class LikeSerializer(serializers.ModelSerializer):
                 'author_id': kwargs.get('author_id'),
                 'post_id': instance.content_object.uuid
             }
-            new_data.update({'object': get_full_uri(request,'api-post-detail',kwargs)})
+            new_data.update({'object': get_full_uri(request,'api-post-detail',kwargs,remove_str='')})
 
         elif isinstance(instance.content_object,Comment):
 
             kwargs.update({'post_id': instance.content_object.post.uuid})
             kwargs.update({'comment_id': instance.content_object.uuid})
-            new_data.update({'object': get_full_uri(request,'api-post-comment',kwargs)})
+            new_data.update({'object': get_full_uri(request,'api-post-comment',kwargs,remove_str='')})
 
 
         new_data.pop('content_object')

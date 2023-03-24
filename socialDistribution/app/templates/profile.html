@@ -4,7 +4,7 @@
 
 {% block title %} 
 {% if user.username == author.username %}
-<title>Profile</title> 
+<title>Profile</title>
 {% else %}
 <title>{{author.displayName}}</title>
 {% endif %}
@@ -25,7 +25,7 @@ var user_id = '{{user.id}}'
         <div class="p-2">
             <div id="profile_card" class="card mb-3 flex-fill" style="max-width: 1000px;">
                 <div class="d-flex justify-content-start flex-fill">
-                    <img src="" width="250px" height="250px"
+                    <img src="{% static 'app/logo.png' %}" width="250px" height="250px"
                         class="profile_image object-fit-cover border rounded-start" alt="profile picture">
                     <div class="p-2 flex-fill">
                         <div class="card-body">

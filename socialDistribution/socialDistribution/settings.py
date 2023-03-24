@@ -14,6 +14,30 @@ from pathlib import Path
 import sys
 import os
 import django_on_heroku  # top of the file
+import dotenv
+
+dotenv.load_dotenv(".env")
+
+DATABASE=os.getenv('DATABASE')
+DB_USER=os.getenv('DB_USER')
+DB_PASSWORD=os.getenv('DB_PASSWORD')
+DB_HOST=os.getenv('DB_HOST')
+if not DATABASE or not DB_USER or not DB_PASSWORD or not DB_HOST:
+    raise ValueError('Database creds are missing in environment.')
+
+DOMAIN = os.getenv('DOMAIN')
+SCHEME = os.getenv('SCHEME')
+
+
+if not DOMAIN:
+    import socket
+    DOMAIN = socket.gethostbyname(socket.gethostname())
+
+if not SCHEME:
+    SCHEME = 'http://'
+
+HOST = SCHEME + DOMAIN
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -30,10 +54,23 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+CORS_ORIGIN_ALLOW_ALL = False
+
+CORS_ALLOW_CREDENTIALS = True
+
+CORS_ALLOWED_ORIGINS = [
+"https://www.distribution.social",
+"https://peer2pressure.herokuapp.com",
+"https://yoshi-connect.herokuapp.com",
+"http://localhost:8000",
+"http://127.0.0.1:8000",
+"http://0.0.0.0:8000"
+]
 
 # Application definition
 
 INSTALLED_APPS = [
+    'corsheaders',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -50,6 +87,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -95,16 +133,16 @@ DATABASES = {
     # }
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'df4fj8louh1vja',
-        'USER': 'mxsbfgthsrlphp',
-        'PASSWORD': 'e5ef20b4e5a19a11132658a17d4a3e924a2eef43669ed6f832671410c7916e65',
-        'HOST': 'ec2-54-160-109-68.compute-1.amazonaws.com',
+        'NAME': DATABASE,
+        'USER': DB_USER,
+        'PASSWORD': DB_PASSWORD,
+        'HOST': DB_HOST,
         'PORT': '5432',
     }
 }
 
 if 'test' in sys.argv:
-    DATABASES['default'] = { 
+    DATABASES['default'] = {
        'ENGINE': 'django.db.backends.sqlite3',
         'NAME': 'testdatabase'
 }
@@ -134,7 +172,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'America/Edmonton'
 
 USE_I18N = True
 
@@ -154,7 +192,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 REST_FRAMEWORK = {
-    "DEFAULT_AUTHENTICATION_CLASSES": [ 
+    "DEFAULT_AUTHENTICATION_CLASSES": [
 
     ]
 }

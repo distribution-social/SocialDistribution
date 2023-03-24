@@ -21,7 +21,7 @@ class AuthorTest(TestCase):
     confirmed = True
 
     def create_author(self):
-        author = Author(host=self.host, displayName=self.displayName,
+        author = Author(displayName=self.displayName,
                         github=self.github, profileImage=self.profileImage, email=self.email, username=self.username, confirmed=self.confirmed)
 
         author.full_clean()
@@ -45,27 +45,27 @@ class AuthorTest(TestCase):
         self.assertRaises(ValidationError, author.full_clean)
 
         # Empty display name
-        author = Author(host=self.host, displayName=None,
+        author = Author(displayName=None,
                github=self.github, profileImage=self.profileImage, email=self.email, username=self.username, confirmed=self.confirmed)
         self.assertRaises(ValidationError, author.full_clean)
 
         # Empty github
-        author = Author(host=self.host, displayName=self.displayName,
+        author = Author(displayName=self.displayName,
                         github=None, profileImage=self.profileImage, email=self.email, username=self.username, confirmed=self.confirmed)
         self.assertRaises(ValidationError, author.full_clean)
 
         # Empty profileImage
-        author = Author(host=self.host, displayName=self.displayName,
+        author = Author(displayName=self.displayName,
                         github=self.github, profileImage=None, email=self.email, username=self.username, confirmed=self.confirmed)
         self.assertRaises(ValidationError, author.full_clean)
 
         # Empty email
-        author = Author(host=self.host, displayName=self.displayName,
+        author = Author(displayName=self.displayName,
                         github=self.github, profileImage=self.profileImage, email=None, username=self.username, confirmed=self.confirmed)
         self.assertRaises(ValidationError, author.full_clean)
 
         # Empty username
-        author = Author(host=self.host, displayName=self.displayName,
+        author = Author(displayName=self.displayName,
                         github=self.github, profileImage=self.profileImage, email=self.email, username=None, confirmed=self.confirmed)
         self.assertRaises(ValidationError, author.full_clean)
 
@@ -77,23 +77,23 @@ class AuthorTest(TestCase):
         self.assertRaises(ValidationError, author.full_clean)
 
         # Invalid github URL
-        author = Author(host=self.host, displayName=self.displayName,
+        author = Author(displayName=self.displayName,
                         github=456, profileImage=self.profileImage, email=self.email, username=self.username, confirmed=self.confirmed)
         self.assertRaises(ValidationError, author.full_clean)
 
         # Invalid profileImage URL
-        author = Author(host=self.host, displayName=self.displayName,
+        author = Author(displayName=self.displayName,
                         github=self.github, profileImage=789, email=self.email, username=self.username, confirmed=self.confirmed)
         self.assertRaises(ValidationError, author.full_clean)
 
         # Invalid email
-        author = Author(host=self.host, displayName=self.displayName,
+        author = Author(displayName=self.displayName,
                         github=self.github, profileImage=self.profileImage, email='google.com', username=self.username, confirmed=self.confirmed)
         self.assertRaises(ValidationError, author.full_clean)
 
 
     def test_add_author_to_db(self):
-        author = Author(host=self.host, displayName="Jane Doe",
+        author = Author(displayName="Jane Doe",
                         github=self.github, profileImage=self.profileImage, email=self.email, username=self.username, confirmed=self.confirmed)
 
         author.full_clean()
@@ -104,7 +104,7 @@ class AuthorTest(TestCase):
         self.assertEqual(retrieved_author.displayName, "Jane Doe")
 
     def test_delete_author_from_db(self):
-        author = Author(host=self.host, displayName="Deleted Author",
+        author = Author(displayName="Deleted Author",
                         github=self.github, profileImage=self.profileImage, email=self.email, username=self.username, confirmed=self.confirmed)
         
         author.full_clean()
@@ -121,7 +121,7 @@ class AuthorTest(TestCase):
             Author.objects.get(displayName="Deleted Author")
 
     def test_update_author_in_db(self):
-        author = Author(host=self.host, displayName="Jamie Doe",
+        author = Author(displayName="Jamie Doe",
                         github=self.github, profileImage=self.profileImage, email=self.email, username=self.username, confirmed=self.confirmed)
 
         author.full_clean()
