@@ -13,6 +13,7 @@ import requests
 from django.core import serializers
 from django.http import JsonResponse
 import json
+from urllib.parse import urljoin
 
 from django.contrib.auth.models import User
 from .helpers import *
@@ -27,7 +28,6 @@ def explore_posts(request):
     allPosts = []
     for foreignNode in foreignNodes:
         base_url = foreignNode.base_url
-        print(base_url)
         headers={}
         if foreignNode.username:
             headers = {
@@ -42,8 +42,9 @@ def explore_posts(request):
         }
 
         try:
-            res = requests.get(f'{base_url}authors', headers=headers, params=params)
-            
+            url = urljoin(base_url,'authors')
+            res = requests.get(url, headers=headers, params=params)
+
             authors = json.loads(res.text)
             # if base_url == "https://peer2pressure.herokuapp.com/":
             #         import pdb; pdb.set_trace()
@@ -65,7 +66,8 @@ def explore_posts(request):
                         Author.objects.create(**author_obj,username=uuid)
 
                 uuid = str(author['id']).split("/")[-1]
-                res = requests.get(f'{base_url}authors/{uuid}/posts',headers=headers)
+                url = urljoin(base_url,f'authors/{uuid}/posts')
+                res = requests.get(url,headers=headers)
 
                 author_posts = json.loads(res.text)
                 for post in author_posts['items']:
@@ -103,15 +105,15 @@ def post_details(request):
 
     post_uuid = request.GET.get("uuid")
     post_obj = Post.objects.get(uuid=post_uuid)
-    
+
     host =  post_obj.made_by.host
     author = post_obj.made_by
 
     if not host.endswith('/'):
         host += '/'
 
-    if not "https" in host:
-        host = host.replace("http", "https")
+    # if not "https" in host:
+    #     host = host.replace("http", "https")
 
     foreignNode = ForeignAPINodes.objects.get(base_url=host)
     headers={}
@@ -124,9 +126,12 @@ def post_details(request):
     params = {
 
     }
-   
-    res = requests.get(post_obj.origin, headers=headers)
-   
+    try:
+        res = requests.get(post_obj.origin, headers=headers)
+    except Exception as e:
+        response = JsonResponse({'error': str(e)})
+        response.status_code = 500
+        return response
     post = json.loads(res.text)
 
     post['tag'] = foreignNode.nickname
