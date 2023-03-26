@@ -13,6 +13,7 @@ import requests
 from django.core import serializers
 from django.http import JsonResponse
 import json
+from urllib.parse import urljoin
 
 from django.contrib.auth.models import User
 from .helpers import *
@@ -27,7 +28,6 @@ def explore_posts(request):
     allPosts = []
     for foreignNode in foreignNodes:
         base_url = foreignNode.base_url
-        print(base_url)
         headers={}
         if foreignNode.username:
             headers = {
@@ -42,7 +42,8 @@ def explore_posts(request):
         }
 
         try:
-            res = requests.get(f'{base_url}authors', headers=headers, params=params)
+            url = urljoin(base_url,'authors')
+            res = requests.get(url, headers=headers, params=params)
 
             authors = json.loads(res.text)
             # if base_url == "https://peer2pressure.herokuapp.com/":
@@ -65,7 +66,8 @@ def explore_posts(request):
                         Author.objects.create(**author_obj,username=uuid)
 
                 uuid = str(author['id']).split("/")[-1]
-                res = requests.get(f'{base_url}authors/{uuid}/posts',headers=headers)
+                url = urljoin(base_url,f'authors/{uuid}/posts')
+                res = requests.get(url,headers=headers)
 
                 author_posts = json.loads(res.text)
                 for post in author_posts['items']:
