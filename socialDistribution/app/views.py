@@ -43,7 +43,7 @@ def signup(request):
         github = form_inputs.get('github')
         password = form_inputs.get('password')
         confirm_password = form_inputs.get('confirm_password')
-       
+
 
         if display_name and username and email and github and password and confirm_password:
 
@@ -262,7 +262,7 @@ def add_to_sent_request(request):
         return HttpResponse("Success")
     else:
         return HttpResponse("Method Not Allowed")
-    
+
 @login_required(login_url="/login")
 @require_http_methods(["GET", "POST"])
 def profile(request, author_id):
@@ -307,8 +307,8 @@ def profile(request, author_id):
         if not host.endswith('/'):
             host += '/'
 
-        if not "https" in host:
-            host = host.replace("http", "https")
+        # if not "https" in host:
+        #     host = host.replace("http", "https")
 
         foreignNode = ForeignAPINodes.objects.get(base_url=host)
 
@@ -319,8 +319,8 @@ def profile(request, author_id):
         if not local_host.endswith('/'):
             local_host += '/'
 
-        if not "https" in local_host:
-            local_host = local_host.replace("http", "https")
+        # if not "https" in local_host:
+        #     local_host = local_host.replace("http", "https")
 
         localNode = ForeignAPINodes.objects.get(base_url=local_host)
 
