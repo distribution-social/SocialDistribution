@@ -304,23 +304,11 @@ def profile(request, author_id):
 
         host = author.host
 
-        if not host.endswith('/'):
-            host += '/'
-
-        # if not "https" in host:
-        #     host = host.replace("http", "https")
-
         foreignNode = ForeignAPINodes.objects.get(base_url=host)
 
         context.update({'foreign_node_token': foreignNode.getToken()})
 
         local_host = userAuthor.host
-
-        if not local_host.endswith('/'):
-            local_host += '/'
-
-        # if not "https" in local_host:
-        #     local_host = local_host.replace("http", "https")
 
         localNode = ForeignAPINodes.objects.get(base_url=local_host)
 
