@@ -2,7 +2,8 @@
 //  https://css-tricks.com/crafting-reusable-html-templates/
 //  https://dmitripavlutin.com/parse-url-javascript/
 
-import { extractUUID } from "./utility.js";
+import { extractUUID, uuidToHex } from "./utility.js";
+
 
 $(document).ready(function() {
     console.log("host:"+author_host);
@@ -11,7 +12,7 @@ $(document).ready(function() {
     setFollowing(serialized_followings, user_id, author_id, author_host);
 
     // get followers from server and use data to set followers and true friends
-    const followersUrl = new URL("authors/" + author_id + "/followers", author_host);
+    const followersUrl = new URL("authors/" + uuidToHex(author_id) + "/followers", author_host);
     fetch(followersUrl, {method: "GET", headers: auth_headers}).then((response) => {
         if (response.status === 200) { // OK
             return response.json();
@@ -27,9 +28,9 @@ $(document).ready(function() {
 });
 
 function getAndSetProfileCard() {
-    const authorProfileUrl = new URL("authors/" + author_id, author_host);
+    const authorProfileUrl = new URL("authors/" + uuidToHex(author_id), author_host);
     // set profile card info
-    fetch(authorProfileUrl, {method: "GET", headers: auth_headers}).then((response) => {
+    fetch(authorProfileUrl, {method: "GET"}).then((response) => {
         if (response.status === 200) { // OK
             return response.json();
         } else {
@@ -37,13 +38,13 @@ function getAndSetProfileCard() {
         }
     }).then((data) => {
         let profileCard = document.getElementById("profile_card");
-        if (data.profileImage !== null) {$(profileCard).find(".profile_image").attr("src", data.profileImage);}
+        if (data.profileImage !== null && data.profileImage !== "") {$(profileCard).find(".profile_image").attr("src", data.profileImage);}
         $(profileCard).find(".profile_github").attr("href", data.github);
         $(profileCard).find(".profile_display_name").text(data.displayName);
         return;
     })
     // handle follow unfollow button
-    const authorIsFollowingUrl = new URL("authors/" + author_id + "/followers/" + user_id, author_host);
+    const authorIsFollowingUrl = new URL("authors/" + uuidToHex(author_id) + "/followers/" + uuidToHex(user_id), author_host);
     fetch(authorIsFollowingUrl, {method: "GET", headers: auth_headers}).then((response) => {
         // console.log(response.json().is_following);
         if (response.status === 200) { // OK
@@ -212,7 +213,7 @@ function setFollowers(followers, user_id, author_id, author_host) {
 function setFriends(followers, author_id) {
     let num2 = 0;
     for (let follower of followers) {
-        const url = new URL("authors/" + extractUUID(follower.id) + "/followers/" + author_id, author_host);
+        const url = new URL("authors/" + uuidToHex(extractUUID(follower.id)) + "/followers/" + uuidToHex(author_id), author_host);
         fetch(url, {method: "GET", headers: auth_headers}).then((response) => {
             if (response.status === 200) { // OK
                 return response.json();

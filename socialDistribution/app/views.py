@@ -304,13 +304,15 @@ def profile(request, author_id):
 
         host = author.host
 
-        foreignNode = ForeignAPINodes.objects.get(base_url=host)
+        #foreignNode = ForeignAPINodes.objects.get(base_url=host)
+        foreignNode = getApiNodeWrapper(host)
 
         context.update({'foreign_node_token': foreignNode.getToken()})
 
         local_host = userAuthor.host
 
-        localNode = ForeignAPINodes.objects.get(base_url=local_host)
+        #localNode = ForeignAPINodes.objects.get(base_url=local_host)
+        localNode = getApiNodeWrapper(local_host)
 
         context.update({'local_node_token': localNode.getToken()})
 
@@ -327,14 +329,13 @@ def profile(request, author_id):
 
         return redirect(reverse("profile", kwargs={"author_id": userAuthor.id}))
 
+def getApiNodeWrapper(host):
+    parsedHost = urllib.parse.urlparse(host)
+    node = ForeignAPINodes.objects.get(base_url__contains="//"+parsedHost.hostname)
+    return node
+
 def getAuthHeadersJson(author_host):
-    parsedAuthorHost = urllib.parse.urlparse(author_host)
-    httpsVersion = urllib.parse.urlunparse(parsedAuthorHost._replace(scheme='https'))
-    httpVersion = urllib.parse.urlunparse(parsedAuthorHost._replace(scheme='http'))
-    try:
-        node = ForeignAPINodes.objects.get(base_url=httpsVersion)
-    except:
-        node = ForeignAPINodes.objects.get(base_url=httpVersion)
+    node = getApiNodeWrapper(author_host)
     headers={}
     if node.username:
         headers = {'Authorization': f"Basic {node.getToken()}", 'Content-Type': 'application/json'}
