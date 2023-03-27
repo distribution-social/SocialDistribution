@@ -28,7 +28,14 @@ $(document).ready(function() {
 });
 
 function getAndSetProfileCard() {
-    const authorProfileUrl = new URL("authors/" + uuidToHex(author_id), author_host);
+    let authorProfileUrl;
+    if (author_host === "https://p2psd.herokuapp.com"){
+        authorProfileUrl = new URL("authors/" + author_id, author_host);
+    } else {
+        authorProfileUrl = new URL("authors/" + uuidToHex(author_id), author_host);
+    }
+
+    console.log(author_host);
     // set profile card info
     fetch(authorProfileUrl, {method: "GET", headers: auth_headers}).then((response) => {
         if (response.status === 200) { // OK
@@ -44,7 +51,13 @@ function getAndSetProfileCard() {
         return;
     })
     // handle follow unfollow button
-    const authorIsFollowingUrl = new URL("authors/" + uuidToHex(author_id) + "/followers/" + uuidToHex(user_id), author_host);
+    let authorIsFollowingUrl;
+    if (author_host === "https://p2psd.herokuapp.com"){
+        authorIsFollowingUrl = new URL("authors/" + author_id + "/followers/" + user_id, author_host);
+    } else {
+        authorIsFollowingUrl = new URL("authors/" + uuidToHex(author_id) + "/followers/" + uuidToHex(user_id), author_host);
+    }
+
     fetch(authorIsFollowingUrl, {method: "GET", headers: auth_headers}).then((response) => {
         // console.log(response.json().is_following);
         if (response.status === 200) { // OK
