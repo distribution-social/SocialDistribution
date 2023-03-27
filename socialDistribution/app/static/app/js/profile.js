@@ -235,11 +235,11 @@ function setFriends(followers, author_id) {
     let num2 = 0;
     for (let follower of followers) {
         if (author_host.includes("p2psd")){
-            const url = new URL("authors/" + uuidToHex(extractUUID(follower.id)) + "/followers/" + author_id, author_host);
+            var url = new URL("authors/" + uuidToHex(extractUUID(follower.id)) + "/followers/" + author_id, author_host);
         } else {
-            const url = new URL("authors/" + uuidToHex(extractUUID(follower.id)) + "/followers/" + uuidToHex(author_id), author_host);
+            var url = new URL("authors/" + uuidToHex(extractUUID(follower.id)) + "/followers/" + uuidToHex(author_id), author_host);
         }
-        const url = new URL("authors/" + uuidToHex(extractUUID(follower.id)) + "/followers/" + uuidToHex(author_id), author_host);
+        //const url = new URL("authors/" + uuidToHex(extractUUID(follower.id)) + "/followers/" + uuidToHex(author_id), author_host);
         fetch(url, {method: "GET", headers: auth_headers}).then((response) => {
             if (response.status === 200) { // OK
                 return response.json();
