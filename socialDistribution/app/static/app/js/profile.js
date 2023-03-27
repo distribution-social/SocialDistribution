@@ -12,7 +12,11 @@ $(document).ready(function() {
     setFollowing(serialized_followings, user_id, author_id, author_host);
 
     // get followers from server and use data to set followers and true friends
-    const followersUrl = new URL("authors/" + uuidToHex(author_id) + "/followers", author_host);
+    if (author_host.includes("p2psd")){
+        const followersUrl = new URL("authors/" + author_id + "/followers", author_host);
+    } else {
+        const followersUrl = new URL("authors/" + uuidToHex(author_id) + "/followers", author_host);
+    }
     fetch(followersUrl, {method: "GET", headers: auth_headers}).then((response) => {
         if (response.status === 200) { // OK
             return response.json();
@@ -28,7 +32,14 @@ $(document).ready(function() {
 });
 
 function getAndSetProfileCard() {
-    const authorProfileUrl = new URL("authors/" + uuidToHex(author_id), author_host);
+    let authorProfileUrl;
+    if (author_host.includes("p2psd")){
+        authorProfileUrl = new URL("authors/" + author_id, author_host);
+    } else {
+        authorProfileUrl = new URL("authors/" + uuidToHex(author_id), author_host);
+    }
+
+    console.log(author_host);
     // set profile card info
     fetch(authorProfileUrl, {method: "GET", headers: auth_headers}).then((response) => {
         if (response.status === 200) { // OK
@@ -44,7 +55,13 @@ function getAndSetProfileCard() {
         return;
     })
     // handle follow unfollow button
-    const authorIsFollowingUrl = new URL("authors/" + uuidToHex(author_id) + "/followers/" + uuidToHex(user_id), author_host);
+    let authorIsFollowingUrl;
+    if (author_host.includes("p2psd")){
+        authorIsFollowingUrl = new URL("authors/" + author_id + "/followers/" + user_id, author_host);
+    } else {
+        authorIsFollowingUrl = new URL("authors/" + uuidToHex(author_id) + "/followers/" + uuidToHex(user_id), author_host);
+    }
+
     fetch(authorIsFollowingUrl, {method: "GET", headers: auth_headers}).then((response) => {
         // console.log(response.json().is_following);
         if (response.status === 200) { // OK
@@ -66,7 +83,10 @@ function getAndSetProfileCard() {
         } else if (author_id !== user_id) {
             $("#follow_unfollow_button").attr("name", "follow").val(author_id).text("Request to Follow");
             const element = document.getElementById("follow_unfollow_button");
-            element.addEventListener("click", sendFollowRequestToInbox);
+            if (element) {
+                element.addEventListener("click", sendFollowRequestToInbox);
+            }
+  
         }
     });
 
@@ -213,6 +233,11 @@ function setFollowers(followers, user_id, author_id, author_host) {
 function setFriends(followers, author_id) {
     let num2 = 0;
     for (let follower of followers) {
+        if (author_host.includes("p2psd")){
+            const url = new URL("authors/" + uuidToHex(extractUUID(follower.id)) + "/followers/" + author_id, author_host);
+        } else {
+            const url = new URL("authors/" + uuidToHex(extractUUID(follower.id)) + "/followers/" + uuidToHex(author_id), author_host);
+        }
         const url = new URL("authors/" + uuidToHex(extractUUID(follower.id)) + "/followers/" + uuidToHex(author_id), author_host);
         fetch(url, {method: "GET", headers: auth_headers}).then((response) => {
             if (response.status === 200) { // OK
