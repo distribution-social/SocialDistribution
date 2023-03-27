@@ -149,11 +149,11 @@ class Post(models.Model):
     ]
     visibility = models.CharField(max_length=7, choices=VISIBILITY_CHOICES)
     unlisted = models.BooleanField(default=False)
-    image = models.ImageField(upload_to='images/')
+    image = models.ImageField(upload_to='posts/images/', blank=True, null=True)
 
     likes = GenericRelation(Like)
     activity = GenericRelation(Activity)
-    
+
 
     def save(self, *args, **kwargs):
         if self.origin == '' or not self.origin:

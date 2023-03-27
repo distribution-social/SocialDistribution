@@ -183,7 +183,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
@@ -203,4 +203,7 @@ SECURE_SSL_REDIRECT = False
 SECURE_CROSS_ORIGIN_OPENER_POLICY = None
 
 django_on_heroku.settings(locals())  # bottom of the file
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
 

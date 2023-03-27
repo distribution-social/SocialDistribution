@@ -31,7 +31,6 @@ class PostForm(forms.ModelForm):
             'visibility' : forms.TextInput(attrs={'class': 'form-control'}),
             'receivers' : forms.SelectMultiple(attrs={'class': 'form-control'}),
             'unlisted' : forms.TextInput(attrs={'class': 'form-control'}),
-            'image' : forms.ImageField(),
         }
 
     def save(self, user,receiver_list = None,commit=True):
