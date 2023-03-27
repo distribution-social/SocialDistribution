@@ -1,0 +1,80 @@
+{% load static %}
+
+<link rel="stylesheet" type="text/css" href="{% static 'app/following.css' %}">
+
+<div class="container-fluid d-flex align-items-center flex-column p-3">
+    {% if requests|length == 0 %}
+    No Follow Requests
+    {% endif %}
+    {% for request in requests %}
+
+    <div class="d-flex flex-column flex-fill" style="max-width: 700px;">
+            <div class="card flex-fill" style="width: 700px;">
+                <div class="d-flex">
+                    {% if request.profileImage and request.profileImage != '' %}
+                    <img src="{{request.profileImage}}" width="230px" height="230px" class="object-fit-cover border rounded-start"
+                    alt="No profile image">
+                    {% else %}
+                    <img src="{% static 'app/logo.png' %}" width="230px" height="230px" class="object-fit-cover border rounded-start"
+                    alt="No profile image">
+                    {% endif %}
+                    <div class="d-flex flex-fill flex-column ">
+                        <div class="card-body">
+                            <h5 class="card-title">{{request.displayName}}</h5>
+                            <p class="card-subtitle mb-2 text-muted">@{{request.username}}</p>
+
+                            <div class="btn-group" role="group" aria-label="Basic example">
+
+                                <a type="button" class="btn btn-primary"
+                                    href="{% url 'profile' author_id=request.id %}"><i
+                                        class="bi bi-person-fill">&nbsp;Profile</i></a>
+                                <a type="button" href="{{request.github}}" target="_blank" class="btn btn-secondary"><i
+                                        class="bi bi-github">&nbsp;GitHub</i></a>
+                            </div>
+                            {% if mode == "received" %}
+                            <form class="mt-3"
+                                action="{% url 'requests' author_id=request.username|convert_username_to_id %}"
+                                method="post">
+                                {% csrf_token %}
+
+                                <button type="submit" name="action" value="accept_{{request.username}}"
+                                    data-username="{{request.username}}" class="btn btn-success"><i
+                                        class="bi bi-check">&nbsp;Accept</i></button>
+
+                                <button type="submit" name="action" value="decline_{{request.username}}"
+                                    data-username="{{request.username}}" class="btn btn-danger"><i
+                                        class="bi bi-x">&nbsp;Decline</i></button>
+
+                            </form>
+                            {% else %}
+
+
+                            <form class="mt-3"
+                                action="{% url 'sent_requests' author_id=request.username|convert_username_to_id %}"
+                                method="post">
+                                {% csrf_token %}
+
+                                <button type="submit" name="action" value="cancel_{{request.username}}"
+                                    data-username="{{request.username}}" class="btn btn-warning"><i
+                                        class="bi bi-arrow-counterclockwise">&nbsp;Cancel Request</i></button>
+                            </form>
+
+
+
+                            {% endif %}
+
+
+                        </div>
+
+                        <div class="card-footer"><a href="{{request.host}}"
+                                class="text-decoration-none">{{request.host|cut:'http://'}}</a></div>
+
+
+                    </div>
+                </div>
+            </div>
+    </div>
+
+    {% endfor %}
+
+</div>

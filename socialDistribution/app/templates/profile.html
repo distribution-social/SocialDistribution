@@ -97,6 +97,13 @@ var local_node_token = '{{local_node_token}}';
                                     id="nav-friends-tab" data-bs-toggle="tab" data-bs-target="#nav-friends"
                                     type="button" role="tab" href="#" aria-controls="nav-friends"
                                     aria-selected="false">True Friends</button>
+                                {% if user.id == author.id %}
+                                <button class="nav-link"
+                                    id="nav-requests-tab" data-bs-toggle="tab" data-bs-target="#nav-requests"
+                                    type="button" role="tab" href="#" aria-controls="nav-requests"
+                                    aria-selected="false">{{requests|length}} Follow Request{{requests|pluralize}}
+                                </button>
+                                {% endif %}
                             </div>
                         </nav>
                     <div class="card p-2">
@@ -121,6 +128,12 @@ var local_node_token = '{{local_node_token}}';
                                 <!--{% include 'friendstab.html' %}-->
                                 {% include 'friends_tab_ajax.html' %}
                             </div>
+                            {% if user.id == author.id %}
+                            <div class="tab-pane fade"
+                                id="nav-requests" role="tabpanel" aria-labelledby="nav-requests-tab" tabindex="4">
+                                {% include 'requests_tab.html' %}
+                            </div>
+                            {% endif %}
                         </div>
                 </div>
 
