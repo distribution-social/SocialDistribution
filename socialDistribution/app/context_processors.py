@@ -11,8 +11,5 @@ def current_author(request):
     serializer = AuthorSerializer(author,context={'request':request,'kwargs':{}})
     return {'current_author': json.dumps(serializer.data)}
   except Exception as e:
-    import pdb
-    pdb.set_trace()
-    print(e)
     author = None
   return {'current_author': author}
