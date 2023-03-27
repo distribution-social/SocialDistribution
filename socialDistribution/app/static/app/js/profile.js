@@ -81,7 +81,7 @@ function getAndSetProfileCard() {
         console.log(author_id, user_id);
         if (result.is_following === true){
             $("#follow_unfollow_button").attr("name", "unfollow").val(author_id).text("Unfollow");
-        } else if (author_id !== user_id) {
+        } else {
             $("#follow_unfollow_button").attr("name", "follow").val(author_id).text("Request to Follow");
             const element = document.getElementById("follow_unfollow_button");
             if (element) {
