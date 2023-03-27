@@ -12,10 +12,11 @@ $(document).ready(function() {
     setFollowing(serialized_followings, user_id, author_id, author_host);
 
     // get followers from server and use data to set followers and true friends
+    var followersUrl;
     if (author_host.includes("p2psd")){
-        const followersUrl = new URL("authors/" + author_id + "/followers", author_host);
+        followersUrl = new URL("authors/" + author_id + "/followers", author_host);
     } else {
-        const followersUrl = new URL("authors/" + uuidToHex(author_id) + "/followers", author_host);
+        followersUrl = new URL("authors/" + uuidToHex(author_id) + "/followers", author_host);
     }
     fetch(followersUrl, {method: "GET", headers: auth_headers}).then((response) => {
         if (response.status === 200) { // OK
