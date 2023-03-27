@@ -13,7 +13,7 @@ import requests
 from django.core import serializers
 from django.http import JsonResponse
 import json
-from urllib.parse import urljoin
+from posixpath import join as urljoin
 
 from django.contrib.auth.models import User
 from .helpers import *
@@ -48,7 +48,6 @@ def explore_posts(request):
             authors = json.loads(res.text)
             # if base_url == "https://peer2pressure.herokuapp.com/":
             #         import pdb; pdb.set_trace()
-            print(authors['items'])
             for author in authors['items']:
                 if author['id']:
                     uuid = author['id'].split("/")[-1]
@@ -92,7 +91,15 @@ def explore_posts(request):
                         except Exception as e:
                             print(f"creating post failed in ajax {post_obj['uuid']}: {e}")
 
+                    like_url = urljoin(url,f'{uuid}/likes')
+                    try:
+                        res = requests.get(like_url,headers=headers)
+                        post['likeCount'] = len(json.loads(res.text)['items'])
+                    except Exception as e:
+                        print(f'Error getting like of post {like_url}: {e}')
+                        post['likeCount'] = 0
                     post['tag'] = foreignNode.nickname
+                    post['auth_token'] = foreignNode.getToken()
                     allPosts.append(post)
         except Exception as e:
             print(base_url,e)
@@ -133,8 +140,15 @@ def post_details(request):
         response.status_code = 500
         return response
     post = json.loads(res.text)
-
+    url = urljoin(post_obj.origin,f'likes')
+    try:
+        res = requests.get(url,headers=headers)
+        post['likeCount'] = len(json.loads(res.text)['items'])
+    except Exception as e:
+        print(f'Error getting like of post {post_obj.origin}: {e}')
+        post['likeCount'] = 0
     post['tag'] = foreignNode.nickname
+    post['auth_token'] = foreignNode.getToken()
 
     return JsonResponse({'post': post})
 

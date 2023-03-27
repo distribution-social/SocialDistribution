@@ -11,6 +11,7 @@ from http import HTTPStatus
 from .mixins import BasicAuthMixin
 from rest_framework.permissions import AllowAny
 from django.conf import settings
+import json
 
 class AuthorListAPIView(BasicAuthMixin,APIView):
     """ Used for Author based actions."""
@@ -334,7 +335,11 @@ class LikesPostView(BasicAuthMixin, APIView):
             return Response({"error": "Post does not exist."}, status=status.HTTP_404_NOT_FOUND)
 
         serializer = LikeSerializer(likes, many=True, context={'request':request,'kwargs':{'author_id':author_id,'post_id':post_id}})
-        return Response(serializer.data,status=status.HTTP_200_OK)
+        response = {
+            'type': 'likes',
+            'items': serializer.data
+        }
+        return Response(response,status=status.HTTP_200_OK)
 
     def post(self, request, author_id, post_id):
         """Adds a like to the {post_id}"""
@@ -375,7 +380,11 @@ class LikesCommentView(BasicAuthMixin,APIView):
             return Response({"error": f"Comment {comment_id} does not exist."}, status=status.HTTP_404_NOT_FOUND)
 
         serializer = LikeSerializer(likes, many=True, context={'request':request,'kwargs':{'author_id':author_id,'post_id':post_id,'comment_id':comment_id}})
-        return Response(serializer.data,status=status.HTTP_200_OK)
+        response = {
+            'type': 'likes',
+            'items': serializer.data
+        }
+        return Response(response,status=status.HTTP_200_OK)
 
     def post(self, request, author_id, post_id, comment_id):
         "Adds a like to the comment {comment_id}"
@@ -442,18 +451,19 @@ class InboxView(BasicAuthMixin,APIView):
     def post(self,request,author_id):
         """Adds the given object to the author\'s {author_id} inbox.
         Objects can be of type \'post\', \'follow\', \'comment\' or \'like\'"""
+        data = json.loads(request.body.decode('utf-8'))
         try:
             author = Author.objects.get(id=author_id)
         except Author.DoesNotExist:
             return Response({"error": f"Author {author_id} does not exist."}, status=status.HTTP_400_BAD_REQUEST)
 
-        if request.data.get('type') == 'follow':
+        if data.get('type') == 'follow':
             try:
-                actor_id = request.data.get('actor').get('url')
+                actor_id = data.get('actor').get('url')
                 actor = Author.objects.get(url=actor_id)
             except Author.DoesNotExist:
                 actor = Author(username=parse_values(actor_id).get('author_id'),confirmed=True)
-                authorSerializer = AuthorSerializer(actor,request.data.get('actor'))
+                authorSerializer = AuthorSerializer(actor,data.get('actor'))
                 if authorSerializer.is_valid():
                     authorSerializer.save()
                 else:
@@ -469,13 +479,13 @@ class InboxView(BasicAuthMixin,APIView):
                     return Response(f"Already following {author.displayName}",status=status.HTTP_400_BAD_REQUEST)
             except Exception as e:
                 return Response({'error': str(e)},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        elif request.data.get('type') == 'post':
+        elif data.get('type') == 'post':
             try:
-                actor_id = request.data.get('author').get('url')
+                actor_id = data.get('author').get('url')
                 actor = Author.objects.get(url=actor_id)
             except Author.DoesNotExist:
                 actor = Author(username=parse_values(actor_id).get('author_id'),confirmed=True)
-                authorSerializer = AuthorSerializer(actor,request.data.get('author'))
+                authorSerializer = AuthorSerializer(actor,data.get('author'))
                 if authorSerializer.is_valid():
                     authorSerializer.save()
                 else:
@@ -485,11 +495,11 @@ class InboxView(BasicAuthMixin,APIView):
 
 
             try:
-                post_id = request.data.get('origin')
+                post_id = data.get('origin')
                 post = Post.objects.get(origin=post_id)
             except Post.DoesNotExist:
                 post = Post(made_by=actor)
-                post_serializer = PostSaveSerializer(post,data=request.data,context={'request':request,'kwargs':{'author_id':author_id}})
+                post_serializer = PostSaveSerializer(post,data=data,context={'request':request,'kwargs':{'author_id':author_id}})
                 if post_serializer.is_valid():
                     post_serializer.save()
                 else:
@@ -502,13 +512,13 @@ class InboxView(BasicAuthMixin,APIView):
                 return Response({'error': str(e)},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-        elif request.data.get('type') == 'comment':
+        elif data.get('type') == 'comment':
             try:
-                actor_id = request.data.get('author').get('url')
+                actor_id = data.get('author').get('url')
                 actor = Author.objects.get(url=actor_id)
             except Author.DoesNotExist:
                 actor = Author(username=parse_values(actor_id).get('author_id'),confirmed=True)
-                authorSerializer = AuthorSerializer(actor,request.data.get('author'))
+                authorSerializer = AuthorSerializer(actor,data.get('author'))
                 if authorSerializer.is_valid():
                     authorSerializer.save()
                 else:
@@ -518,7 +528,7 @@ class InboxView(BasicAuthMixin,APIView):
 
 
             try:
-                post_id = parse_values(request.data.get('id')).get('post_id')
+                post_id = parse_values(data.get('id')).get('post_id')
                 post = Post.objects.get(uuid=post_id)
             except Post.DoesNotExist:
                 return Response({'error':f'Post {post_id} does not exist.'},status=status.HTTP_400_BAD_REQUEST)
@@ -527,15 +537,15 @@ class InboxView(BasicAuthMixin,APIView):
 
 
             try:
-                comment_id = parse_values(request.data.get('id')).get('comment_id')
+                comment_id = parse_values(data.get('id')).get('comment_id')
                 comment = Comment.objects.get(uuid=comment_id)
             except Comment.DoesNotExist:
                 comment = Comment(author=actor,post=post)
                 try:
-                    request.data.pop('id')
+                    data.pop('id')
                 except:
                     pass
-                comment_serializer = CommentSerializer(comment,data=request.data,context={'request':request,'kwargs':{'author_id':author_id}})
+                comment_serializer = CommentSerializer(comment,data=data,context={'request':request,'kwargs':{'author_id':author_id}})
                 if comment_serializer.is_valid():
                     comment_serializer.save()
                 else:
@@ -550,20 +560,20 @@ class InboxView(BasicAuthMixin,APIView):
                 return Response({'error': str(e)},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-        elif request.data.get('type') == 'like':
+        elif data.get('type') == 'like':
             try:
-                kwargs = parse_values(request.data.get('object'))
-                actor_kwargs = parse_values(request.data.get('author').get('url'))
+                kwargs = parse_values(data.get('object'))
+                actor_kwargs = parse_values(data.get('author').get('url'))
             except AttributeError:
                 return Response("Bad request: need object and author:url fields.",status=status.HTTP_400_BAD_REQUEST)
 
 
             try:
-                actor_id = request.data.get('author').get('url')
+                actor_id = data.get('author').get('url')
                 actor = Author.objects.get(url=actor_id)
             except Author.DoesNotExist:
                 actor = Author(username=parse_values(actor_id).get('author_id'),confirmed=True)
-                authorSerializer = AuthorSerializer(actor,request.data.get('author'))
+                authorSerializer = AuthorSerializer(actor,data.get('author'))
                 if authorSerializer.is_valid():
                     authorSerializer.save()
                 else:

@@ -255,11 +255,11 @@ class Likes(APITestCase):
       'HTTP_AUTHORIZATION': f'Basic {self.token}'
     }
     response = self.client.get(reverse('api-post-likes',kwargs=kwargs),**header)
-    self.assertEquals(response.data[0].get('summary'),"liked post")
+    self.assertEquals(response.data.get('items')[0].get('summary'),"liked post")
 
     self.post.likes.create(author=self.comment_author,summary="liked post")
     response = self.client.get(reverse('api-post-likes',kwargs=kwargs),**header)
-    self.assertEquals(len(response.data),2)
+    self.assertEquals(len(response.data.get('items')),2)
 
   def testGetCommentLikes(self):
     self.post.likes.create(author=self.comment_author,summary="liked comment")
@@ -273,11 +273,11 @@ class Likes(APITestCase):
       'HTTP_AUTHORIZATION': f'Basic {self.token}'
     }
     response = self.client.get(reverse('api-post-comment-likes',kwargs=kwargs),**header)
-    self.assertEquals(response.data[0].get('summary'),"liked comment")
+    self.assertEquals(response.data.get('items')[0].get('summary'),"liked comment")
 
     self.comment.likes.create(author=self.comment_author,summary="liked comment")
     response = self.client.get(reverse('api-post-comment-likes',kwargs=kwargs),**header)
-    self.assertEquals(len(response.data),2)
+    self.assertEquals(len(response.data.get('items')),2)
 
   def testGetAuthorLiked(self):
     self.post.likes.create(author=self.comment_author,summary="liked comment")
