@@ -30,7 +30,7 @@ $(document).ready(function() {
 function getAndSetProfileCard() {
     const authorProfileUrl = new URL("authors/" + uuidToHex(author_id), author_host);
     // set profile card info
-    fetch(authorProfileUrl, {method: "GET"}).then((response) => {
+    fetch(authorProfileUrl, {method: "GET", headers: auth_headers}).then((response) => {
         if (response.status === 200) { // OK
             return response.json();
         } else {
@@ -63,7 +63,7 @@ function getAndSetProfileCard() {
         console.log(author_id, user_id);
         if (result.is_following === true){
             $("#follow_unfollow_button").attr("name", "unfollow").val(author_id).text("Unfollow");
-        } else {
+        } else if (author_id !== user_id) {
             $("#follow_unfollow_button").attr("name", "follow").val(author_id).text("Request to Follow");
             const element = document.getElementById("follow_unfollow_button");
             element.addEventListener("click", sendFollowRequestToInbox);

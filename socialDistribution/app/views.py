@@ -275,8 +275,10 @@ def profile(request, author_id):
         following = author.following.all().order_by('displayName')
         followers = author.followers.all().order_by('displayName')
         friends = list(following & followers)
+        requests = Author.objects.get(id=author.id).follow_requests.all()
         posts = get_posts_visible_to_user(userAuthor, author, friends)
         context = {"posts": posts, "comment_form": CommentForm()}
+        context.update({"requests": requests, "mode": "received"})
         context.update({"author": author, "following": following, "followers": followers, "friends": friends, "user": userAuthor, "active_tab": "posts", "edit_profile_form": EditProfileForm(instance=author)})
         context.update({"auth_headers": getAuthHeadersJson(author.host), "server_host": request.get_host()})
         serializedFollowings = AuthorSerializer(following, many=True, context={'request':request,'kwargs':{}}).data
@@ -421,13 +423,17 @@ def received_requests(request, author_id):
     elif request.method == "POST":
         response = ""
         inbox = None
+        profile = None
         request_action = request.POST.get("action").split("_")
         if len(request_action) < 2:
             return HttpResponseBadRequest("Not enough action parameters")
         action = request_action[0]
         sender_username = request_action[1]
         if len(request_action) > 2:
-            inbox = request_action[2]
+            if request_action[2] == "inbox":
+                inbox = request_action[2]
+            elif request_action[2] == "profile":
+                profile = request_action[2]
         sender_author = Author.objects.get(username=sender_username)
 
         # Get our author object
@@ -456,6 +462,8 @@ def received_requests(request, author_id):
 
         if inbox:
             return redirect(reverse("inbox", kwargs={'author_id': convert_username_to_id(user.username)}))
+        elif profile:
+            return redirect(reverse("profile", kwargs={'author_id': convert_username_to_id(user.username)}))
         return redirect(reverse("requests", kwargs={'author_id': convert_username_to_id(user.username)}))
 
 
