@@ -66,7 +66,10 @@ function getAndSetProfileCard() {
         } else {
             $("#follow_unfollow_button").attr("name", "follow").val(author_id).text("Request to Follow");
             const element = document.getElementById("follow_unfollow_button");
-            element.addEventListener("click", sendFollowRequestToInbox);
+            if (element) {
+                element.addEventListener("click", sendFollowRequestToInbox);
+            }
+  
         }
     });
 
