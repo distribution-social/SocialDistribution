@@ -22,6 +22,7 @@
 var author_id = '{{author.id}}';
 var author_host = '{{author.host}}';
 var user_id = '{{user.id}}';
+//var user_url ='{{user.url}}'
 var auth_headers = JSON.parse("{{auth_headers|escapejs}}");
 var serialized_followings = JSON.parse("{{serialized_followings|escapejs}}");
 var server_host = "{{server_host}}";
@@ -31,7 +32,7 @@ var user_display_name = '{{user.displayName}}';
 var author_display_name = '{{author.displayName}}';
 var foreign_node_token = '{{foreign_node_token}}';
 var local_node_token = '{{local_node_token}}';
-
+//console.log("uuid: {{author.id}}, url: {{author.url}}");
 </script>
 <script type="module" src="{% static '../static/app/js/profile.js' %}"></script>
 
