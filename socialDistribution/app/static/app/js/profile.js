@@ -30,7 +30,7 @@ $(document).ready(function() {
 function getAndSetProfileCard() {
     const authorProfileUrl = new URL("authors/" + uuidToHex(author_id), author_host);
     // set profile card info
-    fetch(authorProfileUrl, {method: "GET"}).then((response) => {
+    fetch(authorProfileUrl, {method: "GET", headers: auth_headers}).then((response) => {
         if (response.status === 200) { // OK
             return response.json();
         } else {
