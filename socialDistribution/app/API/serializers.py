@@ -33,6 +33,8 @@ class AuthorSerializer(serializers.ModelSerializer):
                 data['url'] = data['host'] + api + "/authors/" + data['id']
         data['id'] = get_full_uri(request,'api-single_author',kwargs,remove_str='')
 
+        if not data['profileImage']:
+            data['profileImage'] = ''
 
         return data
 

@@ -1,5 +1,10 @@
-import { addLikeEventListener, addDeletePostListener } from "./postCard.js"
+import { addPostLikeEventListener, addDeletePostListener } from "./postCard.js"
 import { extractUUID } from "./utility.js";
+
+const myAuthorElement = document.getElementById('my-author');
+const current_author = myAuthorElement.dataset.myAuthor;
+console.log(current_author)
+
 const spinner = document.getElementById("spinner2")
 // fetches the post when document loads.
 $(document).ready(function() {
@@ -22,8 +27,6 @@ $(document).ready(function() {
 
 
                 postData.author.id = extractUUID(post.author.id)
-                postData.likeCount = 5; // hardcoding for now, since we dont give
-                // console.log(postData)
 
                 $.ajax({
                     url: '/post_card.html',
@@ -38,7 +41,7 @@ $(document).ready(function() {
 
                         $('#post-stream').append(template);
                         spinner.style.display = 'none';
-                        addLikeEventListener(postData.uuid)
+                        addPostLikeEventListener(postData,current_author)
                         addDeletePostListener(postData.uuid)
 
 

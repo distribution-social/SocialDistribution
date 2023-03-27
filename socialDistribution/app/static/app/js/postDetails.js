@@ -1,8 +1,12 @@
-import { addLikeEventListener, addDeletePostListener } from "./postCard.js"
+import { addPostLikeEventListener, addDeletePostListener } from "./postCard.js"
 import { extractUUID } from "./utility.js";
 
 const myDataElement = document.getElementById('my-data');
 const postUUID = myDataElement.dataset.myData;
+
+const myAuthorElement = document.getElementById('my-author');
+const current_author = myAuthorElement.dataset.myAuthor;
+// console.log(current_author)
 const spinner = document.getElementById("spinner3")
 $(document).ready(function() {
     $(`#collapse_${postUUID}`).show()
@@ -20,7 +24,6 @@ $(document).ready(function() {
                 ...res.post
             }
             postData.author.id = extractUUID(res.post.author.id)
-            postData.likeCount = 5; // hardcoding for now, since we dont give
 
             $.ajax({
                 url: '/post_detail.html',
@@ -31,10 +34,9 @@ $(document).ready(function() {
                     'X-CSRFToken': '{{ csrf_token }}'
                 },
                 success: function(template) {
-
                     $('#post-detail').append(template);
                     spinner.style.display = 'none';
-                    addLikeEventListener(postData.uuid)
+                    addPostLikeEventListener(postData,current_author)
                     addDeletePostListener(postData.uuid)
 
                 },
