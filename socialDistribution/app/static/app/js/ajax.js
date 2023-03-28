@@ -5,9 +5,6 @@ export function makeAjaxCall(url, method, data, successCallback, errorCallback) 
     data: data,
     success: function(response, textStatus, xhr) {
       if (typeof successCallback === 'function') {
-        if (xhr.getResponseHeader('content-type').indexOf('application/json') !== -1) {
-          response = JSON.parse(response);
-        }
         successCallback(response,xhr.status);
       }
     },

@@ -17,94 +17,102 @@ from posixpath import join as urljoin
 
 from django.contrib.auth.models import User
 from .helpers import *
+from .API.helpers import *
 from django.db.models import Q
 
-@login_required(login_url="/login")
-@require_http_methods(["GET"])
-def explore_posts(request):
 
+import aiohttp
+import asyncio
+loop = asyncio.get_event_loop()
+
+class URL():
+    def __init__(self,url,method='get',headers=None,params=None,data=None):
+        self.url = url
+        self.method=method
+        self.headers=headers
+        self.params=params
+        self.data=data
+
+async def fetch_url(url:URL):
+
+    async with aiohttp.ClientSession() as session:
+        async with session.request(url=url.url,method=url.method,headers=url.headers,params=url.params) as response:
+            try:
+                return await response.json()
+            except aiohttp.ContentTypeError:
+                # handle invalid JSON content
+                print(f"Invalid JSON content at URL: {url.url}")
+                return None
+
+async def make_requests_async(url_list):
+    tasks = [asyncio.create_task(fetch_url(url)) for url in url_list]
+    responses = await asyncio.gather(*tasks)
+    return responses
+
+def make_http_calls(loop:asyncio.AbstractEventLoop,url_list):
+    return loop.run_until_complete(make_requests_async(url_list))
+
+def get_authors(loop:asyncio.AbstractEventLoop):
     foreignNodes = ForeignAPINodes.objects.all()
-    user = request.user
-    allPosts = []
+    urls = []
     for foreignNode in foreignNodes:
         base_url = foreignNode.base_url
-        headers={}
         if foreignNode.username:
             headers = {
                     'Authorization': f"Basic {foreignNode.getToken()}",
                     'Content-Type': 'application/json'
             }
-
-
         params = {
             'page': '1',
-            'size': '20'
+            'size': '100'
         }
+        url = urljoin(base_url,'authors')
+        urls.append(URL(url,'get',headers,params))
+    responses = make_http_calls(loop,urls)
+    authors = []
+    for response in responses:
+        if response:
+            authors.extend(response['items'])
+    return authors
 
-        try:
-            url = urljoin(base_url,'authors')
-            res = requests.get(url, headers=headers, params=params)
+def get_auth_header(host):
+    try:
+        foreignNode = ForeignAPINodes.objects.get(base_url=host)
+    except:
+        return None
+    return foreignNode.getToken()
 
-            authors = json.loads(res.text)
-            # if base_url == "https://peer2pressure.herokuapp.com/":
-            #         import pdb; pdb.set_trace()
-            for author in authors['items']:
-                if author['id']:
-                    uuid = author['id'].split("/")[-1]
-                    author_exists = Author.objects.filter(id=uuid).exists()
+def get_node_nickname(host):
+    try:
+        foreignNode = ForeignAPINodes.objects.get(base_url=host)
+    except:
+        return None
+    return foreignNode.nickname
 
-                    if not "displayName" in author:
-                        author['displayName'] = "displayName typo on other team"
-
-                    if not author_exists:
-                        author_obj = standardize_author(author)
-                        author_obj['id'] = uuid
-                        author_obj['confirmed'] = True
-
-
-                        Author.objects.create(**author_obj,username=uuid)
-
-                uuid = str(author['id']).split("/")[-1]
-                url = urljoin(base_url,f'authors/{uuid}/posts')
-                res = requests.get(url,headers=headers)
-
-                author_posts = json.loads(res.text)
-                for post in author_posts['items']:
-                    # if base_url == "https://peer2pressure.herokuapp.com/":
-                    #     import pdb; pdb.set_trace()
-                    uuid = post['id'].split("/")[-1]
-
-                    if not "title" in post:
-                        post['title'] = f"title typo on other team {base_url}"
-
-                    post_exists = Post.objects.filter(uuid=uuid).exists()
-
-                    if not post_exists:
-                        post_obj = standardize_post(post)
-                        post_obj['uuid'] = uuid
-                        author_id =  post['author']['id'].split("/")[-1]
-                        post_obj['made_by'] = Author.objects.get(id=author_id)
-
-                        # import pdb; pdb.set_trace()
-                        try:
-                            Post.objects.create(**post_obj)
-                        except Exception as e:
-                            print(f"creating post failed in ajax {post_obj['uuid']}: {e}")
-
-                    like_url = urljoin(url,f'{uuid}/likes')
-                    try:
-                        res = requests.get(like_url,headers=headers)
-                        post['likeCount'] = len(json.loads(res.text)['items'])
-                    except Exception as e:
-                        print(f'Error getting like of post {like_url}: {e}')
-                        post['likeCount'] = 0
-                    post['tag'] = foreignNode.nickname
-                    post['auth_token'] = foreignNode.getToken()
-                    allPosts.append(post)
-        except Exception as e:
-            print(base_url,e)
-
-    return JsonResponse({'posts': allPosts})
+@require_http_methods(["GET"])
+def public_posts(request):
+    authors = get_authors(loop)
+    urls = []
+    for author in authors:
+        token = get_auth_header(author['host'])
+        if not token:
+            continue
+        headers = {
+            'Authorization': f"Basic {token}",
+            'Content-Type': 'application/json'
+        }
+        url = urljoin(author['url'],'posts')
+        urls.append(URL(url,'get',headers))
+    responses = make_http_calls(loop,urls)
+    posts = []
+    for response in responses:
+        if response:
+            posts.extend(response['items'])
+    posts = [d for d in posts if d['visibility'] in ['PUBLIC']]
+    posts = sorted(posts, key=lambda d: d['published'],reverse=True)
+    # for post in posts:
+    #     post['tag'] = get_node_nickname(post['author']['host'])
+    return JsonResponse({'posts': posts})
 
 @login_required(login_url="/login")
 @require_http_methods(["GET"])
@@ -147,6 +155,8 @@ def post_details(request):
     except Exception as e:
         print(f'Error getting like of post {post_obj.origin}: {e}')
         post['likeCount'] = 0
+    post['uuid'] = parse_values(post['url']).get('post_id')
+    post_obj['made_by'] = post['author']
     post['tag'] = foreignNode.nickname
     post['auth_token'] = foreignNode.getToken()
 

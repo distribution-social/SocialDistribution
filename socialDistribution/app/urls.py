@@ -33,7 +33,7 @@ urlpatterns = [
             cache_timeout=0), name='schema-swagger-ui'),
     re_path(r'^redoc/$', schema_view.with_ui('redoc',
                                              cache_timeout=0), name='schema-redoc'),
-    path('', views.root, name='root'),    
+    path('', views.root, name='root'),
     path('signup', views.signup, name='signup'),
     path('home', views.home, name='home'),
     path('explore', views.explore, name='explore'),
@@ -42,6 +42,7 @@ urlpatterns = [
     path('login', views.signin, name='login'),
     path('logout', views.signout, name='logout'),
     path('add-to-sent', views.add_to_sent_request, name='add-to-sent'),
+
 
     path('posts/<str:post_id>', views.post_detail, name='post_detail'),
     path('posts/<str:post_id>/edit', views.post_edit, name='post_edit'),
@@ -54,7 +55,7 @@ urlpatterns = [
     path('authors/<str:author_id>/inbox', views.inbox, name='inbox'),
     path('unfollow', views.unfollow, name='unfollow'),
     path('removefollower', views.removeFollower, name='removefollower'),
-    path('authors/<str:author_id>', views.profile, name='profile'),
+    path('profile', views.profile, name='profile'),
     path('authors/<str:author_id>/edit', views.edit_profile, name='edit-profile'),
     path('<str:username>/true-friends', views.true_friends, name='true-friends'),
     path('authors/<str:author_id>/received', views.received_requests, name='requests'),
@@ -66,7 +67,7 @@ urlpatterns = [
     path('post_detail.html', template_views.get_post_details_template, name='post_detail.html'),
 
     #Ajax Urls (returns JSON response)
-    path('posts', ajax_views.explore_posts, name='posts'),
+    path('public_posts', ajax_views.public_posts, name='posts'),
     path('post-details', ajax_views.post_details, name='post-details'),
 
 
@@ -84,11 +85,12 @@ urlpatterns = [
     # path('api/authors/<uuid:author_id>/posts/<uuid:post_id>/comments/<uuid:comment_id>', CommentView.as_view(), name ='api-post-comment'),
     # path('api/authors/<uuid:author_id>/posts/<uuid:post_id>/comments/<uuid:comment_id>/likes', LikesCommentView.as_view(), name ='api-post-comment-likes'),
 
-
+    path('api/posts/public', PublicPostsAPIView.as_view(),name='api-public-posts'),
     path('api/authors', AuthorListAPIView.as_view(), name='api-author-list'),
     path('api/authors/<str:author_id>', SingleAuthorAPIView.as_view(), name='api-single_author'),
     path('api/authors/<str:author_id>/followers', AuthorFollowersAPIView.as_view(), name='api-author-followers'),
     path('api/authors/<str:author_id>/followers/<str:follower_author_id>', FollowerAPIView.as_view(), name='api-followers'),
+    path('api/authors/<str:author_id>/posts/public', PublicAuthorPostsAPIView.as_view(), name='api-author-public'),
     path('api/authors/<str:author_id>/posts/<str:post_id>', PostDetailView.as_view(), name ='api-post-detail'),
     path('api/authors/<str:author_id>/posts', AuthorPostsView.as_view(), name ='api-author-post'),
     path('api/authors/<str:author_id>/liked', LikedView.as_view(), name ='api-author-liked'),
