@@ -1,6 +1,7 @@
+<!doctype html>
 {% load static %}
 {% load extra_tags %}
-<!doctype html>
+
 <html lang="en">
   {% block css %}<link rel="stylesheet" type="text/css" href="{% static 'app/posts.css' %}">{% endblock %}
   <head>
@@ -34,13 +35,11 @@
                 </a>
               </li>
               <li class="nav-item">
-
-                        <li class="nav-item">
                 <a class="nav-link" href="{% url 'authors' %}">
                   <i class="bi bi-people-fill">&nbsp;Authors</i></a>
               </li>
 
-                      <li class="nav-item">
+              <li class="nav-item">
 
                 <a class="nav-link" href="{% url 'explore' %}">
                   <i class="bi bi-globe">&nbsp;Explore</i>
@@ -182,16 +181,16 @@
 
     <div id="alert-container">
       <div id="alert-success" class="alert alert-success alert-dismissible fade in show">
-        <p><strong>Success! </strong><p>
+        <p><strong>Success! </strong></p>
       </div>
       <div id="alert-error" class="alert alert-danger alert-dismissible fade in show">
-        <p><strong>Error! </strong><p>
+        <p><strong>Error! </strong></p>
       </div>
       <div id="alert-warning" class="alert alert-warning alert-dismissible fade in show">
-        <p><strong>Warning! </strong><p>
+        <p><strong>Warning! </strong></p>
       </div>
       <div id="alert-info" class="alert alert-info alert-dismissible fade in show">
-        <p><strong>Info! </strong><p>
+        <p><strong>Info! </strong></p>
       </div>
     </div>
     <script type="text/javascript">

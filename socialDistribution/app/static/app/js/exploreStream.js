@@ -27,9 +27,11 @@ $(document).ready(function() {
                     'X-CSRFToken': '{{ csrf_token }}'
                 },
                 success: function(template) {
+                    console.log(template)
+                    console.log("++++++++++++++")
                     $('#post-stream').append(template);
                     spinner.style.display = 'none';
-                    console.log(template)
+              
                     // addPostLikeEventListener(postData,current_author)
                     // addDeletePostListener(postData.uuid)
                 },
