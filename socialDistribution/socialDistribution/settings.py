@@ -68,7 +68,8 @@ CORS_ALLOWED_ORIGINS = [
 "https://p2psd.herokuapp.com",
 "http://www.distribution.social",
 "http://nicksnfk.dynns.com",
-"http://localhost:3000"
+"http://localhost:3000",
+"https://d21fo9y212zzon.cloudfront.net"
 ]
 
 # Application definition
