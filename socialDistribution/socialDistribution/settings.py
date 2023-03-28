@@ -101,6 +101,8 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 # Application definition
 
 INSTALLED_APPS = [
+    'django.middleware.gzip.GZipMiddleware',
+    'django.middleware.http.ConditionalGetMiddleware',
     'corsheaders',
     'django.contrib.admin',
     'django.contrib.auth',
