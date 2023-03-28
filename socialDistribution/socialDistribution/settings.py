@@ -72,6 +72,8 @@ CORS_ALLOWED_ORIGINS = [
 "https://d21fo9y212zzon.cloudfront.net"
 ]
 
+CSRF_TRUSTED_ORIGINS = ["https://d21fo9y212zzon.cloudfront.net"]
+
 # Application definition
 
 INSTALLED_APPS = [
