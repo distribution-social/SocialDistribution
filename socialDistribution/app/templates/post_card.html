@@ -46,7 +46,9 @@ Link: https://www.bootdey.com/snippets/view/bs4-s
         </span>
       </div>
     </div>
-    <p class="card-body">{{post.content}}</p>
+    <div class="card-body">
+      <p class="card-body">{{post.content}}</p>
+    </div>
     <div class="card-footer likes-reply">
 
       <button id="like-post-{{post.uuid|convert_uuid_to_hex}}" class="d-inline-flex text-muted like-button" style="text-decoration: none;">
