@@ -473,7 +473,8 @@ class InboxView(BasicAuthMixin,APIView):
 
             try:
                 if actor not in author.followers.all():
-                    actor.sent_requests.add(author)
+                    # actor.sent_requests.add(author)
+                    author.follow_requests.add(actor)
                     add_to_inbox(actor,author,Activity.FOLLOW,actor)
                 else:
                     return Response(f"Already following {author.displayName}",status=status.HTTP_400_BAD_REQUEST)
