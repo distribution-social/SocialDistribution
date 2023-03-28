@@ -473,7 +473,8 @@ class InboxView(BasicAuthMixin,APIView):
 
             try:
                 if actor not in author.followers.all():
-                    # actor.sent_requests.add(author)
+                    # Should be no op if it's handled somewhere
+                    actor.sent_requests.add(author)
                     author.follow_requests.add(actor)
                     add_to_inbox(actor,author,Activity.FOLLOW,actor)
                 else:
