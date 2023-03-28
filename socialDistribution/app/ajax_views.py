@@ -38,7 +38,7 @@ def explore_posts(request):
 
         params = {
             'page': '1',
-            'size': '20'
+            'size': '5'
         }
 
         try:
