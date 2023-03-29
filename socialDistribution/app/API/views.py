@@ -549,7 +549,7 @@ class InboxView(BasicAuthMixin,APIView):
             if comment_serializer.is_valid():
                 comment_serializer.save()
             else:
-                import pdb; pdb.set_trace()
+                # import pdb; pdb.set_trace()
                 return Response(comment_serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 
             try:

@@ -157,29 +157,28 @@ export function addDeletePostListener(uuid){
 
 
 
-function addCommentHandler(event, comment){
-  // add submit event listener to comment form
-    // prevent default form submission
-    event.preventDefault();
-    console.log(comment)
-    // console.log(post)
-    debugger;
+// function addCommentHandler(event, comment){
+//   // add submit event listener to comment form
+//     // prevent default form submission
+//     event.preventDefault();
+//     console.log(comment)
+//     // console.log(post)
 
-    // serialize form data
-    // var formData = $(this).serialize();
+//     // serialize form data
+//     // var formData = $(this).serialize();
 
-    // // send AJAX request to submit form data
-    // $.ajax({
-    //   type: "POST",
-    //   url: $(this).attr("action"),
-    //   data: formData,
-    //   success: function(response) {
-    //     // update comment section with AJAX response
-    //     $("#comment-section").html(response);
-    //   },
-    //   error: function(xhr, status, error) {
-    //     // handle AJAX error
-    //     console.error(xhr);
-    //   }
-    // });
-};
+//     // // send AJAX request to submit form data
+//     // $.ajax({
+//     //   type: "POST",
+//     //   url: $(this).attr("action"),
+//     //   data: formData,
+//     //   success: function(response) {
+//     //     // update comment section with AJAX response
+//     //     $("#comment-section").html(response);
+//     //   },
+//     //   error: function(xhr, status, error) {
+//     //     // handle AJAX error
+//     //     console.error(xhr);
+//     //   }
+//     // });
+// };
