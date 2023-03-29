@@ -539,6 +539,7 @@ class InboxView(BasicAuthMixin,APIView):
 
 
         elif data.get('type') == 'comment':
+         
             try:
                 actor_id = data.get('author').get('url')
                 actor = Author.objects.get(url=actor_id)
@@ -554,7 +555,7 @@ class InboxView(BasicAuthMixin,APIView):
 
 
             try:
-                post_id = parse_values(data.get('id')).get('post_id')
+                post_id = data.get('object').split('/')[-1]
                 post = Post.objects.get(uuid=post_id)
             except Post.DoesNotExist:
                 return Response({'error':f'Post {post_id} does not exist.'},status=status.HTTP_400_BAD_REQUEST)
@@ -562,23 +563,18 @@ class InboxView(BasicAuthMixin,APIView):
                 return Response("Bad request: needs id field.",status=status.HTTP_400_BAD_REQUEST)
 
 
+            comment_text = data.get('comment')
+            comment = Comment(author=actor,post=post, comment=comment_text)
             try:
-                comment_id = parse_values(data.get('id')).get('comment_id')
-                comment = Comment.objects.get(uuid=comment_id)
-            except Comment.DoesNotExist:
-                comment = Comment(author=actor,post=post)
-                try:
-                    data.pop('id')
-                except:
-                    pass
-                comment_serializer = CommentSerializer(comment,data=data,context={'request':request,'kwargs':{'author_id':author_id}})
-                if comment_serializer.is_valid():
-                    comment_serializer.save()
-                else:
-                    return Response(comment_serializer.errors,status=status.HTTP_400_BAD_REQUEST)
-            except AttributeError:
-                return Response("Bad request: needs id field.",status=status.HTTP_400_BAD_REQUEST)
-
+                data.pop('id')
+            except:
+                pass
+            comment_serializer = CommentSerializer(comment,data=data,context={'request':request,'kwargs':{'author_id':author_id}})
+            if comment_serializer.is_valid():
+                comment_serializer.save()
+            else:
+                # import pdb; pdb.set_trace()
+                return Response(comment_serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 
             try:
                 add_to_inbox(actor,author,Activity.COMMENT,comment)

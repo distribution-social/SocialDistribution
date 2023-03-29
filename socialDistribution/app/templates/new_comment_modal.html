@@ -15,6 +15,80 @@
         $(this).find('#id_comment').focus();
     })
     });
+
+    function addCommentHandler(event,user, post){
+    // add submit event listener to comment form
+      // prevent default form submission
+      event.preventDefault();
+      let parsedPost = JSON.parse(post)
+      const textarea = document.getElementById(`comment-textarea-${parsedPost.uuid}`).value;
+      
+      parsedActor = JSON.parse(document.getElementById('my-author').dataset.myAuthor);
+      
+      data =  {
+            "summary": `${parsedActor.displayName}   commented on your post`,         
+            "type": "comment",
+            "author": {...parsedActor},
+            "object": parsedPost.id,
+            "comment": textarea.value,
+      }
+
+      // const url = `${parsedPost.author.url}/inbox`
+      const url = `${parsedPost.author.url}/inbox`
+      $.ajax({
+          type: 'POST',
+          url: url,
+          data: JSON.stringify(data),
+          headers: {
+            Authorization: 'Basic '+parsedPost.auth_token
+          },
+          success: function (result) {
+            showAndDismissAlert("info",result)
+
+          },
+          error: function (xhr, exception) {
+            let error_message = '';
+            if (xhr.status === 0) {
+              error_message = 'No connection to server. Check Network.';
+            } else if (xhr.status == 404) {
+              error_message = 'Requested page not found. [404]';
+            } else if (xhr.status == 500) {
+              error_message = 'Internal Server Error [500].';
+            } else if (exception === 'timeout') {
+              error_message = 'Timed out. Try again.';
+            } else if (exception === 'abort') {
+              error_message = 'Request aborted.';
+            } else {
+              error_message = 'Could not make request. ' + xhr.responseText;
+            }
+            showAndDismissAlert("error",error_message)
+          }
+
+          
+      });
+
+      textarea.value = ""
+
+      // serialize form data
+      // var formData = $(this).serialize();
+  
+      // // send AJAX request to submit form data
+      // $.ajax({
+      //   type: "POST",
+      //   url: $(this).attr("action"),
+      //   data: formData,
+      //   success: function(response) {
+      //     // update comment section with AJAX response
+      //     $("#comment-section").html(response);
+      //   },
+      //   error: function(xhr, status, error) {
+      //     // handle AJAX error
+      //     console.error(xhr);
+      //   }
+      // });
+  };
+
+
   </script>
   <div class="modal fade" id="new-comment-{{post.uuid}}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
@@ -26,13 +100,15 @@
           </button>
         </div>
         <div class="modal-body">
-          <form id="comment_form" method="POST" action="{% url 'comment-form' post_id=post.uuid %}">
-
-            {% csrf_token %}
-            {{ comment_form|crispy }}
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-            <button class="btn btn-success">Comment</button>
-          </form>
+          <div class="form-group"id="comment_form">
+            
+            <label for="exampleFormControlTextarea1">Example textarea</label>
+            <textarea class="form-control" id="comment-textarea-{{post.uuid}}" rows="3"></textarea>
+            <div style="margin-top: 2;">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+              <button class="btn btn-success" onClick=" console.log('gello'); event.preventDefault(); addCommentHandler(event,`{{user}}`, `{{post|convert_to_json}}`)">Comment</button>
+            </div>
+          </div>
         </div>
 
       </div>
