@@ -1,6 +1,6 @@
 import { addPostLikeEventListener, addDeletePostListener } from "./postCard.js"
 import { extractUUID } from "./utility.js";
-import { makeAjaxCall } from "./ajax.js";
+import { makeAjaxCall, makeAjaxCallAsync } from "./ajax.js";
 
 const myAuthorElement = document.getElementById('my-author');
 const current_author = myAuthorElement.dataset.myAuthor;
@@ -11,36 +11,13 @@ $(document).ready(function() {
     // console.log('{{ csrf_token|length }}');
 
     spinner.style.display = 'block';
-    makeAjaxCall("/public_posts","GET",null,
+    var headers = {
+        'X-CSRFToken': '{{ csrf_token }}'
+    }
+    makeAjaxCallAsync("/public_posts","GET",null,headers,
     function (response,status){
-        $.each(response.posts, function(index, post) {
-            const postData = {
-                uuid: extractUUID(post.id),
-                ...post
-            }
-            $.ajax({
-                url: '/post_card.html',
-                type: 'POST',
-                data: JSON.stringify(postData),
-                contentType: 'application/json',
-                headers: {
-                    'X-CSRFToken': '{{ csrf_token }}'
-                },
-                success: function(template) {
-                    console.log(template)
-                    console.log("++++++++++++++")
-                    $('#post-stream').append(template);
-                    spinner.style.display = 'none';
-              
-                    // addPostLikeEventListener(postData,current_author)
-                    // addDeletePostListener(postData.uuid)
-                },
-                error: function(xhr, status, error) {
-                    console.error(xhr.responseText);
-                }
-            });
-
-        });
+        $('#post-stream').html(response);
+        spinner.style.display = 'none';
     },
     function (error,status){
         console.log(error)

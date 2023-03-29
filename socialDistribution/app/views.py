@@ -265,7 +265,8 @@ def add_to_sent_request(request):
 
 @login_required(login_url="/login")
 @require_http_methods(["GET", "POST"])
-def profile(request, author_id):
+def profile(request,node,author_id):
+
     user = request.user
     userAuthor = Author.objects.get(username=request.user.username)
     if request.method == 'GET':
@@ -612,7 +613,7 @@ def edit_profile(request, author_id):
         form = EditProfileForm(request.POST, instance=user)
         if form.is_valid():
             form.save()
-            return redirect(reverse('profile',kwargs={'author_id': author_id}))
+            return redirect(reverse('profile',kwargs={'node': 'Local','author_id': author_id}))
         else:
             print(form.errors)
             return HttpResponseBadRequest("Invalid form")

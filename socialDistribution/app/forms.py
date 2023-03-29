@@ -34,7 +34,6 @@ class PostForm(forms.ModelForm):
         }
 
     def save(self, user,receiver_list = None,commit=True):
-        print('save method called')
         post = super().save(commit=False)
         post.made_by = user
         if commit:
@@ -60,7 +59,6 @@ class CommentForm(forms.ModelForm):
         }
 
     def save(self, user, post,commit=True):
-        print('save method called')
         comment = super().save(commit=False)
         comment.author = user
         comment.post = post
@@ -68,7 +66,7 @@ class CommentForm(forms.ModelForm):
             comment.save()
 
         return comment
-    
+
 
 class EditProfileForm(forms.ModelForm):
      class Meta:
@@ -82,7 +80,6 @@ class EditProfileForm(forms.ModelForm):
          }
 
      def save(self,commit=True):
-         print('save method called')
          author = super().save(commit=False)
          if commit:
              author.save()

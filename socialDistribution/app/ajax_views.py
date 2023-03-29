@@ -13,6 +13,7 @@ import requests
 from django.core import serializers
 from django.http import JsonResponse
 import json
+from datetime import datetime
 from posixpath import join as urljoin
 
 from django.contrib.auth.models import User
@@ -109,58 +110,39 @@ def public_posts(request):
         if response:
             posts.extend(response['items'])
     posts = [d for d in posts if d['visibility'] in ['PUBLIC']]
-    posts = sorted(posts, key=lambda d: d['published'],reverse=True)
-    # for post in posts:
-    #     post['tag'] = get_node_nickname(post['author']['host'])
-    return JsonResponse({'posts': posts})
+    posts.sort(key=lambda x: datetime.strptime(x['published'], '%Y-%m-%dT%H:%M:%S.%fZ'),reverse=True)
+    for post in posts:
+        post['tag'] = get_node_nickname(post['author']['host'])
+    context = {'user': request.user,'posts': posts, "comment_form": CommentForm()}
+    return render(request, 'post_stream.html', context)
 
 @login_required(login_url="/login")
 @require_http_methods(["GET"])
 def post_details(request):
 
-    post_uuid = request.GET.get("uuid")
-    post_obj = Post.objects.get(uuid=post_uuid)
-
-    host =  post_obj.made_by.host
-    author = post_obj.made_by
-
-    if not host.endswith('/'):
-        host += '/'
-
-    # if not "https" in host:
-    #     host = host.replace("http", "https")
-
-    foreignNode = ForeignAPINodes.objects.get(base_url=host)
-    headers={}
-    if foreignNode.username:
-        headers = {
-                'Authorization': f"Basic {foreignNode.getToken()}",
-                'Content-Type': 'application/json'
-        }
-
-    params = {
-
+    post = request.GET.get("origin")
+    headers = {
+            'Authorization': f"Basic {get_auth_header(post.author.host)}",
+            'Content-Type': 'application/json'
     }
+
     try:
-        res = requests.get(post_obj.origin, headers=headers)
+        res = requests.get(post.origin, headers=headers)
     except Exception as e:
         response = JsonResponse({'error': str(e)})
         response.status_code = 500
         return response
     post = json.loads(res.text)
-    url = urljoin(post_obj.origin,f'likes')
+    url = urljoin(post.origin,f'likes')
     try:
         res = requests.get(url,headers=headers)
         post['likeCount'] = len(json.loads(res.text)['items'])
     except Exception as e:
-        print(f'Error getting like of post {post_obj.origin}: {e}')
+        print(f'Error getting like of post {post.origin}: {e}')
         post['likeCount'] = 0
-    post['uuid'] = parse_values(post['url']).get('post_id')
-    post_obj['made_by'] = post['author']
-    post['tag'] = foreignNode.nickname
-    post['auth_token'] = foreignNode.getToken()
-
-    return JsonResponse({'post': post})
+    post['tag'] = get_node_nickname(post.author.host)
+    context = {'user': request.user,'posts': post, "comment_form": CommentForm()}
+    return redirect(request,'post_details.html',context)
 
 
 #utility functions (Refactor to diff file later)

@@ -47,7 +47,7 @@
               </li>
 
               <li class="nav-item">
-                <a class="nav-link" href="{% url 'profile' %}?url={{current_author}}">
+                <a class="nav-link" href="{% url 'profile' node="Local" author_id="1234" %} %}">
                   <i class="bi bi-person-fill">&nbsp;Profile</i></a>
               </li>
 
@@ -207,7 +207,5 @@
           spinner.removeAttribute("hidden");
         })
     </script>
-
-
   </body>
 </html>

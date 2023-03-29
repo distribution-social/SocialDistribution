@@ -44,9 +44,9 @@ urlpatterns = [
     path('add-to-sent', views.add_to_sent_request, name='add-to-sent'),
 
 
-    path('posts/<str:post_id>', views.post_detail, name='post_detail'),
+    path('posts', views.post_detail, name='post_detail'),
     path('posts/<str:post_id>/edit', views.post_edit, name='post_edit'),
-    path('posts/<str:post_id>/comment', views.add_comment, name='comment-form'),
+    path('comment', views.add_comment, name='comment-form'),
     path('posts/<str:post_id>/like', views.add_like_post, name='add_like_post'),
     path('posts/<str:post_id>/comments/<str:comment_id>/like', views.add_like_comment, name='add_like_comment'),
     path('delete-post/<str:post_id>/', views.delete_post, name='delete_post'),
@@ -55,20 +55,15 @@ urlpatterns = [
     path('authors/<str:author_id>/inbox', views.inbox, name='inbox'),
     path('unfollow', views.unfollow, name='unfollow'),
     path('removefollower', views.removeFollower, name='removefollower'),
-    path('profile', views.profile, name='profile'),
+    path('profile/<str:node>/<str:author_id>', views.profile, name='profile'),
     path('authors/<str:author_id>/edit', views.edit_profile, name='edit-profile'),
     path('<str:username>/true-friends', views.true_friends, name='true-friends'),
     path('authors/<str:author_id>/received', views.received_requests, name='requests'),
     path('authors/<str:author_id>/sent', views.sent_requests, name='sent_requests'),
 
-
-    #Template Urls (returns HTML)
-    path('post_card.html', template_views.get_post_card_template, name='post_card'),
-    path('post_detail.html', template_views.get_post_details_template, name='post_detail.html'),
-
     #Ajax Urls (returns JSON response)
     path('public_posts', ajax_views.public_posts, name='posts'),
-    path('post-details', ajax_views.post_details, name='post-details'),
+    path('post_details', ajax_views.post_details, name='post-details'),
 
 
     #API urls

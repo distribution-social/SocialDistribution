@@ -73,3 +73,12 @@ body {
   border: none;
   background: none;
 }
+
+.node-tag {
+  font-size: large;
+  border: 1px solid black;
+  border-radius: 10px;
+  padding-left: 5%;
+  padding-right: 5%;
+  white-space: nowrap;
+}

@@ -27,7 +27,7 @@
           </button>
         </div>
         <div class="modal-body">
-          <form id="comment_form" method="POST" action="{% url 'comment-form' post_id=post.uuid %}">
+          <form id="comment_form" method="POST" action="{% url 'comment-form' %}?origin={{post.origin}}">
 
             {% csrf_token %}
             {{ comment_form|crispy }}
