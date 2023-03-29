@@ -173,13 +173,13 @@ class Comment(models.Model):
     PLAIN = "text/plain"
     MARKDOWN = "text/markdown"
     CONTENT_TYPE_CHOICES = [
-        (MARKDOWN,"markdown" ),
-        (PLAIN,"plain_text")
+        (MARKDOWN,MARKDOWN),
+        (PLAIN,PLAIN)
     ]
     author = models.ForeignKey(Author, blank = False, null = False, related_name = "comments", on_delete=models.CASCADE)
     comment = models.CharField(max_length=200)
 
-    contentType = models.CharField(max_length=18, choices=CONTENT_TYPE_CHOICES,default=PLAIN)
+    contentType = models.CharField(max_length=18, choices=CONTENT_TYPE_CHOICES, null=True)
     post = models.ForeignKey(Post, blank = False, null = False, related_name='comments', on_delete=models.CASCADE)
     likes = GenericRelation(Like)
     activity = GenericRelation(Activity)

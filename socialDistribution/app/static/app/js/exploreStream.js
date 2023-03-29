@@ -27,6 +27,7 @@ $(document).ready(function() {
 
 
                 postData.author.id = extractUUID(post.author.id)
+                
 
                 $.ajax({
                     url: '/post_card.html',
@@ -106,3 +107,6 @@ $(document).ready(function() {
 //   }
 //   )
 // })
+
+
+  

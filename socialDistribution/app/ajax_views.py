@@ -38,7 +38,7 @@ def explore_posts(request):
 
         params = {
             'page': '1',
-            'size': '20'
+            'size': '5'
         }
 
         try:
@@ -116,8 +116,8 @@ def post_details(request):
     host =  post_obj.made_by.host
     author = post_obj.made_by
 
-    if not host.endswith('/'):
-        host += '/'
+    # if not host.endswith('/'):
+    #     host += '/'
 
     # if not "https" in host:
     #     host = host.replace("http", "https")
