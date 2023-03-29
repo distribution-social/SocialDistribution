@@ -33,7 +33,7 @@ urlpatterns = [
             cache_timeout=0), name='schema-swagger-ui'),
     re_path(r'^redoc/$', schema_view.with_ui('redoc',
                                              cache_timeout=0), name='schema-redoc'),
-    path('', views.root, name='root'),    
+    path('', views.root, name='root'),
     path('signup', views.signup, name='signup'),
     path('home', views.home, name='home'),
     path('explore', views.explore, name='explore'),
@@ -84,11 +84,12 @@ urlpatterns = [
     # path('api/authors/<uuid:author_id>/posts/<uuid:post_id>/comments/<uuid:comment_id>', CommentView.as_view(), name ='api-post-comment'),
     # path('api/authors/<uuid:author_id>/posts/<uuid:post_id>/comments/<uuid:comment_id>/likes', LikesCommentView.as_view(), name ='api-post-comment-likes'),
 
-
+    path('api/posts/public', PublicPostsAPIView.as_view(), name ='api-post-public'),
     path('api/authors', AuthorListAPIView.as_view(), name='api-author-list'),
     path('api/authors/<str:author_id>', SingleAuthorAPIView.as_view(), name='api-single_author'),
     path('api/authors/<str:author_id>/followers', AuthorFollowersAPIView.as_view(), name='api-author-followers'),
     path('api/authors/<str:author_id>/followers/<str:follower_author_id>', FollowerAPIView.as_view(), name='api-followers'),
+    path('api/authors/<str:author_id>/posts/public', PublicAuthorPostsAPIView.as_view(), name ='api-author-public'),
     path('api/authors/<str:author_id>/posts/<str:post_id>', PostDetailView.as_view(), name ='api-post-detail'),
     path('api/authors/<str:author_id>/posts', AuthorPostsView.as_view(), name ='api-author-post'),
     path('api/authors/<str:author_id>/liked', LikedView.as_view(), name ='api-author-liked'),
