@@ -95,15 +95,15 @@ var local_node_token = '{{local_node_token}}';
                                 <button class="nav-link active"
                                     id="nav-public-posts-tab" data-bs-toggle="tab" href="#"
                                     data-bs-target="#nav-public-posts" type="button" role="tab"
-                                    aria-controls="nav-public-posts" aria-selected="true">Public Posts</button>
+                                    aria-controls="nav-public-posts" aria-selected="true">Posts</button>
                                 <button class="nav-link"
                                     id="nav-followers-tab" data-bs-toggle="tab" href="#" data-bs-target="#nav-followers"
                                     type="button" role="tab" aria-controls="nav-followers"
                                     aria-selected="false">Followers</button>
-                                <button class="nav-link"
+                                <!--<button class="nav-link"
                                     id="nav-following-tab" data-bs-toggle="tab" data-bs-target="#nav-following"
                                     type="button" role="tab" href="#" aria-controls="nav-following"
-                                    aria-selected="false">{{following|length}} Following</button>
+                                    aria-selected="false">{{following|length}} Following</button>-->
                                 <button class="nav-link"
                                     id="nav-friends-tab" data-bs-toggle="tab" data-bs-target="#nav-friends"
                                     type="button" role="tab" href="#" aria-controls="nav-friends"
@@ -129,19 +129,19 @@ var local_node_token = '{{local_node_token}}';
                                 <!--{% include 'followerstab.html' %}-->
                                 {% include 'followers_tab_ajax.html' %}
                             </div>
-                            <div class="tab-pane fade"
+                            <!--<div class="tab-pane fade"
                                 id="nav-following" role="tabpanel" aria-labelledby="nav-following-tab" tabindex="2">
-                                <!--{% include 'followingtab.html' %}-->
+                                {% include 'followingtab.html' %}
                                 {% include 'following_tab_ajax.html' %}
-                            </div>
+                            </div>-->
                             <div class="tab-pane fade"
-                                id="nav-friends" role="tabpanel" aria-labelledby="nav-friends-tab" tabindex="3">
+                                id="nav-friends" role="tabpanel" aria-labelledby="nav-friends-tab" tabindex="2">
                                 <!--{% include 'friendstab.html' %}-->
                                 {% include 'friends_tab_ajax.html' %}
                             </div>
                             {% if user.id == author.id %}
                             <div class="tab-pane fade"
-                                id="nav-requests" role="tabpanel" aria-labelledby="nav-requests-tab" tabindex="4">
+                                id="nav-requests" role="tabpanel" aria-labelledby="nav-requests-tab" tabindex="3">
                                 {% include 'requests_tab.html' %}
                             </div>
                             {% endif %}

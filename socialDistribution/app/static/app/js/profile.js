@@ -9,7 +9,7 @@ $(document).ready(function() {
     console.log("host:"+author_host);
 
     getAndSetProfileCard();
-    setFollowing(serialized_followings, user_id, author_id, author_host);
+    //setFollowing(serialized_followings, user_id, author_id, author_host);
 
     // get followers from server and use data to set followers and true friends
     var followersUrl;
@@ -18,6 +18,7 @@ $(document).ready(function() {
     } else {
         followersUrl = new URL("authors/" + uuidToHex(author_id) + "/followers", author_host);
     }
+    console.log(auth_headers);
     fetch(followersUrl, {method: "GET", headers: auth_headers}).then((response) => {
         if (response.status === 200) { // OK
             return response.json();
@@ -66,20 +67,19 @@ function getAndSetProfileCard() {
     fetch(authorIsFollowingUrl, {method: "GET", headers: auth_headers}).then((response) => {
         // console.log(response.json().is_following);
         if (response.status === 200) { // OK
-            // following
-            // $("#follow_unfollow_button").attr("name", "unfollow").val(author_id).text("Unfollow");
-            return response.json();
+            let temp = response.json();
+            if (temp.is_following != null && temp.is_following.toLowerCase() === "true") return true;
+            else if (temp.accepted != null && temp.accepted.toLowerCase() === "true") return true;
+            else return false;
         } else if (response.status === 404) {
-            // not following
-            // $("#follow_unfollow_button").attr("name", "follow").val(author_id).text("Request to Follow");
-            return response.json();
+            return false;
         } else {
             alert("Something went wrong: " + response.statusText);
         }
-    }).then((result) => {
+    }).then((isFollowing) => {
         // console.log(result.is_following);
         console.log(author_id, user_id);
-        if (result.is_following === true){
+        if (isFollowing){
             $("#follow_unfollow_button").attr("name", "unfollow").val(author_id).text("Unfollow");
         } else {
             $("#follow_unfollow_button").attr("name", "follow").val(author_id).text("Request to Follow");
@@ -242,13 +242,18 @@ function setFriends(followers, author_id) {
         //const url = new URL("authors/" + uuidToHex(extractUUID(follower.id)) + "/followers/" + uuidToHex(author_id), author_host);
         fetch(url, {method: "GET", headers: auth_headers}).then((response) => {
             if (response.status === 200) { // OK
-                return response.json();
+                let temp = response.json();
+                if (temp.is_following != null && temp.is_following.toLowerCase() === "true") return true;
+                else if (temp.accepted != null && temp.accepted.toLowerCase() === "true") return true;
+                else return false;
+            } else if (response.status === 404) {
+                return false;
             } else {
-                alert("Something went wrong: " + response.status);
+                alert("Something went wrong: " + response.statusText);
             }
-        }).then((data) => {
-            console.log(data);
-            if (data.is_following) {
+        }).then((isFollowing) => {
+            console.log(isFollowing);
+            if (isFollowing) {
                 num2++;
                 const cardTemplate = document.getElementById('friends-card');
                 const instance = document.importNode(cardTemplate.content, true);
@@ -260,9 +265,9 @@ function setFriends(followers, author_id) {
                 $(instance).find(".friend_display_name").text(follower.displayName);
                 $(instance).find(".friend_host").attr("href", host).text(host.replace("http://", ''));
                 $("#friends_tab_stream").append(instance);
-
+                console.log(num2);
                 if (num2 === 0) {
-                    $("#friends_tab_stream").text("No followers")
+                    $("#friends_tab_stream").text("No True Friends")
                 }
                 if (num2 === 1) {
                     $("#nav-friends-tab").text(num2 + " True Friend");
@@ -270,11 +275,16 @@ function setFriends(followers, author_id) {
                     $("#nav-friends-tab").text(num2 + " True Friends");
                 }
             }
-            return;
         })
+    }
+    if (num2 === 0) {
+        $("#friends_tab_stream").text("No True Friends")
+        $("#nav-friends-tab").text(num2 + " True Friends");
     }
 }
 
+
+/*
 function setFollowing(following, user_id, author_id, author_host) {
     let num = 0;
     if (user_id === author_id) {
@@ -304,3 +314,4 @@ function setFollowing(following, user_id, author_id, author_host) {
         $("#nav-following-tab").text(num + " Followings");
     }
 }
+*/
