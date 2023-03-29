@@ -84,14 +84,14 @@ CSRF_COOKIE_SAMESITE = 'Secure'
 
 CSRF_COOKIE_SECURE = True
 
-Session Cookies
+# Session Cookies
 SESSION_COOKIE_SAME = 'Secure'
 
 SESSION_COOKIE_SECURE = True
 
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
-HTTP Strict Transport Security
+# HTTP Strict Transport Security
 SECURE_HSTS_PRELOAD = True
 
 SECURE_HSTS_SECONDS = 3600
