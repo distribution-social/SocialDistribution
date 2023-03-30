@@ -23,16 +23,6 @@ class PostForm(forms.ModelForm):
         model = Post
         fields = ('title', 'description', 'content', 'content_type', 'visibility','receivers', 'unlisted', 'image' )
 
-        widget = {
-            'title' : forms.TextInput(attrs={'class': 'form-control'}),
-            'description' : forms.TextInput(attrs={'class': 'form-control'}),
-            'content' : forms.Textarea(attrs={'class': 'form-control'}),
-            'content_type' : forms.Select(attrs={'class': 'form-control'}),
-            'visibility' : forms.TextInput(attrs={'class': 'form-control'}),
-            'receivers' : forms.SelectMultiple(attrs={'class': 'form-control'}),
-            'unlisted' : forms.TextInput(attrs={'class': 'form-control'}),
-        }
-
     def save(self, user,receiver_list = None,commit=True):
         print('save method called')
         post = super().save(commit=False)
@@ -45,10 +35,6 @@ class PostForm(forms.ModelForm):
                     post.receivers.add(author)
 
         return post
-
-        def __init__(self, *args, **kwargs):
-            super().__init__(*args, **kwargs)
-            self.fields['receiver'].widget.attrs.update({'class': 'form-control'})
 
 class CommentForm(forms.ModelForm):
     class Meta:
