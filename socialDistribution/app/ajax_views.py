@@ -100,6 +100,12 @@ def explore_posts(request):
                         post['likeCount'] = 0
                     post['tag'] = foreignNode.nickname
                     post['auth_token'] = foreignNode.getToken()
+
+
+                    #temp for now, as some teams are not returning
+                    if 'count' not in post:
+                        post['count'] = 0
+
                     allPosts.append(post)
         except Exception as e:
             print(base_url,e)

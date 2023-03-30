@@ -3,130 +3,116 @@
 {% load static %}
 {% load crispy_forms_tags %}
 <html lang="en">
-  <script type="text/javascript">
+  <script>
     $(function () {
       $('#new-comment-{{post.uuid}}').on('hidden.bs.modal', function () {
         $(this).find('#comment_form').trigger('reset');
-
-    })
-    });
-    $(function () {
-      $('#new-comment-{{post.uuid}}').on('shown.bs.modal', function () {
-        $(this).find('#id_comment').focus();
-    })
+      })
     }); 
 
+    $(function () {
+        $('#new-comment-{{post.uuid}}').on('shown.bs.modal', function () {
+            $(this).find('#id_comment').focus();    
+        })
+    });
+
+
     function addCommentHandler(event,user, post){
-    // add submit event listener to comment form
-      // prevent default form submission
-      event.preventDefault();
-      let parsedPost = JSON.parse(post)
-      const textarea = document.getElementById(`comment-textarea-${parsedPost.uuid}`);
-      
-      parsedActor = JSON.parse(document.getElementById('my-author').dataset.myAuthor);
-      
-      data =  {
-            "summary": `${parsedActor.displayName} commented on your post`,         
-            "type": "comment",
-            "author": {...parsedActor},
-            "object": parsedPost.id,
-            "comment": textarea.value,
-      }
+        // prevent default form submission
+        event.preventDefault();
+        let parsedPost = JSON.parse(post)
+        const textarea = document.getElementById(`comment-textarea-${parsedPost.uuid}`);
+        
+        parsedActor = JSON.parse(document.getElementById('my-author').dataset.myAuthor);
+        
+        data =  {
+              "summary": `${parsedActor.displayName} commented on your post`,         
+              "type": "comment",
+              "author": {...parsedActor},
+              "object": parsedPost.id,
+              "comment": textarea.value,
+              "contentType": "plain/text",
+        }
 
-      
+        commentSpinner = document.getElementById('comment-spinner')
+        commentSpinner.removeAttribute("hidden");
+        commentContainer = document.getElementById(`collapse_${parsedPost.uuid}`)
+        const url = `${parsedPost.author.url}/inbox`
 
-      commentSpinner = document.getElementById('comment-spinner')
-      commentSpinner.removeAttribute("hidden");
-      commentContainer = document.getElementById(`collapse_${parsedPost.uuid}`)
-      const url = `${parsedPost.author.url}/inbox`
-      
-      $.ajax({
-          type: 'POST',
-          url: url,
-          data: JSON.stringify(data),
-          headers: {
-            Authorization: 'Basic '+parsedPost.auth_token
-          },
-          success: function (result) {
-            $.ajax({
-                url: '/comment.html',
-                type: 'POST',
-                data: JSON.stringify(data),
-                contentType: 'application/json',
-                headers: {
-                    'X-CSRFToken': '{{ csrf_token }}'
-                },
-                success: function(template) {
-                  const cardFooter = document.createElement('div');
-                  cardFooter.setAttribute('class', 'card-footer');
-                  cardFooter.innerHTML = template;
-                
-                  commentSpinner.setAttribute("hidden", true);
-                  $(`#new-comment-${parsedPost.uuid}`).modal('hide');
-                        
-                  commentContainer.appendChild(cardFooter)
+        $.ajax({
+            type: 'POST',
+            url: url,
+            data: JSON.stringify(data),
+            headers: {
+              "Authorization": 'Basic '+parsedPost.auth_token,
+            "Content-Type": 'application/json; charset=utf-8'
+            },
+            success: function (result) {
+              $.ajax({
+                  url: '/comment.html',
+                  type: 'POST',
+                  data: JSON.stringify(data),
+                  contentType: 'application/json',
+                  headers: {
+                      'X-CSRFToken': '{{ csrf_token }}'
+                  },
+                  success: function(template) {
+                    //creates and sets a cardfooter element
+                    const cardFooter = document.createElement('div');
+                    cardFooter.setAttribute('class', 'card-footer');
+                    cardFooter.innerHTML = template;
 
-                  const commentList = document.getElementById(`collapse_${parsedPost.uuid}`)
-                  commentList.classList.remove('collapse');
+                    commentContainer.appendChild(cardFooter)
+
+                    let value = parseInt($(`#comment-count-${parsedPost.uuid}`).html());
+                    value++;
+                    $(`#comment-count-${parsedPost.uuid}`).html(value);
                   
-  
-          
-                  
-                   
+                    commentSpinner.setAttribute("hidden", true);
+                    $(`#new-comment-${parsedPost.uuid}`).modal('hide');
+                          
+                    const commentList = document.getElementById(`collapse_${parsedPost.uuid}`)
+                    commentList.classList.remove('collapse');
 
-                },
-                error: function(xhr, status, error) {
-                    console.error(xhr.responseText);
-                }
-            });
-            // showAndDismissAlert("info",result)
-          
+                    textarea.value = ""
+                    
 
-          },
-          error: function (xhr, exception) {
-            let error_message = '';
-            if (xhr.status === 0) {
-              error_message = 'No connection to server. Check Network.';
-            } else if (xhr.status == 404) {
-              error_message = 'Requested page not found. [404]';
-            } else if (xhr.status == 500) {
-              error_message = 'Internal Server Error [500].';
-            } else if (exception === 'timeout') {
-              error_message = 'Timed out. Try again.';
-            } else if (exception === 'abort') {
-              error_message = 'Request aborted.';
-            } else {
-              error_message = 'Could not make request. ' + xhr.responseText;
+                  },
+                  error: function(xhr, status, error) {
+                      console.error(xhr.responseText);
+                      textarea.value = ""
+                  }
+              });
+          
+            
+
+            },
+            error: function (xhr, exception) {
+              let error_message = '';
+              if (xhr.status === 0) {
+                error_message = 'No connection to server. Check Network.';
+              } else if (xhr.status == 404) {
+                error_message = 'Requested page not found. [404]';
+              } else if (xhr.status == 500) {
+                error_message = 'Internal Server Error [500].';
+              } else if (exception === 'timeout') {
+                error_message = 'Timed out. Try again.';
+              } else if (exception === 'abort') {
+                error_message = 'Request aborted.';
+              } else {
+                error_message = 'Could not make request. ' + xhr.responseText;
+              }
+              showAndDismissAlert("error",error_message)
             }
-            showAndDismissAlert("error",error_message)
-          }
 
-          
-      });
+            
+        });
 
-      textarea.value = ""
-
-      // serialize form data
-      // var formData = $(this).serialize();
-  
-      // // send AJAX request to submit form data
-      // $.ajax({
-      //   type: "POST",
-      //   url: $(this).attr("action"),
-      //   data: formData,
-      //   success: function(response) {
-      //     // update comment section with AJAX response
-      //     $("#comment-section").html(response);
-      //   },
-      //   error: function(xhr, status, error) {
-      //     // handle AJAX error
-      //     console.error(xhr);
-      //   }
-      // });
-  };
-
+        
+    };
 
   </script>
+
   <div class="modal fade" id="new-comment-{{post.uuid}}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
       <div class="modal-content">
@@ -143,7 +129,7 @@
             <textarea class="form-control" id="comment-textarea-{{post.uuid}}" rows="4"></textarea>
             <div style="margin-top: 6px;">
               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-              <button id="comment-btn" class="btn btn-success"  onClick=" console.log('gello'); event.preventDefault(); addCommentHandler(event,`{{user}}`, `{{post|convert_to_json}}`)">
+              <button id="comment-btn" class="btn btn-success"  onClick="event.preventDefault(); addCommentHandler(event,`{{user}}`, `{{post|convert_to_json}}`)">
                 
                 Comment
                 <span id="comment-spinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true" hidden></span>
