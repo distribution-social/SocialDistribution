@@ -118,11 +118,23 @@ def post_details(request):
 
     # if not host.endswith('/'):
     #     host += '/'
+    # import pdb; pdb.set_trace()
 
-    # if not "https" in host:
-    #     host = host.replace("http", "https")
+    arr = host.split(":")
+    arr[0] ='http'
+    httpHost = ":".join(arr)
+    arr[0] ='https'
+    httpsHost = ":".join(arr)
+    foreignNode = None
+    try:
+        foreignNode = ForeignAPINodes.objects.get(base_url=httpHost)
+    except:
+        try:
+            foreignNode = ForeignAPINodes.objects.get(base_url=httpsHost)
+        except:
+            print("Something wrong w foreign node")
 
-    foreignNode = ForeignAPINodes.objects.get(base_url=host)
+    
     headers={}
     if foreignNode.username:
         headers = {

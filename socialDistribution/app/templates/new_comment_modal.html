@@ -1,7 +1,7 @@
-{% load static %}
-{% load crispy_forms_tags %}
 
 <!doctype html>
+{% load static %}
+{% load crispy_forms_tags %}
 <html lang="en">
   <script type="text/javascript">
     $(function () {
@@ -14,27 +14,32 @@
       $('#new-comment-{{post.uuid}}').on('shown.bs.modal', function () {
         $(this).find('#id_comment').focus();
     })
-    });
+    }); 
 
     function addCommentHandler(event,user, post){
     // add submit event listener to comment form
       // prevent default form submission
       event.preventDefault();
       let parsedPost = JSON.parse(post)
-      const textarea = document.getElementById(`comment-textarea-${parsedPost.uuid}`).value;
+      const textarea = document.getElementById(`comment-textarea-${parsedPost.uuid}`);
       
       parsedActor = JSON.parse(document.getElementById('my-author').dataset.myAuthor);
       
       data =  {
-            "summary": `${parsedActor.displayName}   commented on your post`,         
+            "summary": `${parsedActor.displayName} commented on your post`,         
             "type": "comment",
             "author": {...parsedActor},
             "object": parsedPost.id,
             "comment": textarea.value,
       }
 
-      // const url = `${parsedPost.author.url}/inbox`
+      
+
+      commentSpinner = document.getElementById('comment-spinner')
+      commentSpinner.removeAttribute("hidden");
+      commentContainer = document.getElementById(`collapse_${parsedPost.uuid}`)
       const url = `${parsedPost.author.url}/inbox`
+      
       $.ajax({
           type: 'POST',
           url: url,
@@ -43,7 +48,39 @@
             Authorization: 'Basic '+parsedPost.auth_token
           },
           success: function (result) {
-            showAndDismissAlert("info",result)
+            $.ajax({
+                url: '/comment.html',
+                type: 'POST',
+                data: JSON.stringify(data),
+                contentType: 'application/json',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                success: function(template) {
+                  const cardFooter = document.createElement('div');
+                  cardFooter.setAttribute('class', 'card-footer');
+                  cardFooter.innerHTML = template;
+                
+                  commentSpinner.setAttribute("hidden", true);
+                  $(`#new-comment-${parsedPost.uuid}`).modal('hide');
+                        
+                  commentContainer.appendChild(cardFooter)
+
+                  const commentList = document.getElementById(`collapse_${parsedPost.uuid}`)
+                  commentList.classList.remove('collapse');
+                  
+  
+          
+                  
+                   
+
+                },
+                error: function(xhr, status, error) {
+                    console.error(xhr.responseText);
+                }
+            });
+            // showAndDismissAlert("info",result)
+          
 
           },
           error: function (xhr, exception) {
@@ -99,14 +136,18 @@
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
-        <div class="modal-body">
-          <div class="form-group"id="comment_form">
+        <div class="modal-body" id="comment-modal-body">
+          <div class="form-group" id="comment_form">
             
-            <label for="exampleFormControlTextarea1">Example textarea</label>
-            <textarea class="form-control" id="comment-textarea-{{post.uuid}}" rows="3"></textarea>
-            <div style="margin-top: 2;">
+            <label for="exampleFormControlTextarea1">Comment</label>
+            <textarea class="form-control" id="comment-textarea-{{post.uuid}}" rows="4"></textarea>
+            <div style="margin-top: 6px;">
               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-              <button class="btn btn-success" onClick=" console.log('gello'); event.preventDefault(); addCommentHandler(event,`{{user}}`, `{{post|convert_to_json}}`)">Comment</button>
+              <button id="comment-btn" class="btn btn-success"  onClick=" console.log('gello'); event.preventDefault(); addCommentHandler(event,`{{user}}`, `{{post|convert_to_json}}`)">
+                
+                Comment
+                <span id="comment-spinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true" hidden></span>
+              </button>
             </div>
           </div>
         </div>

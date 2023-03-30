@@ -539,7 +539,7 @@ class InboxView(BasicAuthMixin,APIView):
 
 
         elif data.get('type') == 'comment':
-         
+        
             try:
                 actor_id = data.get('author').get('url')
                 actor = Author.objects.get(url=actor_id)
@@ -565,10 +565,6 @@ class InboxView(BasicAuthMixin,APIView):
 
             comment_text = data.get('comment')
             comment = Comment(author=actor,post=post, comment=comment_text)
-            try:
-                data.pop('id')
-            except:
-                pass
             comment_serializer = CommentSerializer(comment,data=data,context={'request':request,'kwargs':{'author_id':author_id}})
             if comment_serializer.is_valid():
                 comment_serializer.save()
