@@ -138,9 +138,8 @@ class Post(models.Model):
         (PNG, "image/png"),
         (JPG, "image/jpeg"),
     ]
-
     content_type = models.CharField(max_length=18, choices=CONTENT_TYPE_CHOICES)
-    content = models.TextField()
+    content = models.TextField(blank=True, null=True)
     comments_url = models.URLField()
     VISIBILITY_CHOICES = [
         ('PUBLIC', 'public'),
@@ -149,7 +148,6 @@ class Post(models.Model):
     ]
     visibility = models.CharField(max_length=7, choices=VISIBILITY_CHOICES)
     unlisted = models.BooleanField(default=False)
-    image = models.ImageField(upload_to='posts/images/', blank=True, null=True)
 
     likes = GenericRelation(Like)
     activity = GenericRelation(Activity)
