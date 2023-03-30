@@ -4,6 +4,7 @@ from ..models import *
 import uuid
 from datetime import datetime
 import calendar
+import json
 
 register = template.Library()
 
@@ -48,3 +49,15 @@ def convert_uuid_to_hex(uuid_string):
   # except:
   #   # if the conversion fails, the string is not a UUID in hexadecimal representation
   #   return uuid
+
+
+@register.filter
+def convert_to_json(obj):
+  # import pdb; pdb.set_trace()
+  # Convert the dictionary to a JSON string
+  json_string = json.dumps(obj, default=str)
+
+  # # Replace "False" with "false" in the JSON string
+  # json_string = json_string.replace("False", "false")
+  print(json_string)
+  return json_string

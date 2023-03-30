@@ -97,7 +97,7 @@ Link: https://www.bootdey.com/snippets/view/bs4-s
       </button>
     </div>
 
-    <div class="collapse" id="collapse_{{post.uuid|convert_uuid_to_hex}}">
+    <div id="comments-{{post.uuid}}" class="collapse" id="collapse_{{post.uuid|convert_uuid_to_hex}}">
 
       {% for comment in post.commentSrc.comments %}
 
