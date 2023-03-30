@@ -46,8 +46,8 @@ def explore_posts(request):
             res = requests.get(url, headers=headers, params=params)
 
             authors = json.loads(res.text)
-            # if base_url == "https://peer2pressure.herokuapp.com/":
-            #         import pdb; pdb.set_trace()
+            # if base_url == "https://sd7-api.herokuapp.com/api/":
+            #     import pdb; pdb.set_trace()
             for author in authors['items']:
                 if author['id']:
                     uuid = author['id'].split("/")[-1]
@@ -70,8 +70,8 @@ def explore_posts(request):
 
                 author_posts = json.loads(res.text)
                 for post in author_posts['items']:
-                    # if base_url == "https://peer2pressure.herokuapp.com/":
-                    #     import pdb; pdb.set_trace()
+                    if base_url == "https://peer2pressure.herokuapp.com/":
+                        import pdb; pdb.set_trace()
                     uuid = post['id'].split("/")[-1]
 
                     if not "title" in post:
