@@ -47,7 +47,11 @@ Link: https://www.bootdey.com/snippets/view/bs4-s
       </div>
     </div>
     <div class="card-body">
-      <p class="card-body">{{post.content}}</p>
+      {% if post.contentType == "image/png" or post.contentType == "image/jpeg" %} 
+        <img src="data:image;base64,{{ post.content }}" class="card-img-top" alt="...">
+      {% elif post.content_type == "text/plain" %}
+        <p class="card-text">{{post.content}}</p>
+      {% endif %}
     </div>
     <div class="card-footer likes-reply">
 

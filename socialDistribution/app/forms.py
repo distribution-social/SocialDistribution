@@ -19,16 +19,16 @@ class SigninForm(forms.Form):
         label='Password', widget=forms.PasswordInput, required=True)
 
 class PostForm(forms.ModelForm):
-    image = forms.ImageField(widget=forms.FileInput, required=False)
+    post_image = forms.ImageField(widget=forms.FileInput, required=False)
     class Meta:
         model = Post
-        fields = ('title', 'description', 'content_type', 'content', 'image' , 'visibility','receivers', 'unlisted' )
+        fields = ('title', 'description', 'content_type', 'content', 'post_image' , 'visibility','receivers', 'unlisted' )
 
     def save(self, user,receiver_list = None, commit=True):
         post = super().save(commit=False)
         post.made_by = user
         if self.cleaned_data['content_type'] == 'image/png' or self.cleaned_data['content_type'] == 'image/jpeg':
-            img_file = self.cleaned_data['image']
+            img_file = self.cleaned_data['post_image']
             img_data = img_file.read()
             img_base64 = base64.b64encode(img_data).decode('utf-8')
             post.content = img_base64
