@@ -106,6 +106,14 @@ def explore_posts(request):
                     if 'count' not in post:
                         post['count'] = 0
 
+                    if 'commentSrc' not in post:
+                        comments = requests.get(post['comments'], headers=headers)
+                        post['commentSrc'] = json.loads(comments.text)
+              
+                        #yosh is hardcoding so a work arond
+                        post['count'] = len(post['commentSrc']['comments'])
+
+
                     allPosts.append(post)
         except Exception as e:
             print(base_url,e)
