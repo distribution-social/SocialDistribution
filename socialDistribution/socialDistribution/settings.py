@@ -114,12 +114,14 @@ INSTALLED_APPS = [
     'rest_framework',
     'generic_relations',
     'rest_framework_swagger',
-    'drf_yasg'
+    'drf_yasg',
+    'django_minify_html',
 ]
 
 MIDDLEWARE = [
     'django.middleware.gzip.GZipMiddleware',
     'django.middleware.http.ConditionalGetMiddleware',
+    'django_minify_html.middleware.MinifyHtmlMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
