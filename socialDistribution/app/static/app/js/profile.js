@@ -1,12 +1,15 @@
 // References:
 //  https://css-tricks.com/crafting-reusable-html-templates/
 //  https://dmitripavlutin.com/parse-url-javascript/
+//  https://stackoverflow.com/questions/3216013/get-the-last-item-in-an-array
+//  https://www.w3schools.com/jsref/prop_element_childelementcount.asp
 
 import { extractUUID, uuidToHex } from "./utility.js";
 
 
 $(document).ready(function() {
     console.log("host:"+author_host);
+    console.log(auth_headers)
 
     getAndSetProfileCard();
     //setFollowing(serialized_followings, user_id, author_id, author_host);
@@ -68,6 +71,7 @@ function getAndSetProfileCard() {
         // console.log(response.json().is_following);
         if (response.status === 200) { // OK
             let temp = response.json();
+            console.log(temp);
             if (temp.is_following != null && temp.is_following.toLowerCase() === "true") return true;
             else if (temp.accepted != null && temp.accepted.toLowerCase() === "true") return true;
             else return false;
@@ -85,7 +89,7 @@ function getAndSetProfileCard() {
             $("#follow_unfollow_button").attr("name", "follow").val(author_id).text("Request to Follow");
             const element = document.getElementById("follow_unfollow_button");
             if (element) {
-                element.addEventListener("click", sendFollowRequestToInbox);
+                //element.addEventListener("click", sendFollowRequestToInbox);
             }
   
         }
@@ -232,7 +236,6 @@ function setFollowers(followers, user_id, author_id, author_host) {
 }
 
 function setFriends(followers, author_id) {
-    let num2 = 0;
     for (let follower of followers) {
         if (author_host.includes("p2psd")){
             var url = new URL("authors/" + uuidToHex(extractUUID(follower.id)) + "/followers/" + author_id, author_host);
@@ -240,21 +243,24 @@ function setFriends(followers, author_id) {
             var url = new URL("authors/" + uuidToHex(extractUUID(follower.id)) + "/followers/" + uuidToHex(author_id), author_host);
         }
         //const url = new URL("authors/" + uuidToHex(extractUUID(follower.id)) + "/followers/" + uuidToHex(author_id), author_host);
-        fetch(url, {method: "GET", headers: auth_headers}).then((response) => {
+        is_friend = fetch(url, {method: "GET", headers: auth_headers}).then((response) => {
             if (response.status === 200) { // OK
                 let temp = response.json();
-                if (temp.is_following != null && temp.is_following.toLowerCase() === "true") return true;
-                else if (temp.accepted != null && temp.accepted.toLowerCase() === "true") return true;
-                else return false;
+                //console.log(temp);
+                return temp;
             } else if (response.status === 404) {
-                return false;
+                return JSON.parse("{is_following: false");
             } else {
                 alert("Something went wrong: " + response.statusText);
             }
-        }).then((isFollowing) => {
-            console.log(isFollowing);
-            if (isFollowing) {
-                num2++;
+        }).then((data) => {
+            //console.log(isFollowing);
+            console.log(data)
+            let is_following;
+            if (data.is_following != null && String(data.is_following).toLowerCase() === "true") is_following = true;
+            else if (data.accepted != null && String(data.accepted).toLowerCase() === "true") is_following = true;
+            else is_following = false;
+            if (is_following) {
                 const cardTemplate = document.getElementById('friends-card');
                 const instance = document.importNode(cardTemplate.content, true);
                 let uuid = extractUUID(follower.id);
@@ -265,53 +271,19 @@ function setFriends(followers, author_id) {
                 $(instance).find(".friend_display_name").text(follower.displayName);
                 $(instance).find(".friend_host").attr("href", host).text(host.replace("http://", ''));
                 $("#friends_tab_stream").append(instance);
-                console.log(num2);
-                if (num2 === 0) {
-                    $("#friends_tab_stream").text("No True Friends")
-                }
-                if (num2 === 1) {
-                    $("#nav-friends-tab").text(num2 + " True Friend");
-                } else {
-                    $("#nav-friends-tab").text(num2 + " True Friends");
+            }
+        }).then(() => {
+            let num = document.getElementById("friends_tab_stream").childElementCount;
+            if (num === 1) {
+                $("#nav-friends-tab").text(num + " True Friend");
+            } else {
+                $("#nav-friends-tab").text(num + " True Friends");
+            }
+            if (follower === followers.at(-1)) {
+                if (num == 0) {
+                    $("#friends_tab_stream").text("No True Friends");
                 }
             }
         })
     }
-    if (num2 === 0) {
-        $("#friends_tab_stream").text("No True Friends")
-        $("#nav-friends-tab").text(num2 + " True Friends");
-    }
 }
-
-
-/*
-function setFollowing(following, user_id, author_id, author_host) {
-    let num = 0;
-    if (user_id === author_id) {
-        var cardTemplate = document.getElementById('my-following-card');
-    } else {
-        var cardTemplate = document.getElementById('following-card');
-    }
-    for (let follow of following) {
-        num++;
-        const instance = document.importNode(cardTemplate.content, true);
-        let host = follow.host;
-        let uuid = extractUUID(follow.id);
-        if (follow.profileImage !== null && follow.profileImage !== "") {$(instance).find(".following_image").attr("src", follow.profileImage);}
-        $(instance).find(".following_profile_link").attr("href", "http://"+server_host+"/authors/"+uuid); // TODO: switch to server host
-        $(instance).find(".following_github").attr("href", follow.github);
-        $(instance).find(".following_display_name").text(follow.displayName);
-        $(instance).find(".following_host").attr("href", host).text(host.replace("http://",''));
-        $(instance).find(".unfollow").val(uuid);
-        $("#followings_tab_stream").append(instance);
-    }
-    if (num === 0) {
-        $("#followings_tab_stream").text("Not following anyone")
-    }
-    if (num === 1) {
-        $("#nav-following-tab").text(num + " Following");
-    } else {
-        $("#nav-following-tab").text(num + " Followings");
-    }
-}
-*/
