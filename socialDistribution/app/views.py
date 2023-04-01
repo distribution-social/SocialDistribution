@@ -689,7 +689,7 @@ def add_like_comment(request, post_id, comment_id):
     return response
 
 
-@login_required(login_url="/login")
+# @login_required(login_url="/login")
 @require_http_methods(["GET"])
 def github_activity(request, username):
     """
@@ -710,7 +710,10 @@ def github_activity(request, username):
             "title": entry.title,
             "link": entry.link,
             "author": entry.author,
-            "media": entry.media_thumbnail
+            "authors": entry.authors,
+            "media": entry.media_thumbnail,
+            "content": entry.content,
+            "summary": entry.summary
         }
 
         activities.append(entry_dict)
