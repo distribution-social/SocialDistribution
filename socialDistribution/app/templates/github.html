@@ -60,15 +60,9 @@ function formatTitle(title){
     // https://stackoverflow.com/questions/6871403/how-can-i-delete-the-first-word-from-a-line
     const result = title.substr(title.indexOf(" ") + 1);
 
-    const firstLetter = result.charAt(0)
+    const capitalized = result.charAt(0).toUpperCase() + result.slice(1)
 
-    const firstLetterCap = firstLetter.toUpperCase()
-
-    const remainingLetters = result.slice(1)
-
-    const capitalizedWord = firstLetterCap + remainingLetters
-
-    return capitalizedWord;
+    return capitalized;
 }
 
 function createHTMLCard(event, link, title, published, updated, authors) {
