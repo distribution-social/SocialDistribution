@@ -56,6 +56,20 @@ function formatDateTime(datetime){
     return `${month} ${day}, ${year} (${time})`;
 }
 
+function formatTitle(title){
+    // https://stackoverflow.com/questions/6871403/how-can-i-delete-the-first-word-from-a-line
+    const result = title.substr(title.indexOf(" ") + 1);
+
+    const firstLetter = result.charAt(0)
+
+    const firstLetterCap = firstLetter.toUpperCase()
+
+    const remainingLetters = result.slice(1)
+
+    const capitalizedWord = firstLetterCap + remainingLetters
+
+    return capitalizedWord;
+}
 
 function createHTMLCard(event, link, title, published, updated, authors) {
 
@@ -70,7 +84,7 @@ function createHTMLCard(event, link, title, published, updated, authors) {
          </div> -->
       <div class="col-md-8">
          <div class="card-body">
-            <h5 class="card-title"><a href=${link} style="text-decoration:none">${title}</a></h5>
+            <h5 class="card-title"><a href=${link} style="text-decoration:none">${formatTitle(title)}</a></h5>
             <p class="card-text"><small class="text-body-secondary"> ${formatDateTime(published)} </small></p>
          </div>
       </div>
