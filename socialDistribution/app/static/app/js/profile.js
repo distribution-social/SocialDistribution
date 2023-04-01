@@ -71,21 +71,25 @@ function getAndSetProfileCard() {
         // console.log(response.json().is_following);
         if (response.status === 200) { // OK
             let temp = response.json();
-            console.log(temp);
-            if (temp.is_following != null && temp.is_following.toLowerCase() === "true") return true;
-            else if (temp.accepted != null && temp.accepted.toLowerCase() === "true") return true;
-            else return false;
+            //console.log(temp);
+            return temp;
         } else if (response.status === 404) {
-            return false;
+            return JSON.parse('{"is_following" : "false"}');
         } else {
             alert("Something went wrong: " + response.statusText);
         }
-    }).then((isFollowing) => {
-        // console.log(result.is_following);
-        console.log(author_id, user_id);
-        if (isFollowing){
+    }).then((data) => {
+        //console.log(isFollowing);
+        console.log(data)
+        let is_following;
+        if (data.is_following != null && String(data.is_following).toLowerCase() === "true") is_following = true;
+        else if (data.accepted != null && String(data.accepted).toLowerCase() === "true") is_following = true;
+        else is_following = false;
+        if (is_following) {
+            console.log("button should appear")
             $("#follow_unfollow_button").attr("name", "unfollow").val(author_id).text("Unfollow");
         } else {
+            console.log("button should  NOT appear")
             $("#follow_unfollow_button").attr("name", "follow").val(author_id).text("Request to Follow");
             const element = document.getElementById("follow_unfollow_button");
             if (element) {
@@ -236,54 +240,59 @@ function setFollowers(followers, user_id, author_id, author_host) {
 }
 
 function setFriends(followers, author_id) {
-    for (let follower of followers) {
-        if (author_host.includes("p2psd")){
-            var url = new URL("authors/" + uuidToHex(extractUUID(follower.id)) + "/followers/" + author_id, author_host);
-        } else {
-            var url = new URL("authors/" + uuidToHex(extractUUID(follower.id)) + "/followers/" + uuidToHex(author_id), author_host);
-        }
-        //const url = new URL("authors/" + uuidToHex(extractUUID(follower.id)) + "/followers/" + uuidToHex(author_id), author_host);
-        is_friend = fetch(url, {method: "GET", headers: auth_headers}).then((response) => {
-            if (response.status === 200) { // OK
-                let temp = response.json();
-                //console.log(temp);
-                return temp;
-            } else if (response.status === 404) {
-                return JSON.parse("{is_following: false");
+    if (followers.length === 0) {
+        $("#nav-friends-tab").text("0 True Friends");
+        $("#friends_tab_stream").text("No True Friends");
+    } else {
+        for (let follower of followers) {
+            if (author_host.includes("p2psd")){
+                var url = new URL("authors/" + uuidToHex(extractUUID(follower.id)) + "/followers/" + author_id, author_host);
             } else {
-                alert("Something went wrong: " + response.statusText);
+                var url = new URL("authors/" + uuidToHex(extractUUID(follower.id)) + "/followers/" + uuidToHex(author_id), author_host);
             }
-        }).then((data) => {
-            //console.log(isFollowing);
-            console.log(data)
-            let is_following;
-            if (data.is_following != null && String(data.is_following).toLowerCase() === "true") is_following = true;
-            else if (data.accepted != null && String(data.accepted).toLowerCase() === "true") is_following = true;
-            else is_following = false;
-            if (is_following) {
-                const cardTemplate = document.getElementById('friends-card');
-                const instance = document.importNode(cardTemplate.content, true);
-                let uuid = extractUUID(follower.id);
-                let host = follower.host;
-                if (follower.profileImage !== null && follower.profileImage !== "") {$(instance).find(".friend_image").attr("src", follower.profileImage);}
-                $(instance).find(".friend_profile_link").attr("href", "http://"+server_host+"/authors/" + uuid);
-                $(instance).find(".friend_github").attr("href", follower.github);
-                $(instance).find(".friend_display_name").text(follower.displayName);
-                $(instance).find(".friend_host").attr("href", host).text(host.replace("http://", ''));
-                $("#friends_tab_stream").append(instance);
-            }
-        }).then(() => {
-            let num = document.getElementById("friends_tab_stream").childElementCount;
-            if (num === 1) {
-                $("#nav-friends-tab").text(num + " True Friend");
-            } else {
-                $("#nav-friends-tab").text(num + " True Friends");
-            }
-            if (follower === followers.at(-1)) {
-                if (num == 0) {
-                    $("#friends_tab_stream").text("No True Friends");
+            //const url = new URL("authors/" + uuidToHex(extractUUID(follower.id)) + "/followers/" + uuidToHex(author_id), author_host);
+            fetch(url, {method: "GET", headers: auth_headers}).then((response) => {
+                if (response.status === 200) { // OK
+                    let temp = response.json();
+                    //console.log(temp);
+                    return temp;
+                } else if (response.status === 404) {
+                    return JSON.parse('{"is_following" : "false"}');
+                } else {
+                    alert("Something went wrong: " + response.statusText);
                 }
-            }
-        })
+            }).then((data) => {
+                //console.log(isFollowing);
+                console.log(data)
+                let is_following;
+                if (data.is_following != null && String(data.is_following).toLowerCase() === "true") is_following = true;
+                else if (data.accepted != null && String(data.accepted).toLowerCase() === "true") is_following = true;
+                else is_following = false;
+                if (is_following) {
+                    const cardTemplate = document.getElementById('friends-card');
+                    const instance = document.importNode(cardTemplate.content, true);
+                    let uuid = extractUUID(follower.id);
+                    let host = follower.host;
+                    if (follower.profileImage !== null && follower.profileImage !== "") {$(instance).find(".friend_image").attr("src", follower.profileImage);}
+                    $(instance).find(".friend_profile_link").attr("href", "http://"+server_host+"/authors/" + uuid);
+                    $(instance).find(".friend_github").attr("href", follower.github);
+                    $(instance).find(".friend_display_name").text(follower.displayName);
+                    $(instance).find(".friend_host").attr("href", host).text(host.replace("http://", ''));
+                    $("#friends_tab_stream").append(instance);
+                }
+            }).then(() => {
+                let num = document.getElementById("friends_tab_stream").childElementCount;
+                if (num === 1) {
+                    $("#nav-friends-tab").text(num + " True Friend");
+                } else {
+                    $("#nav-friends-tab").text(num + " True Friends");
+                }
+                if (follower === followers.at(-1)) {
+                    if (num == 0) {
+                        $("#friends_tab_stream").text("No True Friends");
+                    }
+                }
+            })
+        }
     }
 }
