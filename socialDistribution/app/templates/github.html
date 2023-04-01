@@ -50,7 +50,7 @@ function formatEvent(event){
 function formatDateTime(datetime){
     const format_datetime = new Date(datetime);
     const month = format_datetime.toLocaleString('default', { month: 'long' });
-    const day = format_datetime.getDay();
+    const day = format_datetime.getDate();
     const year = format_datetime.getFullYear();
     const time = format_datetime.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
     return `${month} ${day}, ${year} (${time})`;
