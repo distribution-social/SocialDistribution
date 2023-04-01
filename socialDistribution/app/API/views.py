@@ -456,7 +456,7 @@ class LikedView(BasicAuthMixin,APIView):
 
         return Response(response,status=status.HTTP_200_OK)
     
-class PostImageView(APIView):
+class PostImageView(BasicAuthMixin, APIView):
      def get(self,request,author_id,post_id):
         """Gets a image for image post."""
         try:
