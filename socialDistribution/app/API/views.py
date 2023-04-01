@@ -481,12 +481,12 @@ class InboxView(BasicAuthMixin,APIView):
         except Author.DoesNotExist:
             return Response({"error": f"Author {author_id} does not exist."}, status=status.HTTP_400_BAD_REQUEST)
 
-        if data.get('type') == 'follow':
+        if str(data.get('type')).lower() == 'follow':
             try:
                 actor_id = data.get('actor').get('url')
                 actor = Author.objects.get(url=actor_id)
             except Author.DoesNotExist:
-                actor = Author(username=parse_values(actor_id).get('author_id'),confirmed=True)
+                actor = Author(username=uuid.uuid4(),confirmed=True)
                 authorSerializer = AuthorSerializer(actor,data.get('actor'))
                 if authorSerializer.is_valid():
                     authorSerializer.save()
@@ -505,12 +505,12 @@ class InboxView(BasicAuthMixin,APIView):
                     return Response(f"Already following {author.displayName}",status=status.HTTP_400_BAD_REQUEST)
             except Exception as e:
                 return Response({'error': str(e)},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        elif data.get('type') == 'post':
+        elif str(data.get('type')).lower() == 'post':
             try:
                 actor_id = data.get('author').get('url')
                 actor = Author.objects.get(url=actor_id)
             except Author.DoesNotExist:
-                actor = Author(username=parse_values(actor_id).get('author_id'),confirmed=True)
+                actor = Author(username=uuid.uuid4(),confirmed=True)
                 authorSerializer = AuthorSerializer(actor,data.get('author'))
                 if authorSerializer.is_valid():
                     authorSerializer.save()
@@ -538,13 +538,13 @@ class InboxView(BasicAuthMixin,APIView):
                 return Response({'error': str(e)},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-        elif data.get('type') == 'comment':
-        
+        elif str(data.get('type')).lower() == 'comment':
+
             try:
                 actor_id = data.get('author').get('url')
                 actor = Author.objects.get(url=actor_id)
             except Author.DoesNotExist:
-                actor = Author(username=parse_values(actor_id).get('author_id'),confirmed=True)
+                actor = Author(username=uuid.uuid4(),confirmed=True)
                 authorSerializer = AuthorSerializer(actor,data.get('author'))
                 if authorSerializer.is_valid():
                     authorSerializer.save()
@@ -578,7 +578,7 @@ class InboxView(BasicAuthMixin,APIView):
                 return Response({'error': str(e)},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-        elif data.get('type') == 'like':
+        elif str(data.get('type')).lower() == 'like':
             try:
                 kwargs = parse_values(data.get('object'))
                 actor_kwargs = parse_values(data.get('author').get('url'))
@@ -590,7 +590,7 @@ class InboxView(BasicAuthMixin,APIView):
                 actor_id = data.get('author').get('url')
                 actor = Author.objects.get(url=actor_id)
             except Author.DoesNotExist:
-                actor = Author(username=parse_values(actor_id).get('author_id'),confirmed=True)
+                actor = Author(username=uuid.uuid4(),confirmed=True)
                 authorSerializer = AuthorSerializer(actor,data.get('author'))
                 if authorSerializer.is_valid():
                     authorSerializer.save()
