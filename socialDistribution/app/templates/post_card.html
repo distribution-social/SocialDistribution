@@ -12,7 +12,7 @@ Link: https://www.bootdey.com/snippets/view/bs4-s
       <div class="media">
         <div class="d-flex flex-row">
           <div class="m-2">
-            <a class="d-flex" href="{% url 'profile' node=post.tag author_id=post.author.url|extract_uuid %}">
+            <a class="d-flex" href="{% url 'profile' author_id=post.author.url|extract_uuid %}">
               {% if post.author.profileImage %}
               <img src="{{post.author.profileImage}}" class="object-fit-cover user-avatar-circle rounded-circle my-1" alt=""></img>
               {% else %}
@@ -22,14 +22,14 @@ Link: https://www.bootdey.com/snippets/view/bs4-s
           </div>
           <div class="m-2">
             <h4>
-              <a class="card-title" href="{% url 'post_detail' %}?node={{post.tag}}?author={{post.author.url|extract_uuid}}?post={{post.origin|extract_uuid}}" style="text-decoration: none;">{{post.title}}</a>
+              <a class="card-title" href="{% url 'node-post-detail' node=post.tag author_id=post.author.url|extract_uuid post_id=post.uuid %}" style="text-decoration: none;">{{post.title}}</a>
             </h4>
             <span class="node-tag">{{post.tag}}</span>
           </div>
 
         </div>
 
-        <a class="text-muted m-2" href="{% url 'profile' node=post.tag author_id=post.author.url|extract_uuid %}" style="text-decoration: none;">
+        <a class="text-muted m-2" href="{% url 'profile' author_id=post.author.url|extract_uuid %}" style="text-decoration: none;">
           {{post.author.displayName}}
         </a>
         <span class="text-muted m-2" style="text-decoration: none;">

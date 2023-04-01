@@ -34,7 +34,7 @@ if not DOMAIN:
     DOMAIN = socket.gethostbyname(socket.gethostname())
 
 if not SCHEME:
-    SCHEME = 'http://'
+    SCHEME = 'https://'
 
 HOST = SCHEME + DOMAIN
 print('Host:',HOST)
@@ -82,12 +82,12 @@ CSRF_COOKIE_HTTPONLY = True
 
 CSRF_COOKIE_SAMESITE = 'Secure'
 
-CSRF_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = False
 
 # Session Cookies
 SESSION_COOKIE_SAME = 'Secure'
 
-SESSION_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = False
 
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
@@ -232,7 +232,7 @@ REST_FRAMEWORK = {
 }
 
 #remove it once we make it https
-SECURE_SSL_REDIRECT = True
+SECURE_SSL_REDIRECT = False
 SECURE_CROSS_ORIGIN_OPENER_POLICY = None
 
 django_on_heroku.settings(locals())  # bottom of the file

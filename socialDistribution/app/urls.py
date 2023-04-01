@@ -45,6 +45,7 @@ urlpatterns = [
 
 
     path('posts', views.post_detail, name='post_detail'),
+    path('posts/<str:node>/<str:author_id>/<str:post_id>', ajax_views.post_details, name='node-post-detail'),
     path('posts/<str:post_id>/edit', views.post_edit, name='post_edit'),
     path('comment', views.add_comment, name='comment-form'),
     path('posts/<str:post_id>/like', views.add_like_post, name='add_like_post'),
@@ -55,7 +56,7 @@ urlpatterns = [
     path('authors/<str:author_id>/inbox', views.inbox, name='inbox'),
     path('unfollow', views.unfollow, name='unfollow'),
     path('removefollower', views.removeFollower, name='removefollower'),
-    path('profile/<str:node>/<str:author_id>', views.profile, name='profile'),
+    path('profile/<str:author_id>', views.profile, name='profile'),
     path('authors/<str:author_id>/edit', views.edit_profile, name='edit-profile'),
     path('<str:username>/true-friends', views.true_friends, name='true-friends'),
     path('authors/<str:author_id>/received', views.received_requests, name='requests'),
@@ -68,8 +69,8 @@ urlpatterns = [
     path('comment.html', template_views.get_comment_template, name='post_detail.html'),
 
     #Ajax Urls (returns JSON response)
-    path('public_posts', ajax_views.public_posts, name='posts'),
-    path('post_details', ajax_views.post_details, name='post-details'),
+    path('public_posts', ajax_views.public_posts, name='posts-explore'),
+    path('home_posts', ajax_views.home_posts, name='posts-home'),
 
 
     #API urls

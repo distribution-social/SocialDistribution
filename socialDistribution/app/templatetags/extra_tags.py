@@ -3,6 +3,7 @@ from django import template
 from ..models import *
 import uuid
 from datetime import datetime
+from dateutil.parser import parse
 import calendar
 import json
 
@@ -32,7 +33,7 @@ def extract_uuid(id):
 
 @register.filter
 def readable_time(time):
-  date = datetime.strptime(time, '%Y-%m-%dT%H:%M:%S.%fZ')
+  date = parse(time)
   return date.strftime('%B %d, %Y | %I:%M %p')
 
 

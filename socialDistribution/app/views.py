@@ -265,7 +265,7 @@ def add_to_sent_request(request):
 
 @login_required(login_url="/login")
 @require_http_methods(["GET", "POST"])
-def profile(request,node,author_id):
+def profile(request,author_id):
 
     user = request.user
     userAuthor = Author.objects.get(username=request.user.username)
@@ -318,6 +318,7 @@ def profile(request,node,author_id):
         localNode = getApiNodeWrapper(local_host)
 
         context.update({'local_node_token': localNode.getToken()})
+        print(context)
 
         return render(request, 'profile.html', context)
 
@@ -330,11 +331,14 @@ def profile(request,node,author_id):
             # Add the author object to our sent_request list (Need to send this to inbox in the future to get approval on the other end)
             userAuthor.sent_requests.add(author_for_action)
 
-        return redirect(reverse("profile", kwargs={"author_id": userAuthor.id}))
+        return redirect(reverse("profile_old", kwargs={"author_id": userAuthor.id}))
 
 def getApiNodeWrapper(host):
     parsedHost = urllib.parse.urlparse(host)
-    node = ForeignAPINodes.objects.get(base_url__contains="//"+parsedHost.hostname)
+    try:
+        node = ForeignAPINodes.objects.get(base_url__contains="//"+parsedHost.hostname)
+    except:
+        return ForeignAPINodes.objects.get(base_url__contains=settings.HOST)
     return node
 
 def getAuthHeadersJson(author_host):
@@ -613,7 +617,7 @@ def edit_profile(request, author_id):
         form = EditProfileForm(request.POST, instance=user)
         if form.is_valid():
             form.save()
-            return redirect(reverse('profile',kwargs={'node': 'Local','author_id': author_id}))
+            return redirect(reverse('profile',kwargs={'author_id': author_id}))
         else:
             print(form.errors)
             return HttpResponseBadRequest("Invalid form")
