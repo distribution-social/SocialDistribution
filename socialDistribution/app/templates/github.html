@@ -16,7 +16,7 @@
 
 <script>
 
-var github_username = "jmonteza";
+var github_username = getGitHubUsername(github_url);
 
 async function fetchActivitiesJSON(username) {
   const response = await fetch(`${window.location.protocol}//${window.location.host}/github/${username}`);
@@ -31,6 +31,12 @@ fetchActivitiesJSON(github_username).then(activities => {
     target.innerHTML += html_element;
   }
 });
+
+function getGitHubUsername(github_url){
+    const url_array = github_url.split("/");
+    const github_username = url_array[3];
+    return github_username;
+}
 
 function formatEvent(event){
 
