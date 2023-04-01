@@ -14,7 +14,8 @@ from django.conf import settings
 import json
 import base64
 from PIL import Image
-from io import BytesIO
+import io
+from django.http import FileResponse
 
 class AuthorListAPIView(BasicAuthMixin,APIView):
     """ Used for Author based actions."""
@@ -463,8 +464,9 @@ class PostImageView(APIView):
         except Post.DoesNotExist:
             return Response({"error": "Post does not exist."}, status=status.HTTP_404_NOT_FOUND)
         if post.content_type == "image/png;base64":
-            content = post.content
-            return Response(content, status=status.HTTP_200_OK)
+            with open("PostImage.png", "wb") as fh:
+                fh.write(base64.decodebytes(post.content.encode()))
+            return FileResponse(open("PostImage.png", 'rb'), status=status.HTTP_200_OK, content_type="image/png")
         elif post.content_type == "image/jpeg;base64":
             content = post.content
             return Response(content, status=status.HTTP_200_OK)
