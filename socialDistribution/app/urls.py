@@ -61,6 +61,12 @@ urlpatterns = [
     path('authors/<str:author_id>/received', views.received_requests, name='requests'),
     path('authors/<str:author_id>/sent', views.sent_requests, name='sent_requests'),
 
+
+    #Template Urls (returns HTML)
+    path('post_card.html', template_views.get_post_card_template, name='post_card'),
+    path('post_detail.html', template_views.get_post_details_template, name='post_detail.html'),
+    path('comment.html', template_views.get_comment_template, name='post_detail.html'),
+
     #Ajax Urls (returns JSON response)
     path('public_posts', ajax_views.public_posts, name='posts'),
     path('post_details', ajax_views.post_details, name='post-details'),

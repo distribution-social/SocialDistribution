@@ -59,5 +59,4 @@ def convert_to_json(obj):
 
   # # Replace "False" with "false" in the JSON string
   # json_string = json_string.replace("False", "false")
-  print(json_string)
   return json_string
