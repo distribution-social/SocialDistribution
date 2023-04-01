@@ -43,6 +43,8 @@ urlpatterns = [
     path('logout', views.signout, name='logout'),
     path('add-to-sent', views.add_to_sent_request, name='add-to-sent'),
 
+    path('github/<str:username>', views.github_activity, name='github'),
+
     path('posts/<str:post_id>', views.post_detail, name='post_detail'),
     path('posts/<str:post_id>/edit', views.post_edit, name='post_edit'),
     path('posts/<str:post_id>/comment', views.add_comment, name='comment-form'),
