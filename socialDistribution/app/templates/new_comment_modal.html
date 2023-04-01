@@ -20,7 +20,11 @@
     function addCommentHandler(event,user, post){
         // prevent default form submission
         event.preventDefault();
-        let parsedPost = JSON.parse(post)
+        
+        // remove bad control characters
+        let cleanedJsonStr = post.replace(/[\x00-\x1F\x7F-\x9F]/g, '');
+
+        let parsedPost = JSON.parse(cleanedJsonStr)
         const textarea = document.getElementById(`comment-textarea-${parsedPost.uuid}`);
         
         parsedActor = JSON.parse(document.getElementById('my-author').dataset.myAuthor);
@@ -38,6 +42,7 @@
         commentSpinner.removeAttribute("hidden");
         commentContainer = document.getElementById(`collapse_${parsedPost.uuid}`)
         const url = `${parsedPost.author.url}/inbox`
+
 
         $.ajax({
             type: 'POST',
