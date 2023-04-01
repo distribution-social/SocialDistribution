@@ -1,4 +1,5 @@
 {% load static %}
+{% load markdownify %}
 <!--
 Some of the html in this file is based off of the following UNDER MIT License:
 Title: Bootstrap snippet. bs4 simple social network post
@@ -47,10 +48,16 @@ Link: https://www.bootdey.com/snippets/view/bs4-s
       </div>
     </div>
     <div class="card-body">
-      {% if post.contentType == "image/png" or post.contentType == "image/jpeg" %} 
+      {% if post.contentType == "image/png;base64" or post.contentType == "image/jpeg;base64" %} 
         <img src="data:image;base64,{{ post.content }}" class="card-img-top" alt="...">
-      {% elif post.content_type == "text/plain" %}
-        <p class="card-text">{{post.content}}</p>
+      {% elif post.contentType == "text/plain" %}
+        <div class="card-body">
+          {{post.content}}
+        </div>
+      {% elif post.contentType == "text/markdown" %}
+        <div class="card-body">
+          {{post.content | markdownify | replace: }}
+        </div>
       {% endif %}
     </div>
     <div class="card-footer likes-reply">

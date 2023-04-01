@@ -130,13 +130,13 @@ class Post(models.Model):
     date_published = models.DateTimeField(default=timezone.now)
     PLAIN = "text/plain"
     MARKDOWN = "text/markdown"
-    PNG = "image/png"
-    JPG = "image/jpeg"
+    PNG = "image/png;base64"
+    JPG = "image/jpeg;base64"
     CONTENT_TYPE_CHOICES = [
         (MARKDOWN, "text/markdown"),
         (PLAIN, "text/plain"),
-        (PNG, "image/png"),
-        (JPG, "image/jpeg"),
+        (PNG, "image/png;base64"),
+        (JPG, "image/jpeg;base64"),
     ]
 
     content_type = models.CharField(max_length=18, choices=CONTENT_TYPE_CHOICES)

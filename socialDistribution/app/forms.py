@@ -1,5 +1,6 @@
 from django import forms
 from .models import *
+import base64
 
 class SignupForm(forms.Form):
     display_name = forms.CharField(label='Display Name', max_length=50, required=True)
@@ -27,7 +28,7 @@ class PostForm(forms.ModelForm):
     def save(self, user,receiver_list = None, commit=True):
         post = super().save(commit=False)
         post.made_by = user
-        if self.cleaned_data['content_type'] == 'image/png' or self.cleaned_data['content_type'] == 'image/jpeg':
+        if self.cleaned_data['content_type'] == 'image/png;base64' or self.cleaned_data['content_type'] == 'image/jpeg;base64':
             img_file = self.cleaned_data['post_image']
             img_data = img_file.read()
             img_base64 = base64.b64encode(img_data).decode('utf-8')
