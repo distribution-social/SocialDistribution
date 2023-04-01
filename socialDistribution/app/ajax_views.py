@@ -46,8 +46,8 @@ def explore_posts(request):
             res = requests.get(url, headers=headers, params=params)
 
             authors = json.loads(res.text)
-            # if base_url == "https://peer2pressure.herokuapp.com/":
-            #         import pdb; pdb.set_trace()
+            # if base_url == "https://sd7-api.herokuapp.com/api/":
+            #     import pdb; pdb.set_trace()
             for author in authors['items']:
                 if author['id']:
                     uuid = author['id'].split("/")[-1]
@@ -100,6 +100,20 @@ def explore_posts(request):
                         post['likeCount'] = 0
                     post['tag'] = foreignNode.nickname
                     post['auth_token'] = foreignNode.getToken()
+
+
+                    #temp for now, as some teams are not returning
+                    if 'count' not in post:
+                        post['count'] = 0
+
+                    if 'commentSrc' not in post:
+                        comments = requests.get(post['comments'], headers=headers)
+                        post['commentSrc'] = json.loads(comments.text)
+              
+                        #yosh is hardcoding so a work arond
+                        post['count'] = len(post['commentSrc']['comments'])
+
+
                     allPosts.append(post)
         except Exception as e:
             print(base_url,e)
@@ -118,11 +132,23 @@ def post_details(request):
 
     # if not host.endswith('/'):
     #     host += '/'
+    # import pdb; pdb.set_trace()
 
-    # if not "https" in host:
-    #     host = host.replace("http", "https")
+    arr = host.split(":")
+    arr[0] ='http'
+    httpHost = ":".join(arr)
+    arr[0] ='https'
+    httpsHost = ":".join(arr)
+    foreignNode = None
+    try:
+        foreignNode = ForeignAPINodes.objects.get(base_url=httpHost)
+    except:
+        try:
+            foreignNode = ForeignAPINodes.objects.get(base_url=httpsHost)
+        except:
+            print("Something wrong w foreign node")
 
-    foreignNode = ForeignAPINodes.objects.get(base_url=host)
+    
     headers={}
     if foreignNode.username:
         headers = {

@@ -1,95 +1,123 @@
-{% load static %}
-{% load crispy_forms_tags %}
 
 <!doctype html>
+{% load static %}
+{% load crispy_forms_tags %}
 <html lang="en">
-  <script type="text/javascript">
+  <script>
     $(function () {
       $('#new-comment-{{post.uuid}}').on('hidden.bs.modal', function () {
         $(this).find('#comment_form').trigger('reset');
+      })
+    }); 
 
-    })
-    });
     $(function () {
-      $('#new-comment-{{post.uuid}}').on('shown.bs.modal', function () {
-        $(this).find('#id_comment').focus();
-    })
+        $('#new-comment-{{post.uuid}}').on('shown.bs.modal', function () {
+            $(this).find('#id_comment').focus();    
+        })
     });
+
 
     function addCommentHandler(event,user, post){
-    // add submit event listener to comment form
-      // prevent default form submission
-      event.preventDefault();
-      let parsedPost = JSON.parse(post)
-      const textarea = document.getElementById(`comment-textarea-${parsedPost.uuid}`).value;
-      
-      parsedActor = JSON.parse(document.getElementById('my-author').dataset.myAuthor);
-      
-      data =  {
-            "summary": `${parsedActor.displayName}   commented on your post`,         
-            "type": "comment",
-            "author": {...parsedActor},
-            "object": parsedPost.id,
-            "comment": textarea.value,
-      }
+        // prevent default form submission
+        event.preventDefault();
+        
+        // remove bad control characters
+        let cleanedJsonStr = post.replace(/[\x00-\x1F\x7F-\x9F]/g, '');
 
-      // const url = `${parsedPost.author.url}/inbox`
-      const url = `${parsedPost.author.url}/inbox`
-      $.ajax({
-          type: 'POST',
-          url: url,
-          data: JSON.stringify(data),
-          headers: {
-            Authorization: 'Basic '+parsedPost.auth_token
-          },
-          success: function (result) {
-            showAndDismissAlert("info",result)
+        let parsedPost = JSON.parse(cleanedJsonStr)
+        const textarea = document.getElementById(`comment-textarea-${parsedPost.uuid}`);
+        
+        parsedActor = JSON.parse(document.getElementById('my-author').dataset.myAuthor);
+        
+        data =  {
+              "summary": `${parsedActor.displayName} commented on your post`,         
+              "type": "comment",
+              "author": {...parsedActor},
+              "object": parsedPost.id,
+              "comment": textarea.value,
+              "contentType": "plain/text",
+        }
 
-          },
-          error: function (xhr, exception) {
-            let error_message = '';
-            if (xhr.status === 0) {
-              error_message = 'No connection to server. Check Network.';
-            } else if (xhr.status == 404) {
-              error_message = 'Requested page not found. [404]';
-            } else if (xhr.status == 500) {
-              error_message = 'Internal Server Error [500].';
-            } else if (exception === 'timeout') {
-              error_message = 'Timed out. Try again.';
-            } else if (exception === 'abort') {
-              error_message = 'Request aborted.';
-            } else {
-              error_message = 'Could not make request. ' + xhr.responseText;
-            }
-            showAndDismissAlert("error",error_message)
-          }
+        commentSpinner = document.getElementById('comment-spinner')
+        commentSpinner.removeAttribute("hidden");
+        commentContainer = document.getElementById(`collapse_${parsedPost.uuid}`)
+        const url = `${parsedPost.author.url}/inbox`
 
+
+        $.ajax({
+            type: 'POST',
+            url: url,
+            data: JSON.stringify(data),
+            headers: {
+              "Authorization": 'Basic '+parsedPost.auth_token,
+            "Content-Type": 'application/json; charset=utf-8'
+            },
+            success: function (result) {
+              $.ajax({
+                  url: '/comment.html',
+                  type: 'POST',
+                  data: JSON.stringify(data),
+                  contentType: 'application/json',
+                  headers: {
+                      'X-CSRFToken': '{{ csrf_token }}'
+                  },
+                  success: function(template) {
+                    //creates and sets a cardfooter element
+                    const cardFooter = document.createElement('div');
+                    cardFooter.setAttribute('class', 'card-footer');
+                    cardFooter.innerHTML = template;
+
+                    commentContainer.appendChild(cardFooter)
+
+                    let value = parseInt($(`#comment-count-${parsedPost.uuid}`).html());
+                    value++;
+                    $(`#comment-count-${parsedPost.uuid}`).html(value);
+                  
+                    commentSpinner.setAttribute("hidden", true);
+                    $(`#new-comment-${parsedPost.uuid}`).modal('hide');
+                          
+                    const commentList = document.getElementById(`collapse_${parsedPost.uuid}`)
+                    commentList.classList.remove('collapse');
+
+                    textarea.value = ""
+                    
+
+                  },
+                  error: function(xhr, status, error) {
+                      console.error(xhr.responseText);
+                      textarea.value = ""
+                  }
+              });
           
-      });
+            
 
-      textarea.value = ""
+            },
+            error: function (xhr, exception) {
+              let error_message = '';
+              if (xhr.status === 0) {
+                error_message = 'No connection to server. Check Network.';
+              } else if (xhr.status == 404) {
+                error_message = 'Requested page not found. [404]';
+              } else if (xhr.status == 500) {
+                error_message = 'Internal Server Error [500].';
+              } else if (exception === 'timeout') {
+                error_message = 'Timed out. Try again.';
+              } else if (exception === 'abort') {
+                error_message = 'Request aborted.';
+              } else {
+                error_message = 'Could not make request. ' + xhr.responseText;
+              }
+              showAndDismissAlert("error",error_message)
+            }
 
-      // serialize form data
-      // var formData = $(this).serialize();
-  
-      // // send AJAX request to submit form data
-      // $.ajax({
-      //   type: "POST",
-      //   url: $(this).attr("action"),
-      //   data: formData,
-      //   success: function(response) {
-      //     // update comment section with AJAX response
-      //     $("#comment-section").html(response);
-      //   },
-      //   error: function(xhr, status, error) {
-      //     // handle AJAX error
-      //     console.error(xhr);
-      //   }
-      // });
-  };
+            
+        });
 
+        
+    };
 
   </script>
+
   <div class="modal fade" id="new-comment-{{post.uuid}}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
       <div class="modal-content">
@@ -99,14 +127,18 @@
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
-        <div class="modal-body">
-          <div class="form-group"id="comment_form">
+        <div class="modal-body" id="comment-modal-body">
+          <div class="form-group" id="comment_form">
             
-            <label for="exampleFormControlTextarea1">Example textarea</label>
-            <textarea class="form-control" id="comment-textarea-{{post.uuid}}" rows="3"></textarea>
-            <div style="margin-top: 2;">
+            <label for="exampleFormControlTextarea1">Comment</label>
+            <textarea class="form-control" id="comment-textarea-{{post.uuid}}" rows="4"></textarea>
+            <div style="margin-top: 6px;">
               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-              <button class="btn btn-success" onClick=" console.log('gello'); event.preventDefault(); addCommentHandler(event,`{{user}}`, `{{post|convert_to_json}}`)">Comment</button>
+              <button id="comment-btn" class="btn btn-success"  onClick="event.preventDefault(); addCommentHandler(event,`{{user}}`, `{{post|convert_to_json}}`)">
+                
+                Comment
+                <span id="comment-spinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true" hidden></span>
+              </button>
             </div>
           </div>
         </div>

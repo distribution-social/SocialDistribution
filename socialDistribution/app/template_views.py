@@ -21,3 +21,13 @@ def get_post_details_template(request):
         return HttpResponse(html)
     else:
         return HttpResponse('Error: Missing post data')
+
+def get_comment_template(request):
+    comment = request.body
+  
+    if comment:
+        context = {'user': request.user,'comment': json.loads(comment), "comment_form": CommentForm()}
+        html = render_to_string('comment.html', context)
+        return HttpResponse(html)
+    else:
+        return HttpResponse('Error: Missing post data')

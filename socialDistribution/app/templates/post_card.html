@@ -99,14 +99,14 @@ Link: https://www.bootdey.com/snippets/view/bs4-s
 
     </div>
     <div class="card-footer">
-      <button class="d-inline-flex btn btn-primary" data-bs-toggle="collapse" data-bs-target="#collapse_{{post.uuid|convert_uuid_to_hex}}" role="button" aria-expanded="false" aria-controls="collapse_{{post.uuid|convert_uuid_to_hex}}">
+      <button id="collapse-comment-btn-{{post.uuid|convert_uuid_to_hex}}" class="d-inline-flex btn btn-primary" data-bs-toggle="collapse" data-bs-target="#collapse_{{post.uuid|convert_uuid_to_hex}}" role="button" aria-expanded="false" aria-controls="collapse_{{post.uuid|convert_uuid_to_hex}}">
         <span class="d-inline-flex">Comments</span>
         <i class="d-inline-flex bi bi-chat mx-1" ></i>
-        <span class="d-inline-flex">{{post.count}}</span>
+        <span id="comment-count-{{post.uuid}}" class="d-inline-flex">{{post.count}}</span>
       </button>
     </div>
 
-    <div id="comments-{{post.uuid}}" class="collapse" id="collapse_{{post.uuid|convert_uuid_to_hex}}">
+    <div class="collapse" id="collapse_{{post.uuid}}">
 
       {% for comment in post.commentSrc.comments %}
 

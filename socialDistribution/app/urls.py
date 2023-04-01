@@ -64,6 +64,7 @@ urlpatterns = [
     #Template Urls (returns HTML)
     path('post_card.html', template_views.get_post_card_template, name='post_card'),
     path('post_detail.html', template_views.get_post_details_template, name='post_detail.html'),
+    path('comment.html', template_views.get_comment_template, name='post_detail.html'),
 
     #Ajax Urls (returns JSON response)
     path('posts', ajax_views.explore_posts, name='posts'),
