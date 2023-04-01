@@ -48,7 +48,7 @@
               </li>
 
               <li class="nav-item">
-                <a class="nav-link" href="{% url 'profile' author_id=user.username|convert_username_to_id %}">
+                <a class="nav-link" href="{% url 'profile' server_name='Local' author_id=user.username|convert_username_to_id %}">
                   <i class="bi bi-person-fill">&nbsp;Profile</i></a>
               </li>
 
