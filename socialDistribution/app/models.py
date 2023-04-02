@@ -23,7 +23,7 @@ class Author(models.Model):
 
     github = models.URLField(max_length=255)
 
-    profileImage = models.URLField(max_length=255,blank=True, null=True)
+    profileImage = models.URLField(max_length=2048,blank=True, null=True)
 
     # Max Length: 64 (Username) + 255 (Domain)
     email = models.EmailField(max_length=320)
