@@ -84,6 +84,8 @@ def send_post_request(type, actor, object):
     # Set the URL to the actor's API Inbox URL
     url = actor.url + "/inbox"
 
+    print("Sending!!!!!!")
+
     print(json, url)
 
     try:
