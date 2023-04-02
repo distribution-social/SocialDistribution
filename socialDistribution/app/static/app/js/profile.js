@@ -86,14 +86,12 @@ function getAndSetProfileCard() {
         else if (data.accepted != null && String(data.accepted).toLowerCase() === "true") is_following = true;
         else is_following = false;
         if (is_following) {
-            console.log("button should appear")
             $("#follow_unfollow_button").attr("name", "unfollow").val(author_id).text("Unfollow");
         } else {
-            console.log("button should  NOT appear")
             $("#follow_unfollow_button").attr("name", "follow").val(author_id).text("Request to Follow");
             const element = document.getElementById("follow_unfollow_button");
             if (element) {
-                //element.addEventListener("click", sendFollowRequestToInbox);
+                element.addEventListener("click", sendFollowRequestToInbox);
             }
   
         }

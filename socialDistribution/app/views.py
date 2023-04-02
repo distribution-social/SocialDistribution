@@ -265,30 +265,28 @@ def add_to_sent_request(request):
 
 @login_required(login_url="/login")
 @require_http_methods(["GET", "POST"])
-def profile(request, author_id):
+def profile(request, server_name, author_id):
     user = request.user
     userAuthor = Author.objects.get(username=request.user.username)
     if request.method == 'GET':
-
-        author = Author.objects.get(id=author_id)
-        username = author.username
-        following = author.following.all().order_by('displayName')
-        followers = author.followers.all().order_by('displayName')
-        friends = list(following & followers)
-        requests = Author.objects.get(id=author.id).follow_requests.all()
-        posts = get_posts_visible_to_user(userAuthor, author, friends)
-        context = {"posts": posts, "comment_form": CommentForm()}
-        context.update({"requests": requests, "mode": "received"})
-        context.update({"author": author, "following": following, "followers": followers, "friends": friends, "user": userAuthor, "active_tab": "posts", "edit_profile_form": EditProfileForm(instance=author)})
-        context.update({"auth_headers": getAuthHeadersJson(author.host), "server_host": request.get_host()})
-        serializedFollowings = AuthorSerializer(following, many=True, context={'request':request,'kwargs':{}}).data
-        context.update({"serialized_followings": json.dumps(serializedFollowings)})
-        try:
-            userFollows = userAuthor.following.get(username=username)
-            context.update({"user_is_following": "True"})
-        except:
-            context.update({"user_is_following": "False"})
-
+        context = {"user": userAuthor, "server_name": server_name, "author_id": author_id, "user_id": str(userAuthor.id)}
+        if str(userAuthor.id) == author_id:
+            requests = Author.objects.get(id=userAuthor.id).follow_requests.all()
+            context.update({"requests": requests, "mode": "received", "edit_profile_form": EditProfileForm(instance=userAuthor)})
+        else:
+            try:
+                userFollows = userAuthor.following.get(id=author_id)
+                context.update({"user_is_following": "True"})
+            except:
+                context.update({"user_is_following": "False"})
+        node = ForeignAPINodes.objects.get(nickname=server_name)
+        headers = json.dumps({'Authorization': f"Basic {node.getToken()}", 'Content-Type': 'application/json'})
+        context.update({"auth_headers": headers, "local_server_host": request.get_host(), "server_url": node.base_url})
+        context.update({"nicknameTable": getNicknameTable()})
+        print("user.id:", userAuthor.id)
+        print("author_id:", author_id)
+        print(str(userAuthor.id) == str(author_id))
+    
         id_to_follow = author_id
 
         # Get the author object
@@ -304,7 +302,7 @@ def profile(request, author_id):
         else:
             context.update({"user_pending_following": "False"})
 
-        host = author.host
+        host = author_to_follow.host
 
         #foreignNode = ForeignAPINodes.objects.get(base_url=host)
         foreignNode = getApiNodeWrapper(host)
@@ -330,31 +328,6 @@ def profile(request, author_id):
             userAuthor.sent_requests.add(author_for_action)
 
         return redirect(reverse("profile", kwargs={"author_id": userAuthor.id}))
-
-@login_required(login_url="/login")
-@require_http_methods(["GET", "POST"])
-def profile2(request, server_name, author_id):
-    user = request.user
-    userAuthor = Author.objects.get(username=request.user.username)
-    if request.method == 'GET':
-        context = {"user": userAuthor, "server_name": server_name, "author_id": author_id, "user_id": str(userAuthor.id)}
-        if str(userAuthor.id) == author_id:
-            requests = Author.objects.get(id=userAuthor.id).follow_requests.all()
-            context.update({"requests": requests, "mode": "received", "edit_profile_form": EditProfileForm(instance=userAuthor)})
-        else:
-            try:
-                userFollows = userAuthor.following.get(id=author_id)
-                context.update({"user_is_following": "True"})
-            except:
-                context.update({"user_is_following": "False"})
-        node = ForeignAPINodes.objects.get(nickname=server_name)
-        headers = json.dumps({'Authorization': f"Basic {node.getToken()}", 'Content-Type': 'application/json'})
-        context.update({"auth_headers": headers, "local_server_host": request.get_host(), "server_url": node.base_url})
-        context.update({"nicknameTable": getNicknameTable()})
-        print("user.id:", userAuthor.id)
-        print("author_id:", author_id)
-        print(str(userAuthor.id) == str(author_id))
-        return render(request, 'profile.html', context)
 
 def getNicknameTable():
     nodes = ForeignAPINodes.objects.all()
