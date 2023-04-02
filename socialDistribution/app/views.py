@@ -429,6 +429,9 @@ def true_friends(request, username):
         return render(request, 'true-friends.html', context)
 
 
+
+
+
 @login_required(login_url="/login")
 @require_http_methods(["GET", "POST"])
 def received_requests(request, author_id):
@@ -473,6 +476,9 @@ def received_requests(request, author_id):
             # Remove this follow request on our side
             current_user_author.follow_requests.remove(sender_author)
             response = "Accepted"
+
+            # Send a type == "accept" to the user's node
+            send_post_request("accept", sender_author, current_user_author)
 
         elif action == "decline":
 
