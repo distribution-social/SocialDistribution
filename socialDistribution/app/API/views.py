@@ -567,13 +567,17 @@ class InboxView(BasicAuthMixin,APIView):
                     # Add the object as one of our current author's following
                     author.following.add(object)
 
+                    # Remove from sent_requests
+                    author.sent_requests.remove(object)
+
+                    # Remove from follow_requests
+                    object.follow_requests.remove(author)
+
                     # add_to_inbox(actor, author, 'accept', actor)
                     print(f"{object.displayName} accepted {author.displayName}'s follow request")
                 else:
 
                     # add_to_inbox(actor, author, 'accept', actor)
-                    print(
-                        f"{object.displayName} accepted {author.displayName}'s follow request")
 
                     return Response(f"Already following {object.displayName}", status=status.HTTP_400_BAD_REQUEST)
                 
