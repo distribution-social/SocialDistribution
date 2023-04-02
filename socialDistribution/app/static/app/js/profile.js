@@ -87,7 +87,7 @@ function getAndSetProfileCard() {
             if (element) {
                 element.addEventListener("click", sendFollowRequestToInbox);
             }
-  
+
         }
     });
 
@@ -117,7 +117,7 @@ function sendFollowRequestToInbox(e){
         var currentUserObject = currentUserData;
         var foreignUserObject;
         var follow_object = {
-            type: "follow",      
+            type: "follow",
             summary: `${user_first_name} wants to follow ${author_first_name}`,
         }
 
@@ -135,7 +135,7 @@ function sendFollowRequestToInbox(e){
 
             if (foreign_node_token){
                 headers = new Headers({
-                'Authorization': 'Basic '+foreign_node_token, 
+                'Authorization': 'Basic '+foreign_node_token,
                 'Content-Type': 'application/json'
                 })
             } else {
@@ -143,23 +143,23 @@ function sendFollowRequestToInbox(e){
                 'Content-Type': 'application/json'
                 })
             }
-            
+
             fetch(foreignAuthorURL, {
                 method: "POST",
-                headers: headers, 
+                headers: headers,
                 body: JSON.stringify(follow_object)
             }).then(response => {
                 console.log("-------------Response: ", response.status);
             })
-            
+
             const addToSentRequestURL = new URL("add-to-sent", `${window.location.protocol}//` + window.location.host);
-            
+
             const sentRequestObject = {user_id:user_id, author_id:author_id};
 
             fetch(addToSentRequestURL, {
                 method: "POST",
                 headers: new Headers({
-                'Authorization': 'Basic '+btoa('server1:123'), 
+                'Authorization': 'Basic '+btoa('server1:123'),
                 'Content-Type': 'application/json'
             }),
                 body: JSON.stringify(sentRequestObject)
@@ -183,7 +183,7 @@ async function getSingleAuthorInfo(url, token){
 
     if (token){
         headers = new Headers({
-                'Authorization': 'Basic '+token, 
+                'Authorization': 'Basic '+token,
                 'Content-Type': 'application/json'
         })
     } else {
@@ -198,7 +198,7 @@ async function getSingleAuthorInfo(url, token){
     const currentAuthorResponseJSON = await currentAuthorResponse.json();
 
     return currentAuthorResponseJSON;
-  
+
 }
 
 function setFollowers(followers, user_id, author_id, author_host) {
