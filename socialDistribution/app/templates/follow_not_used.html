@@ -37,7 +37,7 @@
 
 <div class="btn-group" role="group" aria-label="Basic example">
 
-    <a type="button" class="btn btn-primary" href="{% url 'profile' author_id=person.username|convert_username_to_id %}" target="_blank"><i class="bi bi-person-fill">&nbsp;Profile</i></a>
+    <a type="button" class="btn btn-primary" href="{% url 'profile' server_name=person.host|get_server_name author_id=person.username|convert_username_to_id %}" target="_blank"><i class="bi bi-person-fill">&nbsp;Profile</i></a>
         <a type="button" href="{{person.github}}" target="_blank" class="btn btn-secondary"><i class="bi bi-github">&nbsp;GitHub</i></a>
 
 </div>

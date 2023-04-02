@@ -12,7 +12,7 @@ Link: https://www.bootdey.com/snippets/view/bs4-s
       <div class="media">
         <div class="d-flex flex-row">
           <div class="m-2">
-            <a class="d-flex" href="{% url 'profile' author_id=post.author.url|extract_uuid %}">
+            <a class="d-flex" href="{% url 'profile' server_name=post.author.host|get_server_name author_id=post.author.url|extract_uuid %}">
               {% if post.author.profileImage %}
               <img src="{{post.author.profileImage}}" class="object-fit-cover user-avatar-circle rounded-circle my-1" alt=""></img>
               {% else %}
@@ -29,7 +29,7 @@ Link: https://www.bootdey.com/snippets/view/bs4-s
 
         </div>
 
-        <a class="text-muted m-2" href="{% url 'profile' author_id=post.author.url|extract_uuid %}" style="text-decoration: none;">
+        <a class="text-muted m-2" href="{% url 'profile' server_name=post.author.host|get_server_name author_id=post.author.url|extract_uuid %}" style="text-decoration: none;">
           {{post.author.displayName}}
         </a>
         <span class="text-muted m-2" style="text-decoration: none;">

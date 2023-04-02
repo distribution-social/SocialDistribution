@@ -28,6 +28,14 @@ def convert_username_to_id(value):
     return Author.objects.get(username=value).id
 
 @register.filter
+def get_server_name(host):
+  try:
+    nickname = ForeignAPINodes.objects.get(base_url__contains=host).nickname
+    return nickname
+  except:
+    return 'Local'
+
+@register.filter
 def extract_uuid(id):
     return id.split("/")[-1]
 
@@ -35,7 +43,6 @@ def extract_uuid(id):
 def readable_time(time):
   date = parse(time)
   return date.strftime('%B %d, %Y | %I:%M %p')
-
 
 @register.filter
 def convert_uuid_to_hex(uuid_string):
