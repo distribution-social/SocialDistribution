@@ -44,8 +44,11 @@ urlpatterns = [
     path('add-to-sent', views.add_to_sent_request, name='add-to-sent'),
 
 
-    path('posts', views.post_detail, name='post_detail'),
+    # path('posts', views.post_detail, name='post_detail'),
     path('posts/<str:node>/<str:author_id>/<str:post_id>', ajax_views.post_details, name='node-post-detail'),
+    path('github/<str:username>', views.github_activity, name='github'),
+
+    path('posts/<str:post_id>', views.post_detail, name='post_detail'),
     path('posts/<str:post_id>/edit', views.post_edit, name='post_edit'),
     path('comment', views.add_comment, name='comment-form'),
     path('posts/<str:post_id>/like', views.add_like_post, name='add_like_post'),

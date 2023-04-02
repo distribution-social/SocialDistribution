@@ -22,6 +22,9 @@ export function addPostLikeEventListener(post,author){
           headers: {
             Authorization: 'Basic '+post.auth_token
           },
+          xhrFields: {
+            withCredentials: true
+          },
           success: function (result) {
             showAndDismissAlert("info",result)
             // console.log(result)
@@ -73,6 +76,9 @@ export function addCommentLikeEventListener(comment,author){
           headers: {
             Authorization: 'Basic '+comment.auth_token
           },
+          xhrFields: {
+            withCredentials: true
+          },
           success: function (result) {
             showAndDismissAlert("info",result)
             // console.log(result)
@@ -123,6 +129,9 @@ export function addDeletePostListener(uuid){
             data: {
                 csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
                 action: 'delete_post'
+            },
+            xhrFields: {
+              withCredentials: true
             },
             success: function (result) {
 
