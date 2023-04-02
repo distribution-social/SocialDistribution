@@ -54,6 +54,8 @@ def send_post_request(type, actor, object):
     password = foreign_api_node.password
     # token = f"{foreign_api_node.username}:{foreign_api_node.password}"
 
+    print("*" * 1000, username, password)
+
     headers = {
             'Content-Type': 'application/json'
     }
@@ -63,7 +65,7 @@ def send_post_request(type, actor, object):
         "summary": f"{actor.displayName} wants to follow {object.displayName}",
         "actor": {
             "type": "author",
-            "id": actor.id,
+            "id": actor.url,
             "url": actor.url,
             "host": actor.host,
             "displayName": actor.displayName,
@@ -72,7 +74,7 @@ def send_post_request(type, actor, object):
         },
         "object": {
             "type": "author",
-            "id": object.id,
+            "id": object.url,
             "host": object.host,
             "displayName": object.displayName,
             "url": object.url,
@@ -90,6 +92,14 @@ def send_post_request(type, actor, object):
 
     try:
         request = requests.post(url, auth=HTTPBasicAuth(username, password), headers=headers,json=json)
+
+        print(request.status_code)
+        print(request.text)
+        print(request.json())
+        print(request.reason)
+
+        request.raise_for_status()
+
     except requests.exceptions.HTTPError as errh:
         print("Http Error:", errh)
     except requests.exceptions.ConnectionError as errc:
