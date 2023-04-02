@@ -8,6 +8,7 @@ Date Accessed: Feb 15, 2023
 Link: https://www.bootdey.com/snippets/view/bs4-s
 -->
 <!doctype html>
+<script type="module" src="https://md-block.verou.me/md-block.js"></script>
 <html lang="en">
   {% block css %}<link rel="stylesheet" type="text/css" href="{% static 'app/posts.css' %}">{% endblock %}
 
@@ -47,7 +48,17 @@ Link: https://www.bootdey.com/snippets/view/bs4-s
       </div>
     </div>
     <div class="card-body">
-      <p class="card-body">{{post.content}}</p>
+      {% if post.contentType == "image/png;base64" or post.contentType == "image/jpeg;base64" %} 
+        <img src="data:image;base64,{{ post.content }}" class="card-img-top" alt="...">
+      {% elif post.contentType == "text/plain" %}
+        <div class="card-body">
+          {{post.content}}
+        </div>
+      {% elif post.contentType == "text/markdown" %}
+        <md-block class="card-body">
+          {{post.content}}
+        </md-block>
+      {% endif %}
     </div>
     <div class="card-footer likes-reply">
 
