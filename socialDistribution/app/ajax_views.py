@@ -46,7 +46,7 @@ def explore_posts(request):
             res = requests.get(url, headers=headers, params=params)
 
             authors = json.loads(res.text)
-            # if base_url == "https://sd7-api.herokuapp.com/api/":
+            # if base_url == "https://bigger-yoshi.herokuapp.com/api/":
             #     import pdb; pdb.set_trace()
             for author in authors['items']:
                 if author['id']:
