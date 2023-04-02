@@ -1,4 +1,3 @@
-import { addPostLikeEventListener, addDeletePostListener } from "./postCard.js"
 import { extractUUID } from "./utility.js";
 import { makeAjaxCall, makeAjaxCallAsync } from "./ajax.js";
 
@@ -17,10 +16,35 @@ $(document).ready(function() {
     makeAjaxCallAsync("/home_posts","GET",null,headers,
     function (response,status){
 
-        if(response.trim() == ''){
+        if(response.posts.length == 0){
             $('#post-stream').html('No posts to show, use the \'Explore\' tab to find people to follow.')
         }else{
-            $('#post-stream').html(response);
+            $.each(response.posts, function(index, post) {
+                // console.log(post)
+                const postData = {
+                    uuid: extractUUID(post.id),
+                    ...post
+                }
+                postData.author.id = extractUUID(post.author.id)
+                var promises = [];
+                promises.push(
+                    $.ajax({
+                        url: '/post_card.html',
+                        type: 'POST',
+                        data: JSON.stringify(postData),
+                        contentType: 'application/json',
+                        headers: headers
+                    }))
+            Promise.all(promises).then(function(datas){
+                for(var y = 0; y < datas.length; y++){
+                        // Append the new item to the list
+                        $('#post-stream').append(datas[y]);
+                        spinner.style.display = 'none';
+                        addPostLikeEventListener(postData,current_author)
+                        addDeletePostListener(postData.uuid)
+                }
+            });
+            });
         }
         spinner.style.display = 'none';
     },

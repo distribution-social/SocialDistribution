@@ -131,7 +131,11 @@ var github_url = '{{author.github}}'
                         <div class="tab-content" id="nav-tabContent">
                             <div class="tab-pane fade show active"
                                 id="nav-public-posts" role="tabpanel" aria-labelledby="nav-public-posts-tab" tabindex="0">
-                                <!--{% include 'posts_tab.html' %}-->
+                                <div class="d-flex justify-content-center">
+                                    <div id="spinner2" class="spinner-border text-primary mt-2" style="display: none;" role="status"></div>
+                                </div>
+                                <div id="post-stream" class="container-fluid d-flex align-items-center flex-column p-3" style="max-width: 1000px;">
+                                </div>
                             </div>
 
                             <div class="tab-pane fade"

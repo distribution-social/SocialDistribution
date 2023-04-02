@@ -148,6 +148,17 @@ def filter_authors_profile(author_id,authors):
     authors = [d for d in authors if author_id in d['id']]
     return authors
 
+def filter_posts(posts,visibility=['PUBLIC']):
+    posts = [d for d in posts if d['visibility'] in visibility and not bool(d['unlisted'])]
+    return posts
+
+def sort_and_tag_posts(posts:list):
+    posts.sort(key=lambda x: parse(str(x['published'])).replace(tzinfo=timezone.get_current_timezone()),reverse=True)
+    for post in posts:
+        post['tag'] = get_node_nickname(post['author']['host'])
+        post['uuid'] = post['id'].split("/")[-1]
+    return posts
+
 def get_auth_token(host):
     try:
         foreignNode = ForeignAPINodes.objects.get(base_url__contains=host)
@@ -173,47 +184,33 @@ def get_node_host(nickname):
 def public_posts(request):
     authors = get_authors()
     posts = get_posts(authors)
-
-    posts = [d for d in posts if d['visibility'] in ['PUBLIC'] and not bool(d['unlisted'])]
-    posts.sort(key=lambda x: parse(str(x['published'])).replace(tzinfo=timezone.get_current_timezone()),reverse=True)
-
-    for post in posts:
-        post['tag'] = get_node_nickname(post['author']['host'])
-        post['uuid'] = post['id'].split("/")[-1]
-        if not post.get('likeCount'):
-            post = get_like_count(post)
+    posts = filter_posts(posts)
+    posts = sort_and_tag_posts(posts)
     context = {'user': request.user,'posts': posts, "comment_form": CommentForm()}
-    return render(request, 'post_stream.html', context)
+    return JsonResponse({'posts': posts})
+    # return render(request, 'post_stream.html', context)
 
+@login_required(login_url="/login")
 @require_http_methods(["GET"])
 def home_posts(request):
     authors = get_authors()
     authors = filter_authors_following(request.user,authors)
     posts = get_posts(authors)
-    posts = [d for d in posts if d['visibility'] in ['PUBLIC','FRIENDS'] and not bool(d['unlisted'])]
-    posts.sort(key=lambda x: parse(str(x['published'])).replace(tzinfo=timezone.get_current_timezone()),reverse=True)
-    for post in posts:
-        post['tag'] = get_node_nickname(post['author']['host'])
-        post['uuid'] = post['id'].split("/")[-1]
-        if not post.get('likeCount'):
-            post = get_like_count(post)
+    posts = filter_posts(posts,['PUBLIC','FRIENDS'])
+    posts = sort_and_tag_posts(posts)
     context = {'user': request.user,'posts': posts, "comment_form": CommentForm()}
-    return render(request, 'post_stream.html', context)
+    return JsonResponse({'posts': posts})
 
+@login_required(login_url="/login")
 @require_http_methods(["GET"])
 def profile_posts(request,author_id):
     authors = get_authors()
     authors = filter_authors_profile(author_id,authors)
     posts = get_posts(authors)
-    posts = [d for d in posts if d['visibility'] in ['PUBLIC','FRIENDS'] and not bool(d['unlisted'])]
-    posts.sort(key=lambda x: parse(str(x['published'])).replace(tzinfo=timezone.get_current_timezone()),reverse=True)
-    for post in posts:
-        post['tag'] = get_node_nickname(post['author']['host'])
-        post['uuid'] = post['id'].split("/")[-1]
-        if not post.get('likeCount'):
-            post = get_like_count(post)
+    posts = filter_posts(posts,['PUBLIC','FRIENDS'])
+    posts = sort_and_tag_posts(posts)
     context = {'user': request.user,'posts': posts, "comment_form": CommentForm()}
-    return render(request, 'post_stream.html', context)
+    return JsonResponse({'posts': posts})
 
 @login_required(login_url="/login")
 @require_http_methods(["GET"])

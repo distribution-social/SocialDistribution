@@ -18,11 +18,15 @@ class AuthorListAPIView(BasicAuthMixin,APIView):
     def get(self, request):
         """Returns a list of local authors on the node.
         """
+        page_number = request.GET.get('page')
+        page_size = request.GET.get('size')
         authors = Author.objects.filter(host=settings.HOST + "/api/",confirmed=True).order_by('displayName')
-        paginator = CustomPaginator()
-        result_page = paginator.paginate_queryset(authors, request)
-        serializer = AuthorSerializer(result_page, many=True,context={'request':request,'kwargs':{}})
-
+        if page_number or page_size:
+            paginator = CustomPaginator()
+            result_page = paginator.paginate_queryset(authors, request)
+            serializer = AuthorSerializer(result_page, many=True,context={'request':request,'kwargs':{}})
+        else:
+            serializer = AuthorSerializer(authors, many=True,context={'request':request,'kwargs':{}})
         data = {
             "type": "authors",
             "items": serializer.data

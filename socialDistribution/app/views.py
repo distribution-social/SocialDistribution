@@ -34,7 +34,7 @@ class HttpResponseUnauthorized(HttpResponse):
 @require_http_methods(["GET"])
 def root(request):
     # redirects to home page
-    return redirect(reverse('home'))
+    return redirect(reverse('explore'))
 
 
 @require_http_methods(["GET", "POST"])
@@ -107,7 +107,6 @@ def home(request):
 
 
 @require_http_methods(["GET"])
-@login_required(login_url="/login")
 def explore(request):
     context = {"comment_form": CommentForm()}
     return render(request, 'explore_stream.html', context)
@@ -164,7 +163,7 @@ def add_post(request):
 
                 add_to_inbox(user, receiver, Activity.POST, post)
 
-            return redirect(reverse('post_detail', kwargs={'post_id': post.uuid}))
+            return redirect(reverse('node-post-detail', kwargs={'node': 'Local','author_id': user.id,'post_id': post.uuid}))
     elif request.method == "GET":
         context = {"title": "Create a Post",
                    "form": PostForm(), "action": "PUBLISH"}
@@ -213,7 +212,7 @@ def signin(request):
 def signout(request):
     if request.method == "POST":
         logout(request)
-        return redirect(reverse('home'))
+        return redirect(reverse('explore'))
 
 
 @login_required(login_url="/login")
@@ -368,9 +367,6 @@ def profile2(request, server_name, author_id):
         headers = json.dumps({'Authorization': f"Basic {node.getToken()}", 'Content-Type': 'application/json'})
         context.update({"auth_headers": headers, "local_server_host": request.get_host(), "server_url": node.base_url})
         context.update({"nicknameTable": getNicknameTable()})
-        print("user.id:", userAuthor.id)
-        print("author_id:", author_id)
-        print(str(userAuthor.id) == str(author_id))
         return render(request, 'profile.html', context)
 
 def getNicknameTable():
@@ -678,7 +674,7 @@ def edit_profile(request, author_id):
         form = EditProfileForm(request.POST, instance=user)
         if form.is_valid():
             form.save()
-            return redirect(reverse('profile', kwargs={'author_id': author_id}))
+            return redirect(reverse('profile', kwargs={'server_name': 'Local','author_id': author_id}))
         else:
             print(form.errors)
             return HttpResponseBadRequest("Invalid form")

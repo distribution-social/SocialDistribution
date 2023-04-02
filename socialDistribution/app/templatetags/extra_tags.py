@@ -25,7 +25,7 @@ def is_following(user_id,id):
 
 @register.filter
 def convert_username_to_id(value):
-    return Author.objects.get(username=value).id
+  return Author.objects.get(username=value).id
 
 @register.filter
 def get_server_name(host):

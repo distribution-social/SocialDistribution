@@ -74,6 +74,7 @@ urlpatterns = [
     #Ajax Urls (returns JSON response)
     path('public_posts', ajax_views.public_posts, name='posts-explore'),
     path('home_posts', ajax_views.home_posts, name='posts-home'),
+    path('profile_posts/<str:author_id>', ajax_views.profile_posts, name='posts-profile'),
 
 
     #API urls

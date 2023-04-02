@@ -5,23 +5,25 @@
 //  https://www.w3schools.com/jsref/prop_element_childelementcount.asp
 
 import { extractUUID, uuidToHex } from "./utility.js";
-
+import { getGitHubUsername, fetchActivitiesJSON, createHTMLCard } from "./github.js";
+import { makeAjaxCall, makeAjaxCallAsync } from "./ajax.js";
 
 $(document).ready(function() {
-    console.log("host:"+author_host);
-    console.log(auth_headers)
+    // console.log("host:"+author_host);
+    // console.log(auth_headers)
 
     getAndSetProfileCard();
     //setFollowing(serialized_followings, user_id, author_id, author_host);
 
+
+
     // get followers from server and use data to set followers and true friends
     var followersUrl;
-    if (author_host.includes("p2psd")){
+    if (author_host.includes("p2psd") || author_host.includes("bigger-yoshi")){
         followersUrl = new URL("authors/" + author_id + "/followers", author_host);
     } else {
         followersUrl = new URL("authors/" + uuidToHex(author_id) + "/followers", author_host);
     }
-    console.log(auth_headers);
     fetch(followersUrl, {method: "GET", headers: auth_headers}).then((response) => {
         if (response.status === 200) { // OK
             return response.json();
@@ -34,17 +36,19 @@ $(document).ready(function() {
         setFriends(followers, author_id);
         return;
     })
+
 });
 
 function getAndSetProfileCard() {
     let authorProfileUrl;
-    if (author_host.includes("p2psd")){
+    if (author_host.includes("p2psd") || author_host.includes("bigger-yoshi")){
         authorProfileUrl = new URL("authors/" + author_id, author_host);
     } else {
         authorProfileUrl = new URL("authors/" + uuidToHex(author_id), author_host);
     }
 
     console.log(author_host);
+    console.log(authorProfileUrl);
     // set profile card info
     fetch(authorProfileUrl, {method: "GET", headers: auth_headers}).then((response) => {
         if (response.status === 200) { // OK
@@ -57,11 +61,59 @@ function getAndSetProfileCard() {
         if (data.profileImage !== null && data.profileImage !== "") {$(profileCard).find(".profile_image").attr("src", data.profileImage);}
         $(profileCard).find(".profile_github").attr("href", data.github);
         $(profileCard).find(".profile_display_name").text(data.displayName);
+        var github_username = getGitHubUsername(data.github);
+        fetchActivitiesJSON(github_username).then(activities => {
+            const target = document.getElementById("github_activity_stream");
+            for (var activity of activities) {
+            let html_element = createHTMLCard(activity.id, activity.link, activity.title, activity.published, activity.updated, activity.authors);
+            target.innerHTML += html_element;
+            }
+        });
+        makeAjaxCallAsync("/profile_posts/"+author_id,"GET",null,auth_headers,
+        function (response,status){
+            if(response.posts.length == 0){
+                $('#post-stream').html('No posts to show, use the \'Explore\' tab to find people to follow.')
+            }else{
+                $.each(response.posts, function(index, post) {
+                    // console.log(post)
+                    const postData = {
+                        uuid: extractUUID(post.id),
+                        ...post
+                    }
+                    let headers = {
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    }
+                    postData.author.id = extractUUID(post.author.id)
+                    var promises = [];
+                    promises.push(
+                        $.ajax({
+                            url: '/post_card.html',
+                            type: 'POST',
+                            data: JSON.stringify(postData),
+                            contentType: 'application/json',
+                            headers: headers
+                        }))
+                Promise.all(promises).then(function(datas){
+                    for(var y = 0; y < datas.length; y++){
+                            // Append the new item to the list
+                            $('#post-stream').append(datas[y]);
+                            spinner.style.display = 'none';
+                            addPostLikeEventListener(postData,current_author)
+                            addDeletePostListener(postData.uuid)
+                    }
+                });
+                });
+            }
+            spinner.style.display = 'none';
+        },
+        function (error,status){
+            console.log(error)
+        });
         return;
     })
     // handle follow unfollow button
     let authorIsFollowingUrl;
-    if (author_host.includes("p2psd")){
+    if (author_host.includes("p2psd") || author_host.includes("bigger-yoshi")){
         authorIsFollowingUrl = new URL("authors/" + author_id + "/followers/" + user_id, author_host);
     } else {
         authorIsFollowingUrl = new URL("authors/" + uuidToHex(author_id) + "/followers/" + uuidToHex(user_id), author_host);
@@ -247,7 +299,7 @@ function setFriends(followers, author_id) {
         $("#friends_tab_stream").text("No True Friends");
     } else {
         for (let follower of followers) {
-            if (author_host.includes("p2psd")){
+            if (author_host.includes("p2psd") || author_host.includes("bigger-yoshi")){
                 var url = new URL("authors/" + uuidToHex(extractUUID(follower.id)) + "/followers/" + author_id, author_host);
             } else {
                 var url = new URL("authors/" + uuidToHex(extractUUID(follower.id)) + "/followers/" + uuidToHex(author_id), author_host);

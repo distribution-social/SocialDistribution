@@ -7,6 +7,10 @@ Link: https://www.bootdey.com/snippets/view/bs4-simple-social-network-post
 Date Accessed: Feb 15, 2023
 Link: https://www.bootdey.com/snippets/view/bs4-s
 -->
+  <script>
+    var post = "{{ post|escapejs }}";
+  </script>
+  <script type="module" src="{% static '../static/app/js/postCard.js' %}"></script>
   <div class="card container-fluid p-0 my-3">
     <div class="card-header">
       <div class="media">
@@ -47,7 +51,7 @@ Link: https://www.bootdey.com/snippets/view/bs4-s
         <strong id="like-count-{{post.uuid|convert_uuid_to_hex}}">{{post.likeCount}}</strong>
       </button>
 
-      {% if user %}
+      {% if user.username %}
         <a type="button" class="d-inline-flex text-muted mx-2" data-bs-toggle="modal" data-bs-target="#new-comment-{{post.uuid|convert_uuid_to_hex}}" style="text-decoration: none;">
           <i class="bi bi-reply mx-1"></i>
           <strong>Reply</strong>
@@ -108,7 +112,7 @@ Link: https://www.bootdey.com/snippets/view/bs4-s
       {% endfor %}
 
     </div>
-    {% if user %}
+    {% if user.username %}
     {% include "new_comment_modal.html" %}
     {% endif %}
   </div>
