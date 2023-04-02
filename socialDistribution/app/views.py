@@ -1,5 +1,8 @@
 from django.shortcuts import render, redirect
 from django.http import *
+from app.API.helpers import get_full_uri
+
+from app.API.paginators import CustomPaginator
 from .forms import *
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
@@ -20,7 +23,7 @@ from django.db.models import Q
 from django.conf import settings
 
 import urllib.parse
-from .API.serializers import AuthorSerializer
+from .API.serializers import AuthorSerializer, CommentSerializer, PostSerializer
 
 
 class HttpResponseUnauthorized(HttpResponse):
@@ -149,18 +152,53 @@ def add_post(request):
     if request.method == "POST":
         form = PostForm(request.POST, request.FILES)
         if form.is_valid():
-            # Save the form data to the database
+       
+            post = form.save(user=user)
+            
             if request.POST['visibility'] == 'PRIVATE':
-                post = form.save(user=user, receiver_list = request.POST.getlist('receivers'))
-            else:
-                post = form.save(user=user)
-            for receiver in post.receivers.all():
+                for receiver_id in request.POST.getlist('receivers'):
+                    author = Author.objects.get(id=receiver_id)
+                    foreign_node = get_foreign_API_node(author.host)
+                    if foreign_node:
+                        auth_token = ''
+                        if foreign_node.username:
+                            auth_token = foreign_node.getToken()
 
-                add_to_inbox(user,receiver,Activity.POST,post)
+                        serializer = PostSerializer(post, context={'request':request,'kwargs':{'author_id':receiver_id,'post_id':post.uuid}})
+                        data = serializer.data
+
+                        comments = post.comments.all().order_by('-published')
+                        # paginator = CustomPaginator()
+                        # commentResultPage = paginator.paginate_queryset(comments, request)
+                        context = {'request':request,'kwargs':{'author_id':receiver_id,'post_id':data['id'].split("/")[-1]}}
+                        comment_serializer = CommentSerializer(comments, many=True, context=context)
+
+                        response = {
+                            "type": "comments",
+                            "post": get_full_uri(request,'api-post-detail',context['kwargs']),
+                            "id": get_full_uri(request,'api-post-comments',context['kwargs']),
+                            "comments": comment_serializer.data,
+                        }
+
+                        data["commentSrc"] = response
+                        data['count'] = len(comments)
+
+                        url = f"{author.url}/inbox"
+                        headers = {
+                            "Authorization": f"Basic {auth_token}",
+                            "Content-Type": 'application/json; charset=utf-8',
+
+                        }
+                        response = requests.post(url, data=json.dumps(data), headers=headers)
+                        response.raise_for_status()
+
+                    else:
+                        raise("Error finding foreign Node")
+
 
             return redirect(reverse('post_detail',kwargs={'post_id':post.uuid}))
     elif request.method == "GET":
-        context = {"title": "Create a Post", "form": PostForm(), "action": "PUBLISH"}
+        context = {"title": "Create a Post", "form": PostForm(author=user), "action": "PUBLISH"}
         return render(request, 'post.html', context)
 
 

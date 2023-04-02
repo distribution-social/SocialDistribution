@@ -26,7 +26,7 @@ function sharePost(post) {
         followerObj = JSON.parse(checkboxes[i].value)
         // url = followerObj.url + "/inbox"
 
-        url = 'http://127.0.0.1:8000/api/authors/2dbfa6cd-d99f-4756-977e-82873b2e51fe/inbox'
+        url = 'http://127.0.0.1:8000/api/authors/78bc8cfc-58c5-442c-a668-966eaded48fd/inbox'
 
         
         pendingRequests++

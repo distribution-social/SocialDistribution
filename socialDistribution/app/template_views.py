@@ -14,7 +14,6 @@ def get_post_card_template(request):
     # jsonFollowers = json.loads(followers)
     jsonFollowers = []
     for follower in followers:
-   
         arr = follower.host.split(":")
         arr[0] ='http'
         httpHost = ":".join(arr)
@@ -27,10 +26,10 @@ def get_post_card_template(request):
             try:
                 foreignNode = ForeignAPINodes.objects.get(base_url=httpsHost)
             except:
+                # import pdb; pdb.set_trace()
                 print("Something wrong w foreign node")
 
        
-        
         auth_token = ''
         if foreignNode.username:
             auth_token = foreignNode.getToken()
