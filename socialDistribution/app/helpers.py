@@ -84,6 +84,9 @@ def send_post_request(type, actor, object):
     }
 
     # Set the URL to the actor's API Inbox URL
+    
+    # url = actor.url.replace("https://www.distribution.social", "http://127.0.0.1:8000") + "/inbox"
+
     url = actor.url + "/inbox"
 
     print("Sending!!!!!!")
