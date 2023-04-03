@@ -61,8 +61,6 @@ function getAndSetProfileCard() {
         authorProfileUrl = new URL("authors/" + uuidToHex(author_id), author_host);
     }
 
-    // console.log(author_host);
-    // console.log(authorProfileUrl);
     // set profile card info
     fetch(authorProfileUrl, {method: "GET", redirect: "follow", headers: auth_headers}).then((response) => {
         if (response.status === 200) { // OK
@@ -157,6 +155,7 @@ function getAndSetProfileCard() {
         else if (data.accepted != null && String(data.accepted).toLowerCase() === "true") is_following = true;
         else is_following = false;
         if (is_following) {
+            if (author_host.includes("bigger-yoshi"));
             $("#follow_unfollow_button").attr("name", "unfollow").val(author_id).text("Unfollow");
         } else {
             $("#follow_unfollow_button").attr("name", "follow").val(author_id).text("Request to Follow");
@@ -169,6 +168,8 @@ function getAndSetProfileCard() {
     });
 
 }
+
+
 
 function sendFollowRequestToInbox(e){
 

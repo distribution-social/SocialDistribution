@@ -128,7 +128,7 @@ def author_search(request):
 
         if search_term:
             search_term = Author.objects.filter(
-                username__icontains=search_term)[:5]
+                username__icontains=search_term, host__contains="distribution.social" )[:5]
 
             data = serializers.serialize('json', list(
                 search_term), fields=('id', 'username'))
