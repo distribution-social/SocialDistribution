@@ -22,11 +22,15 @@ class AuthorListAPIView(BasicAuthMixin,APIView):
     def get(self, request):
         """Returns a list of local authors on the node.
         """
+        page_number = request.GET.get('page')
+        page_size = request.GET.get('size')
         authors = Author.objects.filter(host=settings.HOST + "/api/",confirmed=True).order_by('displayName')
-        paginator = CustomPaginator()
-        result_page = paginator.paginate_queryset(authors, request)
-        serializer = AuthorSerializer(result_page, many=True,context={'request':request,'kwargs':{}})
-
+        if page_number or page_size:
+            paginator = CustomPaginator()
+            result_page = paginator.paginate_queryset(authors, request)
+            serializer = AuthorSerializer(result_page, many=True,context={'request':request,'kwargs':{}})
+        else:
+            serializer = AuthorSerializer(authors, many=True,context={'request':request,'kwargs':{}})
         data = {
             "type": "authors",
             "items": serializer.data
@@ -455,7 +459,7 @@ class LikedView(BasicAuthMixin,APIView):
         }
 
         return Response(response,status=status.HTTP_200_OK)
-    
+
 class PostImageView(BasicAuthMixin, APIView):
      def get(self,request,author_id,post_id):
         """Gets a image for image post."""
@@ -470,7 +474,7 @@ class PostImageView(BasicAuthMixin, APIView):
         elif post.content_type == "image/jpeg;base64":
             content = post.content
             return Response(content, status=status.HTTP_200_OK)
-        
+
         return Response({"error": "Image does not exist."}, status=status.HTTP_404_NOT_FOUND)
 
 class InboxView(BasicAuthMixin,APIView):

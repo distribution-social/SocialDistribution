@@ -7,14 +7,14 @@ Link: https://www.bootdey.com/snippets/view/bs4-simple-social-network-post
 Date Accessed: Feb 15, 2023
 Link: https://www.bootdey.com/snippets/view/bs4-s
 -->
+
 <!doctype html>
 {% load static %}
 {% load extra_tags %}
 <script type="module" src="https://md-block.verou.me/md-block.js"></script>
 <html lang="en">
   {% block css %}<link rel="stylesheet" type="text/css" href="{% static 'app/posts.css' %}">{% endblock %}
-
-  {% if user %}
+  {% if user.username %}
   {% csrf_token %}
   {% endif %}
   <div class="card container-fluid p-0 my-3">
@@ -22,7 +22,7 @@ Link: https://www.bootdey.com/snippets/view/bs4-s
       <div class="media">
         <div class="d-flex flex-row">
           <div class="m-2">
-            <a class="d-flex" href="">
+            <a class="d-flex" href="{% url 'profile' server_name=post.author.host|get_server_name author_id=post.author.url|extract_uuid %}">
               {% if post.author.profileImage %}
               <img src="{{post.author.profileImage}}" class="object-fit-cover user-avatar-circle rounded-circle my-1" alt=""></img>
               {% else %}
@@ -32,25 +32,23 @@ Link: https://www.bootdey.com/snippets/view/bs4-s
           </div>
           <div class="m-2">
             <h4>
-              <a class="card-title" href="{% url 'post_detail' post_id=post.uuid|convert_uuid_to_hex %}" style="text-decoration: none;">{{post.title}}</a>
+              <a class="card-title" href="{% url 'node-post-detail' node=post.tag author_id=post.author.url|extract_uuid post_id=post.uuid %}" style="text-decoration: none;">{{post.title}}</a>
             </h4>
-
-              <span style="border: 1px solid black; background-color: #f5d442; border-radius:10%; color: black;">{{post.tag}}</span>
+            <span class="node-tag">{{post.tag}}</span>
           </div>
 
         </div>
 
-        <a class="text-muted m-2" href="" style="text-decoration: none;">
+        <a class="text-muted m-2" href="{% url 'profile' server_name=post.author.host|get_server_name author_id=post.author.url|extract_uuid %}" style="text-decoration: none;">
           {{post.author.displayName}}
         </a>
         <span class="text-muted m-2" style="text-decoration: none;">
-          {{post.date_published}}
-          {{post.published}}
+          {{post.published|readable_time}}
         </span>
       </div>
     </div>
     <div class="card-body">
-      {% if post.contentType == "image/png;base64" or post.contentType == "image/jpeg;base64" %} 
+      {% if post.contentType == "image/png;base64" or post.contentType == "image/jpeg;base64" %}
         <img src="data:image;base64,{{ post.content }}" class="card-img-top" alt="...">
       {% elif post.contentType == "text/plain" %}
         <div class="card-body">
@@ -69,7 +67,7 @@ Link: https://www.bootdey.com/snippets/view/bs4-s
         <strong id="like-count-{{post.uuid|convert_uuid_to_hex}}">{{post.likeCount}}</strong>
       </button>
 
-      {% if user %}
+      {% if user.username %}
         <a type="button" class="d-inline-flex text-muted mx-2" data-bs-toggle="modal" data-bs-target="#new-comment-{{post.uuid|convert_uuid_to_hex}}" style="text-decoration: none;">
           <i class="bi bi-reply mx-1"></i>
           <strong>Reply</strong>
@@ -126,19 +124,12 @@ Link: https://www.bootdey.com/snippets/view/bs4-s
 
     <div class="collapse" id="collapse_{{post.uuid}}">
 
-      {% for comment in post.commentSrc.comments %}
-
-      <div class="card-footer">
-        {% include "comment.html" %}
-      </div>
-
-      {% endfor %}
 
     </div>
-      {% if user %}
-      {% include "new_comment_modal.html" %}
-      {% endif %}
-    </div>
+    {% if user.username %}
+    {% include "new_comment_modal.html" %}
+    {% endif %}
+  </div>
 
     {% include "share_post_modal.html" %}
 </html>

@@ -5,6 +5,7 @@ from  django.http import JsonResponse
 from django.core import serializers
 import json
 
+
 def current_author(request):
   try:
     author = Author.objects.get(username=request.user.username)

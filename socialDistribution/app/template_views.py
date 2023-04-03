@@ -4,32 +4,31 @@ import json
 from .forms import CommentForm
 from .models import *
 from django.contrib.auth import get_user
-
+from urllib.parse import urlparse
 
 def get_post_card_template(request):
     post_data = request.body
-    author = Author.objects.get(username=request.user.username)
-    followers = author.followers.all()
-    
+    try:
+        author = Author.objects.get(username=request.user.username)
+        followers = author.followers.all()
+    except:
+        followers = []
+
     # jsonFollowers = json.loads(followers)
     jsonFollowers = []
     for follower in followers:
-        arr = follower.host.split(":")
-        arr[0] ='http'
-        httpHost = ":".join(arr)
-        arr[0] ='https'
-        httpsHost = ":".join(arr)
+        parsed = urlparse(follower.host)
         foreignNode = None
         try:
-            foreignNode = ForeignAPINodes.objects.get(base_url=httpHost)
+            foreignNode = ForeignAPINodes.objects.get(base_url__contains=parsed.netloc)
         except:
             try:
-                foreignNode = ForeignAPINodes.objects.get(base_url=httpsHost)
+                foreignNode = ForeignAPINodes.objects.get(base_url__contains=parsed.netloc)
             except:
                 # import pdb; pdb.set_trace()
                 print("Something wrong w foreign node")
 
-       
+
         auth_token = ''
         if foreignNode.username:
             auth_token = foreignNode.getToken()
@@ -46,13 +45,13 @@ def get_post_card_template(request):
         return HttpResponse(html)
     else:
         return HttpResponse('Error: Missing post data')
-    
+
 
 def get_post_details_template(request):
     post_data = request.body
     author = Author.objects.get(username=request.user.username)
     followers = author.followers.all()
-    
+
     jsonFollowers = []
     for follower in followers:
         arr = follower.host.split(":")
@@ -70,7 +69,7 @@ def get_post_details_template(request):
                 # import pdb; pdb.set_trace()
                 print("Something wrong w foreign node")
 
-       
+
         auth_token = ''
         if foreignNode.username:
             auth_token = foreignNode.getToken()
@@ -90,7 +89,7 @@ def get_post_details_template(request):
 
 def get_comment_template(request):
     comment = request.body
-  
+
     if comment:
         context = {'user': request.user,'comment': json.loads(comment), "comment_form": CommentForm()}
         html = render_to_string('comment.html', context)

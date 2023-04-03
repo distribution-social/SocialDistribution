@@ -4,15 +4,28 @@
 //  https://stackoverflow.com/questions/3216013/get-the-last-item-in-an-array
 //  https://www.w3schools.com/jsref/prop_element_childelementcount.asp
 
+import { addPostLikeEventListener, addDeletePostListener, getPostLikes, getComments } from "./postCard.js"
 import { extractUUID, uuidToHex } from "./utility.js";
-
+import { getGitHubUsername, fetchActivitiesJSON, createHTMLCard } from "./github.js";
+import { makeAjaxCall, makeAjaxCallAsync } from "./ajax.js";
+const spinner = document.getElementById("spinner2")
+const myAuthorElement = document.getElementById('my-author');
+let current_author = null
+try{
+    current_author = JSON.parse(myAuthorElement.dataset.myAuthor);
+}
+catch{
+    current_author = null;
+}
 
 $(document).ready(function() {
-    console.log("host:"+author_host);
-    console.log(auth_headers)
+    // console.log("host:"+author_host);
+    // console.log(auth_headers)
 
     getAndSetProfileCard();
     //setFollowing(serialized_followings, user_id, author_id, author_host);
+
+
 
     // get followers from server and use data to set followers and true friends
     var followersUrl;
@@ -21,7 +34,6 @@ $(document).ready(function() {
     } else {
         followersUrl = new URL("authors/" + uuidToHex(author_id) + "/followers", author_host);
     }
-    console.log(auth_headers);
     fetch(followersUrl, {method: "GET", redirect: "follow", headers: auth_headers}).then((response) => {
         if (response.status === 200) { // OK
             return response.json();
@@ -34,6 +46,7 @@ $(document).ready(function() {
         setFriends(followers, author_id);
         return;
     })
+
 });
 
 function getAndSetProfileCard() {
@@ -44,7 +57,8 @@ function getAndSetProfileCard() {
         authorProfileUrl = new URL("authors/" + uuidToHex(author_id), author_host);
     }
 
-    console.log(author_host);
+    // console.log(author_host);
+    // console.log(authorProfileUrl);
     // set profile card info
     fetch(authorProfileUrl, {method: "GET", redirect: "follow", headers: auth_headers}).then((response) => {
         if (response.status === 200) { // OK
@@ -57,6 +71,57 @@ function getAndSetProfileCard() {
         if (data.profileImage !== null && data.profileImage !== "") {$(profileCard).find(".profile_image").attr("src", data.profileImage);}
         $(profileCard).find(".profile_github").attr("href", data.github);
         $(profileCard).find(".profile_display_name").text(data.displayName);
+        $("#edit_profile_from").attr("action","/authors/"+author_id+"/edit");
+
+        try{
+            var github_username = getGitHubUsername(data.github);
+            fetchActivitiesJSON(github_username).then(activities => {
+                const target = document.getElementById("github_activity_stream");
+                for (var activity of activities) {
+                let html_element = createHTMLCard(activity.id, activity.link, activity.title, activity.published, activity.updated, activity.authors);
+                target.innerHTML += html_element;
+                }
+            });
+        }
+        catch {
+            console.log('Issue with github.')
+        }
+        let headers = {
+            'X-CSRFToken': '{{ csrf_token }}'
+        }
+        makeAjaxCallAsync("/profile_posts/"+author_id,"GET",null,headers,
+        function (response,status){
+            spinner.style.display = 'none';
+            if(response.posts.length == 0){
+                $('#post-stream').html('No public posts to show')
+            }else{
+                $.each(response.posts, function(index, post) {
+                    // console.log(post)
+                    const postData = {
+                        uuid: extractUUID(post.id),
+                        ...post
+                    }
+                    postData.author.id = extractUUID(post.author.id)
+                    makeAjaxCallAsync('/post_card.html','POST',JSON.stringify(postData),headers,
+                    function(response,status){
+                        $('#post-stream').append(response);
+                        spinner.style.display = 'none';
+                        getPostLikes(postData);
+                        getComments(postData);
+                        if(current_author != null){
+                            addPostLikeEventListener(postData,current_author)
+                            addDeletePostListener(postData.uuid)
+                        }
+                    },
+                    function (error,status){
+                        console.log(error)
+                    })
+                });
+            }
+        },
+        function (error,status){
+            console.log(error)
+        });
         return;
     })
     // handle follow unfollow button
@@ -113,12 +178,12 @@ function sendFollowRequestToInbox(e){
         var currentUserObject = currentUserData;
         var foreignUserObject;
         // var follow_object = {
-        //     type: "follow",      
+        //     type: "follow",
         //     summary: `${user_first_name} wants to follow ${author_first_name}`,
         // }
 
         var follow_object = {
-            type: "follow",      
+            type: "follow",
         }
 
         // follow_object.actor = currentUserObject;
@@ -150,7 +215,7 @@ function sendFollowRequestToInbox(e){
             follow_object.actor = currentUserObject;
 
             follow_object.object = foreignUserObject
-            
+
 
             // console.log(follow_object);
 
@@ -158,10 +223,10 @@ function sendFollowRequestToInbox(e){
             const foreignAuthorURL = author_url + "/inbox"
 
             // var headers;
-            
+
             // if (foreign_node_token){
             //     headers = new Headers({
-            //     'Authorization': 'Basic '+foreign_node_token, 
+            //     'Authorization': 'Basic '+foreign_node_token,
             //     'Content-Type': 'application/json'
             //     })
             // } else {
@@ -169,10 +234,10 @@ function sendFollowRequestToInbox(e){
             //     'Content-Type': 'application/json'
             //     })
             // }
-            
+
             fetch(foreignAuthorURL, {
                 method: "POST",
-                headers: auth_headers, 
+                headers: auth_headers,
                 redirect: "follow",
                 body: JSON.stringify(follow_object)
             }).then(response => {
@@ -225,7 +290,7 @@ async function getSingleAuthorInfo(url, auth_headers){
 
 //     if (token){
 //         headers = new Headers({
-//                 'Authorization': 'Basic '+token, 
+//                 'Authorization': 'Basic '+token,
 //                 'Content-Type': 'application/json'
 //         })
 //     } else {
@@ -240,7 +305,7 @@ async function getSingleAuthorInfo(url, auth_headers){
 //     const currentAuthorResponseJSON = await currentAuthorResponse.json();
 
 //     return currentAuthorResponseJSON;
-  
+
 // }
 
 function setFollowers(followers, user_id, author_id, author_host, nickname_table) {

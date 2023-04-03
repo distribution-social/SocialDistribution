@@ -13,196 +13,235 @@ import requests
 from django.core import serializers
 from django.http import JsonResponse
 import json
+from datetime import datetime, timezone
+from dateutil.parser import parse
 from posixpath import join as urljoin
+from urllib.parse import urlparse
 
 from django.contrib.auth.models import User
 from .helpers import *
+from .API.helpers import *
+from .API.serializers import *
 from django.db.models import Q
-# import pdb
-@login_required(login_url="/login")
-@require_http_methods(["GET"])
-def explore_posts(request):
 
+import aiohttp
+import asyncio
+import sys
+
+class URL():
+    def __init__(self,url,method='get',headers=None,params=None,data=None):
+        self.url = url
+        self.method=method
+        self.headers=headers
+        self.params=params
+        self.data=data
+
+async def fetch_url(url:URL):
+    async with aiohttp.ClientSession() as session:
+        try:
+            async with session.request(url=url.url,method=url.method,headers=url.headers,params=url.params) as response:
+                try:
+                    return await response.json()
+                except aiohttp.ContentTypeError:
+                    # handle invalid JSON content
+                    print(f"Invalid JSON content at URL: {url.url}")
+                    return None
+        except Exception as e:
+            print(f'Error getting request: {url.url} - {str(e)}')
+            return None
+
+async def make_requests_async(url_list,future):
+    loop = asyncio.get_running_loop()
+    tasks = [loop.create_task(fetch_url(url)) for url in url_list]
+    responses = await asyncio.gather(*tasks)
+    future.set_result(responses)
+
+def make_http_calls(url_list):
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    future = asyncio.Future()
+    loop.create_task(make_requests_async(url_list,future))
+    loop.run_until_complete(future)
+    loop.close()
+    return future.result()
+
+def get_authors():
     foreignNodes = ForeignAPINodes.objects.all()
-    user = request.user
-    allPosts = []
+    urls = []
     for foreignNode in foreignNodes:
         base_url = foreignNode.base_url
-        headers={}
+        print(base_url)
         if foreignNode.username:
             headers = {
                     'Authorization': f"Basic {foreignNode.getToken()}",
                     'Content-Type': 'application/json'
             }
-
-
         params = {
             'page': '1',
-            'size': '10'
+            'size': '10000'
         }
+        url = urljoin(base_url,'authors')
+        urls.append(URL(url,'get',headers,params))
+    responses = make_http_calls(urls)
+    authors = []
+    for response in responses:
+        if response:
+            try:
+                authors.extend(response['items'])
+            except KeyError:
+                print(f'Skipping an authors response since it doesnt have items. {response}')
+            except:
+                pass
+    return authors
 
+def get_posts(authors):
+    urls = []
+    for author in authors:
+        token = get_auth_token(author.get('url'))
+        if not token:
+            continue
+        headers = {
+            'Authorization': f"Basic {token}",
+            'Content-Type': 'application/json'
+        }
+        url = urljoin(author['url'],'posts')
+        urls.append(URL(url,'get',headers))
+    responses = make_http_calls(urls)
+    posts = []
+    for response in responses:
+        if response:
+            try:
+                posts.extend(response['items'])
+            except KeyError:
+                print(f'Skipping a posts response since it doesnt have items. {response}')
+            except:
+                pass
+    for post in posts:
+        post['auth_token'] = get_auth_token(post.get('id'))
+    return posts
+
+def get_like_count(post):
+    origin = post.get('id')
+    url = urljoin(origin,f'likes')
+    if 'localhost' not in url:
         try:
-            # if base_url == "https://bigger-yoshi.herokuapp.com/api/":
-            #     import pdb; pdb.set_trace()
-            url = urljoin(base_url,'authors')
-            res = requests.get(url, headers=headers, params=params)
-
-            authors = json.loads(res.text)
-           
-
-            for author in authors['items']:
-                try:
-                    if author['id']:
-                        uuid = author['id'].split("/")[-1]
-                        author_exists = Author.objects.filter(id=uuid).exists()
-
-                        if not "displayName" in author:
-                            author['displayName'] = "displayName typo on other team"
-
-                        if not author_exists:
-                            author_obj = standardize_author(author)
-                            author_obj['id'] = uuid
-                            author_obj['confirmed'] = True
-
-                            if not author['github']:
-                                author['github'] = ''
-
-
-                            Author.objects.create(**author_obj,username=uuid)
-                except Exception as e:
-                    # pdb.set_trace()
-                    continue
-
-                try:
-                    uuid = str(author['id']).split("/")[-1]
-                    url = urljoin(base_url,f'authors/{uuid}/posts')
-                    res = requests.get(url,headers=headers)
-
-                    author_posts = json.loads(res.text)
-                    for post in author_posts['items']:
-                        # if base_url == "https://peer2pressure.herokuapp.com/":
-                        #     import pdb; pdb.set_trace()
-                        uuid = post['id'].split("/")[-1]
-
-                        if not "title" in post:
-                            post['title'] = f"title typo on other team {base_url}"
-
-                        post_exists = Post.objects.filter(uuid=uuid).exists()
-
-                        if not post_exists:
-                            post_obj = standardize_post(post)
-                            post_obj['uuid'] = uuid
-                            author_id =  post['author']['id'].split("/")[-1]
-                            post_obj['made_by'] = Author.objects.get(id=author_id)
-
-                            # import pdb; pdb.set_trace()
-                            try:
-                                Post.objects.create(**post_obj)
-                            except Exception as e:
-                                # pdb.set_trace()
-                                print(f"creating post failed in ajax {post_obj['uuid']}: {e}")
-
-                       
-                        try:
-                            like_url = urljoin(url,f'{uuid}/likes')
-                            res = requests.get(like_url,headers=headers)
-                            post['likeCount'] = len(json.loads(res.text)['items'])
-                        except Exception as e:
-                            print(f'Error getting like of post {like_url}: {e}')
-                            post['likeCount'] = 0
-
-                        post['tag'] = foreignNode.nickname
-                        post['auth_token'] = foreignNode.getToken()
-
-
-                        #temp for now, as some teams are not returning
-                        if 'count' not in post:
-                            post['count'] = 0
-
-                        if 'commentSrc' not in post:
-                            #Bigger yoshi is sending comments as list when it should be url, next line breaks.
-                            try:
-                                comments = requests.get(post['comments'], headers=headers)
-                                post['commentSrc'] = json.loads(comments.text)
-                        
-                                #yosh is hardcoding so a work arond
-                                post['count'] = len(post['commentSrc']['comments'])
-                            except:
-                                post['commentSrc'] = []
-
-                        # if base_url == "https://bigger-yoshi.herokuapp.com/api/":
-                        #     import pdb; pdb.set_trace()
-                        allPosts.append(post)
-                except Exception as e:
-                    # pdb.set_trace()
-                    print('errors')
+            headers = {
+                'Authorization': f"Basic {get_auth_token(post.get('author').get('url'))}",
+                'Content-Type': 'application/json'
+            }
+            res = requests.get(url,headers=headers,timeout=2)
+            post['likeCount'] = len(json.loads(res.text)['items'])
         except Exception as e:
-            # pdb.set_trace()
-            print("error here with author url")
-            
-        # except Exception as e:
-        #     import pdb; pdb.set_trace()
-        #     print(base_url,e)
+            print(f'Error getting like of post {origin}: {e}')
+            post['likeCount'] = 0
+    else:
+        print(f'Has local host:',post['id'])
+        post['likeCount'] = 0
+    return post
 
-    return JsonResponse({'posts': allPosts})
+def filter_authors_following(actor,authors):
+    urls = []
+    try:
+        actor_obj = Author.objects.get(username=actor.username)
+    except:
+        return []
+    for author in actor_obj.following.all():
+        urls.append(author.url)
+    authors = [d for d in authors if d['url'] in urls]
+    return authors
+
+def filter_authors_profile(author_id,authors):
+    authors = [d for d in authors if author_id in d['id'] or author_id.replace('-','') in d['id']]
+    return authors
+
+def filter_posts(posts,visibility=['PUBLIC']):
+    posts = [d for d in posts if d['visibility'] in visibility and not bool(d['unlisted'])]
+    return posts
+
+def sort_and_tag_posts(posts:list):
+    posts.sort(key=lambda x: parse(str(x['published'])).replace(tzinfo=timezone.get_current_timezone()),reverse=True)
+    for post in posts:
+        post['tag'] = get_node_nickname(post['author']['host'])
+        post['uuid'] = post['id'].split("/")[-1]
+    return posts
+
+def get_auth_token(url):
+    parsed = urlparse(url)
+    try:
+        foreignNode = ForeignAPINodes.objects.get(base_url__contains=parsed.netloc)
+    except:
+        return None
+    return foreignNode.getToken()
+
+def get_node_nickname(host):
+    try:
+        foreignNode = ForeignAPINodes.objects.get(base_url__contains=host)
+    except:
+        return None
+    return foreignNode.nickname
+
+def get_node_host(nickname):
+    try:
+        foreignNode = ForeignAPINodes.objects.get(nickname=nickname)
+    except:
+        return None
+    return foreignNode.base_url
+
+@require_http_methods(["GET"])
+def public_posts(request):
+    authors = get_authors()
+    posts = get_posts(authors)
+    posts = filter_posts(posts)
+    posts = sort_and_tag_posts(posts)
+    context = {'user': request.user,'posts': posts, "comment_form": CommentForm()}
+    return JsonResponse({'posts': posts})
+    # return render(request, 'post_stream.html', context)
 
 @login_required(login_url="/login")
 @require_http_methods(["GET"])
-def post_details(request):
+def home_posts(request):
+    authors = get_authors()
+    authors = filter_authors_following(request.user,authors)
+    posts = get_posts(authors)
+    posts = filter_posts(posts,['PUBLIC','FRIENDS'])
+    posts = sort_and_tag_posts(posts)
+    context = {'user': request.user,'posts': posts, "comment_form": CommentForm()}
+    return JsonResponse({'posts': posts})
 
-    post_uuid = request.GET.get("uuid")
-    post_obj = Post.objects.get(uuid=post_uuid)
+@login_required(login_url="/login")
+@require_http_methods(["GET"])
+def profile_posts(request,author_id):
+    authors = get_authors()
+    authors = filter_authors_profile(author_id,authors)
+    posts = get_posts(authors)
+    posts = filter_posts(posts,['PUBLIC','FRIENDS'])
+    posts = sort_and_tag_posts(posts)
+    context = {'user': request.user,'posts': posts, "comment_form": CommentForm()}
+    return JsonResponse({'posts': posts})
 
-    host =  post_obj.made_by.host
-    author = post_obj.made_by
-
-    # if not host.endswith('/'):
-    #     host += '/'
-    # import pdb; pdb.set_trace()
-
-    arr = host.split(":")
-    arr[0] ='http'
-    httpHost = ":".join(arr)
-    arr[0] ='https'
-    httpsHost = ":".join(arr)
-    foreignNode = None
-    try:
-        foreignNode = ForeignAPINodes.objects.get(base_url=httpHost)
-    except:
-        try:
-            foreignNode = ForeignAPINodes.objects.get(base_url=httpsHost)
-        except:
-            print("Something wrong w foreign node")
-
-    
-    headers={}
-    if foreignNode.username:
-        headers = {
-                'Authorization': f"Basic {foreignNode.getToken()}",
-                'Content-Type': 'application/json'
-        }
-
-    params = {
-
+@login_required(login_url="/login")
+@require_http_methods(["GET"])
+def post_details(request,node,author_id,post_id):
+    url = urljoin(get_node_host(node),'authors',author_id,'posts',post_id)
+    headers = {
+        'Authorization': f"Basic {get_auth_token(get_node_host(node))}",
+        'Content-Type': 'application/json'
     }
     try:
-        res = requests.get(post_obj.origin, headers=headers)
+        res = requests.get(url, headers=headers)
+        if res.status_code != 200:
+            raise Exception('Post not found.')
     except Exception as e:
         response = JsonResponse({'error': str(e)})
         response.status_code = 500
         return response
     post = json.loads(res.text)
-    url = urljoin(post_obj.origin,f'likes')
-    try:
-        res = requests.get(url,headers=headers)
-        post['likeCount'] = len(json.loads(res.text)['items'])
-    except Exception as e:
-        print(f'Error getting like of post {post_obj.origin}: {e}')
-        post['likeCount'] = 0
-    post['tag'] = foreignNode.nickname
-    post['auth_token'] = foreignNode.getToken()
-
-    return JsonResponse({'post': post})
+    if not post.get('likeCount'):
+        post = get_like_count(post)
+    post['tag'] = node
+    post['uuid'] = post['id'].split("/")[-1]
+    context = {'user': request.user,'post': post, "comment_form": CommentForm()}
+    return render(request,'post_detail.html',context)
 
 
 #utility functions (Refactor to diff file later)
