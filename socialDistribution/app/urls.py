@@ -42,6 +42,7 @@ urlpatterns = [
     path('login', views.signin, name='login'),
     path('logout', views.signout, name='logout'),
     path('add-to-sent', views.add_to_sent_request, name='add-to-sent'),
+    path('add-to-following', views.add_to_following, name='add-to-following'),
 
 
     # path('posts', views.post_detail, name='post_detail'),

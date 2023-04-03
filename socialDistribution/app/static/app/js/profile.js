@@ -52,7 +52,7 @@ $(document).ready(function() {
 });
 
 function getAndSetProfileCard() {
-    let authorProfileUrl;
+    var authorProfileUrl;
     if (author_host.includes("p2psd")) {
         authorProfileUrl = new URL("authors/" + author_id + "/", author_host);
     } else if (author_host.includes("bigger-yoshi")){
@@ -178,6 +178,36 @@ function getAndSetProfileCard() {
         else is_following = false;
         if (is_following) {
             $("#follow_unfollow_button").attr("name", "unfollow").val(author_id).text("Unfollow");
+            
+            if (author_host.includes("bigger-yoshi")){
+                fetch(authorProfileUrl, {method: "GET", redirect: "follow", headers: auth_headers}).then((response) => {
+            if (response.status === 200) { // OK
+                return response.json();
+            } else {
+                alert("Something went wrong: " + response.status);
+            }
+            }).then((data) => {
+                console.log("dataaaaaaaa", data);
+
+                const addToFollowingURL = new URL("add-to-following", `${window.location.protocol}//` + window.location.host);
+
+                const foreignAuthorObject = {user_id: user_id, author_id: author_id, foreign_user_object: data};
+                
+                fetch(addToFollowingURL, {
+                    method: "POST",
+                    redirect: "follow",
+                    headers: new Headers({
+                    'Authorization': 'Basic '+btoa('server1:123'),
+                    'Content-Type': 'application/json'
+                }),
+                    body: JSON.stringify(foreignAuthorObject)
+                });
+            })
+        }
+            
+        
+
+
         } else {
             $("#follow_unfollow_button").attr("name", "follow").val(author_id).text("Request to Follow");
             const element = document.getElementById("follow_unfollow_button");
@@ -189,7 +219,6 @@ function getAndSetProfileCard() {
     });
 
 }
-
 
 
 function sendFollowRequestToInbox(e){
@@ -275,7 +304,6 @@ function sendFollowRequestToInbox(e){
             const addToSentRequestURL = new URL("add-to-sent", `${window.location.protocol}//` + window.location.host);
 
             const sentRequestObject = {user_id:user_id, author_id:author_id, foreign_user_object: foreignUserObject};
-
 
             fetch(addToSentRequestURL, {
                 method: "POST",
