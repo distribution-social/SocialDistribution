@@ -164,7 +164,7 @@ def add_post(request):
 
                 add_to_inbox(user, receiver, Activity.POST, post)
 
-            return redirect(reverse('post_detail', kwargs={'post_id': post.uuid}))
+            return redirect(reverse('home'))
     elif request.method == "GET":
         context = {"title": "Create a Post",
                    "form": PostForm(), "action": "PUBLISH"}
