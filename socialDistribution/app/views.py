@@ -360,10 +360,8 @@ def profile(request, server_name, author_id):
         context.update({"local_auth_headers": headers})
 
         context.update({"nicknameTable": getNicknameTable()})
-        print("user.id:", userAuthor.id)
-        print("author_id:", author_id)
-        print(str(userAuthor.id) == str(author_id))
-
+        context.update({"tokenTable": getTokenTable()})
+    
         id_to_follow = author_id
 
         # Get the author object
@@ -408,6 +406,13 @@ def getNicknameTable():
         table.update({str(parsedHost.hostname): node.nickname})
     return json.dumps(table)
 
+def getTokenTable():
+    nodes = ForeignAPINodes.objects.all()
+    table = {}
+    for node in nodes:
+        parsedHost = urllib.parse.urlparse(node.base_url)
+        table.update({str(parsedHost.hostname): node.getToken()})
+    return json.dumps(table)
 
 def getServerNickname(request, url):
     parsedHost = urllib.parse.urlparse(url)
