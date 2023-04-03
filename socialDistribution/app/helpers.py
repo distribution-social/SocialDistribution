@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User
 from .models import *
 from django.contrib import messages
+from app.models import *
 
 
 def username_exists(username):
@@ -44,3 +45,21 @@ def add_to_inbox(from_author,to,type,object):
 
 def convert_username_to_id(username):
     return Author.objects.get(username=username).id
+
+def get_foreign_API_node(host):
+    arr = host.split(":")
+    arr[0] ='http'
+    httpHost = ":".join(arr)
+    arr[0] ='https'
+    httpsHost = ":".join(arr)
+    foreignNode = None
+    try:
+        foreignNode = ForeignAPINodes.objects.get(base_url=httpHost)
+    except:
+        try:
+            foreignNode = ForeignAPINodes.objects.get(base_url=httpsHost)
+        except:
+            print("Something wrong w foreign node")
+
+    return foreignNode
+

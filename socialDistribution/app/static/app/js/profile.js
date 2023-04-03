@@ -93,7 +93,7 @@ function getAndSetProfileCard() {
             if (element) {
                 element.addEventListener("click", sendFollowRequestToInbox);
             }
-  
+
         }
     });
 
@@ -177,15 +177,15 @@ function sendFollowRequestToInbox(e){
             }).then(response => {
                 console.log("-------------Response: ", response.status);
             })
-            
+
             const addToSentRequestURL = new URL("add-to-sent", `${window.location.protocol}//` + window.location.host);
-            
+
             const sentRequestObject = {user_id:user_id, author_id:author_id};
 
             fetch(addToSentRequestURL, {
                 method: "POST",
                 headers: new Headers({
-                'Authorization': 'Basic '+btoa('server1:123'), 
+                'Authorization': 'Basic '+btoa('server1:123'),
                 'Content-Type': 'application/json'
             }),
                 body: JSON.stringify(sentRequestObject)
@@ -207,7 +207,7 @@ async function getSingleAuthorInfo(url, auth_headers){
     const currentAuthorResponseJSON = await currentAuthorResponse.json();
 
     return currentAuthorResponseJSON;
-  
+
 }
 
 // async function getSingleAuthorInfo(url, token){

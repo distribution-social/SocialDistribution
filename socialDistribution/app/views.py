@@ -1,5 +1,8 @@
 from django.shortcuts import render, redirect
 from django.http import *
+from app.API.helpers import get_full_uri
+
+from app.API.paginators import CustomPaginator
 from .forms import *
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
@@ -20,11 +23,20 @@ from django.db.models import Q
 from django.conf import settings
 
 import urllib.parse
-from .API.serializers import AuthorSerializer
+from .API.serializers import AuthorSerializer, CommentSerializer, PostSerializer
+
+import feedparser
+
+from django.http import JsonResponse
+
+import feedparser
+
+from django.http import JsonResponse
 
 
 class HttpResponseUnauthorized(HttpResponse):
     status_code = 401
+
 
 @require_http_methods(["GET"])
 def root(request):
@@ -44,7 +56,6 @@ def signup(request):
         password = form_inputs.get('password')
         confirm_password = form_inputs.get('confirm_password')
 
-
         if display_name and username and email and github and password and confirm_password:
 
             try:
@@ -52,7 +63,6 @@ def signup(request):
             except ValueError:
                 first_name = display_name
                 last_name = ""
-
 
             if not is_valid_info(request, username, email, github, password, confirm_password):
                 return redirect(reverse('signup'))
@@ -83,7 +93,8 @@ def signup(request):
                         request, "Please contact the admin to be confirmed and be able to login")
                     return redirect(reverse('login'))
             else:
-                messages.warning(request, "Please contact the admin to be confirmed and be able to login")
+                messages.warning(
+                    request, "Please contact the admin to be confirmed and be able to login")
                 return redirect(reverse('signup'))
         else:
             return redirect(reverse('signup'))
@@ -100,6 +111,7 @@ def signup(request):
 def home(request):
     context = {"comment_form": CommentForm()}
     return render(request, 'home_stream.html', context)
+
 
 @require_http_methods(["GET"])
 @login_required(login_url="/login")
@@ -147,20 +159,55 @@ def add_post(request):
     user = Author.objects.get(username=request.user.username)
 
     if request.method == "POST":
-        form = PostForm(request.POST)
+        form = PostForm(request.POST, request.FILES)
         if form.is_valid():
-            # Save the form data to the database
+       
+            post = form.save(user=user)
+            
             if request.POST['visibility'] == 'PRIVATE':
-                post = form.save(user=user, receiver_list = request.POST.getlist('receivers'))
-            else:
-                post = form.save(user=user)
-            for receiver in post.receivers.all():
+                for receiver_id in request.POST.getlist('receivers'):
+                    author = Author.objects.get(id=receiver_id)
+                    foreign_node = get_foreign_API_node(author.host)
+                    if foreign_node:
+                        auth_token = ''
+                        if foreign_node.username:
+                            auth_token = foreign_node.getToken()
 
-                add_to_inbox(user,receiver,Activity.POST,post)
+                        serializer = PostSerializer(post, context={'request':request,'kwargs':{'author_id':receiver_id,'post_id':post.uuid}})
+                        data = serializer.data
 
-            return redirect(reverse('post_detail',kwargs={'post_id':post.uuid}))
+                        comments = post.comments.all().order_by('-published')
+                        # paginator = CustomPaginator()
+                        # commentResultPage = paginator.paginate_queryset(comments, request)
+                        context = {'request':request,'kwargs':{'author_id':receiver_id,'post_id':data['id'].split("/")[-1]}}
+                        comment_serializer = CommentSerializer(comments, many=True, context=context)
+
+                        response = {
+                            "type": "comments",
+                            "post": get_full_uri(request,'api-post-detail',context['kwargs']),
+                            "id": get_full_uri(request,'api-post-comments',context['kwargs']),
+                            "comments": comment_serializer.data,
+                        }
+
+                        data["commentSrc"] = response
+                        data['count'] = len(comments)
+
+                        url = f"{author.url}/inbox"
+                        headers = {
+                            "Authorization": f"Basic {auth_token}",
+                            "Content-Type": 'application/json; charset=utf-8',
+
+                        }
+                        response = requests.post(url, data=json.dumps(data), headers=headers)
+                        response.raise_for_status()
+
+                    else:
+                        raise("Error finding foreign Node")
+
+
+            return redirect(reverse('post_detail', kwargs={'post_id': post.uuid}))
     elif request.method == "GET":
-        context = {"title": "Create a Post", "form": PostForm(), "action": "PUBLISH"}
+        context = {"title": "Create a Post", "form": PostForm(author=user), "action": "PUBLISH"}
         return render(request, 'post.html', context)
 
 
@@ -169,7 +216,6 @@ def signin(request):
     if request.method == "POST":
         username = request.POST.get("username")
         password = request.POST.get("password")
-
         if username and password:
             user = authenticate(username=username, password=password)
 
@@ -178,15 +224,18 @@ def signin(request):
                     login(request, user)
                     return redirect(reverse('home'))
                 else:
-                    messages.warning(request, "Your account is not confirmed. Please contact the admin to get their approval.")
+                    messages.warning(
+                        request, "Your account is not confirmed. Please contact the admin to get their approval.")
                     return redirect(reverse('login'))
             else:
-                messages.warning(request, "Invalid username, invalid password, or unconfirmed user.")
+                messages.warning(
+                    request, "Invalid username, invalid password, or unconfirmed user.")
                 return redirect(reverse('login'))
 
         # Username and/or password is missing
         else:
-            messages.warning(request, "Invalid username, invalid password, or unconfirmed user.")
+            messages.warning(
+                request, "Invalid username, invalid password, or unconfirmed user.")
             return redirect(reverse('login'))
 
     elif request.method == "GET":
@@ -235,9 +284,11 @@ def authors(request):
 
         # Add the author object to our sent_request list (Need to send this to inbox in the future to get approval on the other end)
         current_user_author.sent_requests.add(author_to_follow)
-        add_to_inbox(current_user_author,author_to_follow,Activity.FOLLOW,current_user_author)
+        add_to_inbox(current_user_author, author_to_follow,
+                     Activity.FOLLOW, current_user_author)
 
         return redirect(reverse("authors"))
+
 
 @login_required(login_url="/login")
 @require_http_methods(["GET", "POST"])
@@ -257,11 +308,10 @@ def add_to_sent_request(request):
         # Add the author object to our sent_request list (Need to send this to inbox in the future to get approval on the other end)
         current_user_author.sent_requests.add(author_to_follow)
 
-
-
         return HttpResponse("Success")
     else:
         return HttpResponse("Method Not Allowed")
+
 
 @login_required(login_url="/login")
 @require_http_methods(["GET", "POST"])
@@ -269,6 +319,7 @@ def profile(request, server_name, author_id):
     user = request.user
     userAuthor = Author.objects.get(username=request.user.username)
     if request.method == 'GET':
+
         context = {"user": userAuthor, "server_name": server_name, "author_id": author_id, "user_id": str(userAuthor.id)}
         if str(userAuthor.id) == author_id:
             requests = Author.objects.get(id=userAuthor.id).follow_requests.all()
@@ -309,14 +360,14 @@ def profile(request, server_name, author_id):
 
         host = author_to_follow.host
 
-        #foreignNode = ForeignAPINodes.objects.get(base_url=host)
+        # foreignNode = ForeignAPINodes.objects.get(base_url=host)
         foreignNode = getApiNodeWrapper(host)
 
         context.update({'foreign_node_token': foreignNode.getToken()})
 
         local_host = userAuthor.host
 
-        #localNode = ForeignAPINodes.objects.get(base_url=local_host)
+        # localNode = ForeignAPINodes.objects.get(base_url=local_host)
         localNode = getApiNodeWrapper(local_host)
 
         context.update({'local_node_token': localNode.getToken()})
@@ -347,32 +398,38 @@ def getServerNickname(request, url):
     node = ForeignAPINodes.objects.get(base_url__contains="//"+parsedHost.hostname)    
     return node.nickname
 
+
 def getApiNodeWrapper(host):
     parsedHost = urllib.parse.urlparse(host)
-    node = ForeignAPINodes.objects.get(base_url__contains="//"+parsedHost.hostname)
+    node = ForeignAPINodes.objects.get(
+        base_url__contains="//"+parsedHost.hostname)
     return node
+
 
 def getAuthHeadersJson(author_host):
     node = getApiNodeWrapper(author_host)
-    headers={}
+    headers = {}
     if node.username:
-        headers = {'Authorization': f"Basic {node.getToken()}", 'Content-Type': 'application/json'}
+        headers = {'Authorization': f"Basic {node.getToken()}",
+                   'Content-Type': 'application/json'}
     return json.dumps(headers)
 
+
 def get_posts_visible_to_user(userAuthor, author, friends):
-    if userAuthor.id==author.id:
+    if userAuthor.id == author.id:
         return Post.objects.filter(made_by=author).order_by('-date_published')
     public = Post.objects.filter(made_by=author, visibility="PUBLIC")
-    #private = Post.objects.filter(made_by=author, receivers__contains=user)
+    # private = Post.objects.filter(made_by=author, receivers__contains=user)
     if userAuthor in friends:
         friends = Post.objects.filter(made_by=author, visibility="FRIENDS")
-        #posts = (private | public | friends).distinct()
+        # posts = (private | public | friends).distinct()
         posts = (public | friends).distinct()
     else:
-        #posts = (private | public).distinct()
+        # posts = (private | public).distinct()
         posts = public
 
     return posts.order_by('-date_published')
+
 
 @login_required(login_url="/login")
 @require_http_methods(["POST"])
@@ -389,6 +446,7 @@ def unfollow(request):
 
     return redirect(reverse("profile", kwargs={"author_id": user_author.id}))
 
+
 @login_required(login_url="/login")
 @require_http_methods(["POST"])
 def removeFollower(request):
@@ -403,6 +461,7 @@ def removeFollower(request):
     author_to_remove.following.remove(user_author)
 
     return redirect(reverse("profile", kwargs={"author_id": user_author.id}))
+
 
 @login_required(login_url="/login")
 @require_http_methods(["GET"])
@@ -420,6 +479,9 @@ def true_friends(request, username):
         context = {"friends": true_friends, "author": author}
 
         return render(request, 'true-friends.html', context)
+
+
+
 
 
 @login_required(login_url="/login")
@@ -458,14 +520,17 @@ def received_requests(request, author_id):
 
         if action == "accept":
             # Add ourself to the sender author's following
-            sender_author.following.add(current_user_author)
+            # sender_author.following.add(current_user_author)
 
             # Remove this follow request on the sender side
-            sender_author.sent_requests.remove(current_user_author)
+            # sender_author.sent_requests.remove(current_user_author)
 
             # Remove this follow request on our side
-            current_user_author.follow_requests.remove(sender_author)
-            response = "Accepted"
+            # current_user_author.follow_requests.remove(sender_author)
+            # response = "Accepted"
+
+            # Send a type == "accept" to the user's node
+            send_post_request("accept", sender_author, current_user_author)
 
         elif action == "decline":
 
@@ -526,16 +591,14 @@ def sent_requests(request, author_id):
 #     return render(request, 'posts_stream.html', context)
 
 
-
-
-
 @login_required(login_url="/login")
 @require_http_methods(["GET"])
 def post_detail(request, post_id):
 
-    #TODO: Check if post is on different host, if yes, then poll info from that particular hosts endpoint, and then pass that data on.
+    # TODO: Check if post is on different host, if yes, then poll info from that particular hosts endpoint, and then pass that data on.
     post = Post.objects.get(uuid=post_id)
-    context = {"request": request, "post": str(post.uuid), "comment_form": CommentForm()}
+    context = {"request": request, "post": str(
+        post.uuid), "comment_form": CommentForm()}
 
     return render(request, 'post_detail.html', context)
 
@@ -553,7 +616,8 @@ def post_edit(request, post_id):
             # Save the form data to the database
             if request.POST['visibility'] == 'PRIVATE':
                 print("saving")
-                post = form.save(user=user, receiver_list = request.POST.getlist('receivers'))
+                post = form.save(
+                    user=user, receiver_list=request.POST.getlist('receivers'))
                 print("saved")
             else:
                 print("saving")
@@ -568,14 +632,15 @@ def post_edit(request, post_id):
             return HttpResponseBadRequest("Invalid form")
 
     elif request.method == "GET":
-        context = {"title": "Edit Your Post", "form": PostForm(instance=post), "action": "SAVE", "post": post}
+        context = {"title": "Edit Your Post", "form": PostForm(
+            instance=post), "action": "SAVE", "post": post}
         if post.made_by.username != request.user.username:
             return JsonResponse({'success': False, 'message': 'You are not authorized to delete this post.'})
         return render(request, 'post_edit.html', context)
 
 
 @login_required(login_url="/login")
-@require_http_methods(["GET","POST"])
+@require_http_methods(["GET", "POST"])
 def inbox(request, author_id):
 
     # Requested author
@@ -594,30 +659,31 @@ def inbox(request, author_id):
         comments = all.filter(object__type="comment")
         posts = all.filter(object__type="post")
         requests = all.filter(object__type="follow")
-        context.update({"items": all, "likes": likes, "comments": comments, "posts": posts, "requests": requests})
+        context.update({"items": all, "likes": likes,
+                       "comments": comments, "posts": posts, "requests": requests})
 
-    elif request.method == "POST" and request.POST.get("action")=="clear_inbox":
+    elif request.method == "POST" and request.POST.get("action") == "clear_inbox":
         author.my_inbox.all().delete()
 
     return render(request, 'inbox.html', context)
 
+
 @login_required(login_url="/login")
 @require_http_methods(["POST"])
-def add_comment(request,post_id):
+def add_comment(request, post_id):
     user = Author.objects.get(username=request.user.username)
     post = Post.objects.get(uuid=post_id)
 
     if request.method == "POST":
         form = CommentForm(request.POST)
         if form.is_valid():
-            comment = form.save(user=user,post=post)
-            add_to_inbox(user,post.made_by,Activity.COMMENT,post)
+            comment = form.save(user=user, post=post)
+            add_to_inbox(user, post.made_by, Activity.COMMENT, post)
 
             # Do something with the saved data (e.g. redirect to a detail view)
             # return redirect('post_detail', pk=post.pk)
 
-            return redirect(reverse('post_detail',kwargs={'post_id': post.uuid}))
-
+            return redirect(reverse('post_detail', kwargs={'post_id': post.uuid}))
 
 
 @login_required(login_url="/login")
@@ -628,7 +694,7 @@ def edit_profile(request, author_id):
         form = EditProfileForm(request.POST, instance=user)
         if form.is_valid():
             form.save()
-            return redirect(reverse('profile',kwargs={'author_id': author_id}))
+            return redirect(reverse('profile', kwargs={'author_id': author_id}))
         else:
             print(form.errors)
             return HttpResponseBadRequest("Invalid form")
@@ -636,7 +702,7 @@ def edit_profile(request, author_id):
 
 @login_required(login_url="/login")
 @require_http_methods(["POST"])
-def add_like_post(request,post_id):
+def add_like_post(request, post_id):
     user = Author.objects.get(username=request.user.username)
     post = Post.objects.get(uuid=post_id)
     response = HttpResponse()
@@ -647,17 +713,19 @@ def add_like_post(request,post_id):
             return response
         found = post.likes.filter(author=user)
         if not found:
-            post.likes.create(type=Like.POST,author=user,summary=f'{user.displayName} liked your post.')
-            add_to_inbox(user,post.made_by,Activity.LIKE,post)
+            post.likes.create(type=Like.POST, author=user,
+                              summary=f'{user.displayName} liked your post.')
+            add_to_inbox(user, post.made_by, Activity.LIKE, post)
             response.content = "Liked"
         else:
             response.content = "Already liked this post."
 
     return response
 
+
 @login_required(login_url="/login")
 @require_http_methods(["POST"])
-def add_like_comment(request,post_id,comment_id):
+def add_like_comment(request, post_id, comment_id):
     user = Author.objects.get(username=request.user.username)
     post = Post.objects.get(uuid=post_id)
     comment = Comment.objects.get(uuid=comment_id)
@@ -669,10 +737,43 @@ def add_like_comment(request,post_id,comment_id):
             return response
         found = comment.likes.filter(author=user)
         if not found:
-            comment.likes.create(type=Like.COMMENT,author=user,summary=f'{user.displayName} liked your comment.')
-            add_to_inbox(user,comment.author,Activity.LIKE,comment)
+            comment.likes.create(type=Like.COMMENT, author=user,
+                                 summary=f'{user.displayName} liked your comment.')
+            add_to_inbox(user, comment.author, Activity.LIKE, comment)
             response.content = "Liked"
         else:
             response.content = "Already liked this comment."
 
     return response
+
+
+# @login_required(login_url="/login")
+@require_http_methods(["GET"])
+def github_activity(request, username):
+    """
+    Returns a JSON string of a user's GitHub activity
+    """
+    
+    feed = feedparser.parse(f"https://github.com/{username}.atom")
+
+    activities = []
+
+    entries = feed.entries
+
+    for entry in entries:
+        entry_dict = {
+            "id": entry.id,
+            "published": entry.published,
+            "updated": entry.updated,
+            "title": entry.title,
+            "link": entry.link,
+            "author": entry.author,
+            "authors": entry.authors,
+            "media": entry.media_thumbnail,
+            "content": entry.content,
+            "summary": entry.summary
+        }
+
+        activities.append(entry_dict)
+
+    return JsonResponse(activities, safe=False)

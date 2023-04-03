@@ -14,21 +14,21 @@ class Author(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
 
     # Server host of the user
-    host = models.URLField(max_length=200)
+    host = models.URLField(max_length=255)
 
-    url = models.URLField(max_length=200,null=True,blank=True)
+    url = models.URLField(max_length=255,null=True,blank=True)
 
     # Max Length: 35 (First Name) + 35 (Last Name)
-    displayName = models.CharField(max_length=70)
+    displayName = models.CharField(max_length=255)
 
-    github = models.URLField(max_length=200)
+    github = models.URLField(max_length=255, null=True)
 
-    profileImage = models.URLField(max_length=200,blank=True, null=True)
+    profileImage = models.URLField(max_length=2048,blank=True, null=True)
 
     # Max Length: 64 (Username) + 255 (Domain)
     email = models.EmailField(max_length=320)
 
-    username = models.CharField(max_length=50, unique=True)
+    username = models.CharField(max_length=255, unique=True)
 
     created = models.DateTimeField(auto_now_add=True)
 
@@ -130,17 +130,17 @@ class Post(models.Model):
     date_published = models.DateTimeField(default=timezone.now)
     PLAIN = "text/plain"
     MARKDOWN = "text/markdown"
-    PNG = "image/png"
-    JPG = "image/jpeg"
+    PNG = "image/png;base64"
+    JPG = "image/jpeg;base64"
     CONTENT_TYPE_CHOICES = [
-        (MARKDOWN, "markdown"),
-        (PLAIN, "plain"),
-        (PNG, "image-png"),
-        (JPG, "image-jpeg"),
+        (MARKDOWN, "text/markdown"),
+        (PLAIN, "text/plain"),
+        (PNG, "image/png;base64"),
+        (JPG, "image/jpeg;base64"),
     ]
 
     content_type = models.CharField(max_length=18, choices=CONTENT_TYPE_CHOICES)
-    content = models.TextField()
+    content = models.TextField(blank=True, null=True)
     comments_url = models.URLField()
     VISIBILITY_CHOICES = [
         ('PUBLIC', 'public'),
@@ -149,10 +149,11 @@ class Post(models.Model):
     ]
     visibility = models.CharField(max_length=7, choices=VISIBILITY_CHOICES)
     unlisted = models.BooleanField(default=False)
-    image = models.CharField(max_length=100,null=True, blank=True)
+    image = models.ImageField(upload_to='posts/images/', blank=True, null=True)
 
     likes = GenericRelation(Like)
     activity = GenericRelation(Activity)
+
 
     def save(self, *args, **kwargs):
         if self.origin == '' or not self.origin:
@@ -172,13 +173,13 @@ class Comment(models.Model):
     PLAIN = "text/plain"
     MARKDOWN = "text/markdown"
     CONTENT_TYPE_CHOICES = [
-        (MARKDOWN,"markdown" ),
-        (PLAIN,"plain_text")
+        (MARKDOWN,MARKDOWN),
+        (PLAIN,PLAIN)
     ]
     author = models.ForeignKey(Author, blank = False, null = False, related_name = "comments", on_delete=models.CASCADE)
     comment = models.CharField(max_length=200)
 
-    contentType = models.CharField(max_length=18, choices=CONTENT_TYPE_CHOICES,default=PLAIN)
+    contentType = models.CharField(max_length=18, choices=CONTENT_TYPE_CHOICES, null=True)
     post = models.ForeignKey(Post, blank = False, null = False, related_name='comments', on_delete=models.CASCADE)
     likes = GenericRelation(Like)
     activity = GenericRelation(Activity)

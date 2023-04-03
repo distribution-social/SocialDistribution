@@ -97,7 +97,6 @@ class CommentSerializer(serializers.ModelSerializer):
     author = AuthorSerializer(read_only=True)
     published = serializers.DateTimeField(required=False)
     comment = serializers.CharField()
-    contentType = serializers.CharField()
 
     def get_type(self,obj):
         return "comment"
@@ -124,7 +123,7 @@ class CommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Comment
-        fields = ['type', 'author', 'id', 'comment', 'published', 'contentType',]
+        fields = ['type', 'author', 'id', 'comment', 'published']
 
 class LikeSerializer(serializers.ModelSerializer):
     type = serializers.SerializerMethodField()

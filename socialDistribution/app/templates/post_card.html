@@ -8,6 +8,9 @@ Date Accessed: Feb 15, 2023
 Link: https://www.bootdey.com/snippets/view/bs4-s
 -->
 <!doctype html>
+{% load static %}
+{% load extra_tags %}
+<script type="module" src="https://md-block.verou.me/md-block.js"></script>
 <html lang="en">
   {% block css %}<link rel="stylesheet" type="text/css" href="{% static 'app/posts.css' %}">{% endblock %}
 
@@ -29,7 +32,7 @@ Link: https://www.bootdey.com/snippets/view/bs4-s
           </div>
           <div class="m-2">
             <h4>
-              <a class="card-title" href={% url 'post_detail' post_id=post.uuid|convert_uuid_to_hex %} style="text-decoration: none;">{{post.title}}</a>
+              <a class="card-title" href="{% url 'post_detail' post_id=post.uuid|convert_uuid_to_hex %}" style="text-decoration: none;">{{post.title}}</a>
             </h4>
 
               <span style="border: 1px solid black; background-color: #f5d442; border-radius:10%; color: black;">{{post.tag}}</span>
@@ -46,7 +49,19 @@ Link: https://www.bootdey.com/snippets/view/bs4-s
         </span>
       </div>
     </div>
-    <p class="card-body">{{post.content}}</p>
+    <div class="card-body">
+      {% if post.contentType == "image/png;base64" or post.contentType == "image/jpeg;base64" %} 
+        <img src="data:image;base64,{{ post.content }}" class="card-img-top" alt="...">
+      {% elif post.contentType == "text/plain" %}
+        <div class="card-body">
+          {{post.content}}
+        </div>
+      {% elif post.contentType == "text/markdown" %}
+        <md-block class="card-body">
+          {{post.content}}
+        </md-block>
+      {% endif %}
+    </div>
     <div class="card-footer likes-reply">
 
       <button id="like-post-{{post.uuid|convert_uuid_to_hex}}" class="d-inline-flex text-muted like-button" style="text-decoration: none;">
@@ -58,6 +73,11 @@ Link: https://www.bootdey.com/snippets/view/bs4-s
         <a type="button" class="d-inline-flex text-muted mx-2" data-bs-toggle="modal" data-bs-target="#new-comment-{{post.uuid|convert_uuid_to_hex}}" style="text-decoration: none;">
           <i class="bi bi-reply mx-1"></i>
           <strong>Reply</strong>
+        </a>
+
+        <a type="button" class="d-inline-flex text-muted mx-2" data-bs-toggle="modal" data-bs-target="#share-post-modal-{{post.uuid|convert_uuid_to_hex}}" style="text-decoration: none;">
+          <i class="bi bi-share"></i>
+          <strong style="margin-left: 0.5rem">Share</strong>
         </a>
 
         {% if user.username|convert_username_to_id|stringformat:"s" == post.author.id|convert_uuid_to_hex|stringformat:"s" %}
@@ -97,14 +117,14 @@ Link: https://www.bootdey.com/snippets/view/bs4-s
 
     </div>
     <div class="card-footer">
-      <button class="d-inline-flex btn btn-primary" data-bs-toggle="collapse" data-bs-target="#collapse_{{post.uuid|convert_uuid_to_hex}}" role="button" aria-expanded="false" aria-controls="collapse_{{post.uuid|convert_uuid_to_hex}}">
+      <button id="collapse-comment-btn-{{post.uuid|convert_uuid_to_hex}}" class="d-inline-flex btn btn-primary" data-bs-toggle="collapse" data-bs-target="#collapse_{{post.uuid|convert_uuid_to_hex}}" role="button" aria-expanded="false" aria-controls="collapse_{{post.uuid|convert_uuid_to_hex}}">
         <span class="d-inline-flex">Comments</span>
         <i class="d-inline-flex bi bi-chat mx-1" ></i>
-        <span class="d-inline-flex">{{post.count}}</span>
+        <span id="comment-count-{{post.uuid}}" class="d-inline-flex">{{post.count}}</span>
       </button>
     </div>
 
-    <div class="collapse" id="collapse_{{post.uuid|convert_uuid_to_hex}}">
+    <div class="collapse" id="collapse_{{post.uuid}}">
 
       {% for comment in post.commentSrc.comments %}
 
@@ -115,8 +135,10 @@ Link: https://www.bootdey.com/snippets/view/bs4-s
       {% endfor %}
 
     </div>
-    {% if user %}
-    {% include "new_comment_modal.html" %}
-    {% endif %}
-  </div>
+      {% if user %}
+      {% include "new_comment_modal.html" %}
+      {% endif %}
+    </div>
+
+    {% include "share_post_modal.html" %}
 </html>

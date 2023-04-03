@@ -18,7 +18,7 @@ from posixpath import join as urljoin
 from django.contrib.auth.models import User
 from .helpers import *
 from django.db.models import Q
-
+import pdb
 @login_required(login_url="/login")
 @require_http_methods(["GET"])
 def explore_posts(request):
@@ -38,71 +38,111 @@ def explore_posts(request):
 
         params = {
             'page': '1',
-            'size': '20'
+            'size': '10'
         }
 
         try:
+            # if base_url == "https://bigger-yoshi.herokuapp.com/api/":
+            #     import pdb; pdb.set_trace()
             url = urljoin(base_url,'authors')
             res = requests.get(url, headers=headers, params=params)
 
             authors = json.loads(res.text)
-            # if base_url == "https://peer2pressure.herokuapp.com/":
-            #         import pdb; pdb.set_trace()
+           
+
             for author in authors['items']:
-                if author['id']:
-                    uuid = author['id'].split("/")[-1]
-                    author_exists = Author.objects.filter(id=uuid).exists()
+                try:
+                    if author['id']:
+                        uuid = author['id'].split("/")[-1]
+                        author_exists = Author.objects.filter(id=uuid).exists()
 
-                    if not "displayName" in author:
-                        author['displayName'] = "displayName typo on other team"
+                        if not "displayName" in author:
+                            author['displayName'] = "displayName typo on other team"
 
-                    if not author_exists:
-                        author_obj = standardize_author(author)
-                        author_obj['id'] = uuid
-                        author_obj['confirmed'] = True
+                        if not author_exists:
+                            author_obj = standardize_author(author)
+                            author_obj['id'] = uuid
+                            author_obj['confirmed'] = True
+
+                            if not author['github']:
+                                author['github'] = ''
 
 
-                        Author.objects.create(**author_obj,username=uuid)
+                            Author.objects.create(**author_obj,username=uuid)
+                except Exception as e:
+                    # pdb.set_trace()
+                    continue
 
-                uuid = str(author['id']).split("/")[-1]
-                url = urljoin(base_url,f'authors/{uuid}/posts')
-                res = requests.get(url,headers=headers)
+                try:
+                    uuid = str(author['id']).split("/")[-1]
+                    url = urljoin(base_url,f'authors/{uuid}/posts')
+                    res = requests.get(url,headers=headers)
 
-                author_posts = json.loads(res.text)
-                for post in author_posts['items']:
-                    # if base_url == "https://peer2pressure.herokuapp.com/":
-                    #     import pdb; pdb.set_trace()
-                    uuid = post['id'].split("/")[-1]
+                    author_posts = json.loads(res.text)
+                    for post in author_posts['items']:
+                        # if base_url == "https://peer2pressure.herokuapp.com/":
+                        #     import pdb; pdb.set_trace()
+                        uuid = post['id'].split("/")[-1]
 
-                    if not "title" in post:
-                        post['title'] = f"title typo on other team {base_url}"
+                        if not "title" in post:
+                            post['title'] = f"title typo on other team {base_url}"
 
-                    post_exists = Post.objects.filter(uuid=uuid).exists()
+                        post_exists = Post.objects.filter(uuid=uuid).exists()
 
-                    if not post_exists:
-                        post_obj = standardize_post(post)
-                        post_obj['uuid'] = uuid
-                        author_id =  post['author']['id'].split("/")[-1]
-                        post_obj['made_by'] = Author.objects.get(id=author_id)
+                        if not post_exists:
+                            post_obj = standardize_post(post)
+                            post_obj['uuid'] = uuid
+                            author_id =  post['author']['id'].split("/")[-1]
+                            post_obj['made_by'] = Author.objects.get(id=author_id)
 
-                        # import pdb; pdb.set_trace()
+                            # import pdb; pdb.set_trace()
+                            try:
+                                Post.objects.create(**post_obj)
+                            except Exception as e:
+                                # pdb.set_trace()
+                                print(f"creating post failed in ajax {post_obj['uuid']}: {e}")
+
+                       
                         try:
-                            Post.objects.create(**post_obj)
+                            like_url = urljoin(url,f'{uuid}/likes')
+                            res = requests.get(like_url,headers=headers)
+                            post['likeCount'] = len(json.loads(res.text)['items'])
                         except Exception as e:
-                            print(f"creating post failed in ajax {post_obj['uuid']}: {e}")
+                            print(f'Error getting like of post {like_url}: {e}')
+                            post['likeCount'] = 0
 
-                    like_url = urljoin(url,f'{uuid}/likes')
-                    try:
-                        res = requests.get(like_url,headers=headers)
-                        post['likeCount'] = len(json.loads(res.text)['items'])
-                    except Exception as e:
-                        print(f'Error getting like of post {like_url}: {e}')
-                        post['likeCount'] = 0
-                    post['tag'] = foreignNode.nickname
-                    post['auth_token'] = foreignNode.getToken()
-                    allPosts.append(post)
+                        post['tag'] = foreignNode.nickname
+                        post['auth_token'] = foreignNode.getToken()
+
+
+                        #temp for now, as some teams are not returning
+                        if 'count' not in post:
+                            post['count'] = 0
+
+                        if 'commentSrc' not in post:
+                            #Bigger yoshi is sending comments as list when it should be url, next line breaks.
+                            try:
+                                comments = requests.get(post['comments'], headers=headers)
+                                post['commentSrc'] = json.loads(comments.text)
+                        
+                                #yosh is hardcoding so a work arond
+                                post['count'] = len(post['commentSrc']['comments'])
+                            except:
+                                post['commentSrc'] = []
+
+                        # if base_url == "https://bigger-yoshi.herokuapp.com/api/":
+                        #     import pdb; pdb.set_trace()
+                        allPosts.append(post)
+                except Exception as e:
+                    # pdb.set_trace()
+                    print('errors')
         except Exception as e:
-            print(base_url,e)
+            # pdb.set_trace()
+            print("error here with author url")
+            
+        # except Exception as e:
+        #     import pdb; pdb.set_trace()
+        #     print(base_url,e)
 
     return JsonResponse({'posts': allPosts})
 
@@ -116,13 +156,25 @@ def post_details(request):
     host =  post_obj.made_by.host
     author = post_obj.made_by
 
-    if not host.endswith('/'):
-        host += '/'
+    # if not host.endswith('/'):
+    #     host += '/'
+    # import pdb; pdb.set_trace()
 
-    # if not "https" in host:
-    #     host = host.replace("http", "https")
+    arr = host.split(":")
+    arr[0] ='http'
+    httpHost = ":".join(arr)
+    arr[0] ='https'
+    httpsHost = ":".join(arr)
+    foreignNode = None
+    try:
+        foreignNode = ForeignAPINodes.objects.get(base_url=httpHost)
+    except:
+        try:
+            foreignNode = ForeignAPINodes.objects.get(base_url=httpsHost)
+        except:
+            print("Something wrong w foreign node")
 
-    foreignNode = ForeignAPINodes.objects.get(base_url=host)
+    
     headers={}
     if foreignNode.username:
         headers = {

@@ -22,6 +22,9 @@ export function addPostLikeEventListener(post,author){
           headers: {
             Authorization: 'Basic '+post.auth_token
           },
+          xhrFields: {
+            withCredentials: true
+          },
           success: function (result) {
             showAndDismissAlert("info",result)
             // console.log(result)
@@ -72,6 +75,9 @@ export function addCommentLikeEventListener(comment,author){
           },
           headers: {
             Authorization: 'Basic '+comment.auth_token
+          },
+          xhrFields: {
+            withCredentials: true
           },
           success: function (result) {
             showAndDismissAlert("info",result)
@@ -124,6 +130,9 @@ export function addDeletePostListener(uuid){
                 csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
                 action: 'delete_post'
             },
+            xhrFields: {
+              withCredentials: true
+            },
             success: function (result) {
 
               $(`#delete-post-modal-${uuid}`).hide()
@@ -154,3 +163,31 @@ export function addDeletePostListener(uuid){
     });
   });
 }
+
+
+
+// function addCommentHandler(event, comment){
+//   // add submit event listener to comment form
+//     // prevent default form submission
+//     event.preventDefault();
+//     console.log(comment)
+//     // console.log(post)
+
+//     // serialize form data
+//     // var formData = $(this).serialize();
+
+//     // // send AJAX request to submit form data
+//     // $.ajax({
+//     //   type: "POST",
+//     //   url: $(this).attr("action"),
+//     //   data: formData,
+//     //   success: function(response) {
+//     //     // update comment section with AJAX response
+//     //     $("#comment-section").html(response);
+//     //   },
+//     //   error: function(xhr, status, error) {
+//     //     // handle AJAX error
+//     //     console.error(xhr);
+//     //   }
+//     // });
+// };

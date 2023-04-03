@@ -3,6 +3,8 @@ from django import template
 from ..models import *
 import uuid
 import urllib
+import json
+
 
 register = template.Library()
 
@@ -42,6 +44,7 @@ def convert_uuid_to_hex(uuid_string):
   #   # if the conversion fails, the string is not a UUID in hexadecimal representation
   #   return uuid
 
+
 @register.filter
 def getHostNickname(url):
     parsedHost = urllib.parse.urlparse(url)
@@ -50,3 +53,25 @@ def getHostNickname(url):
       return node.nickname
     except:
       return "bad_host"
+
+
+@register.filter
+def convert_to_json(obj):
+  # import pdb; pdb.set_trace()
+  # Convert the dictionary to a JSON string
+
+  json_string = json.dumps(obj, default=str)
+
+  # # Replace "False" with "false" in the JSON string
+  # json_string = json_string.replace("False", "false")
+  return json_string
+
+@register.filter
+def convert_to_json2(obj):
+  # Convert the dictionary to a JSON string
+
+  json_string = json.dumps(obj, default=str)
+
+  # # Replace "False" with "false" in the JSON string
+  # json_string = json_string.replace("False", "false")
+  return json_string
