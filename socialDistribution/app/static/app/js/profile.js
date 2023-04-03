@@ -150,7 +150,7 @@ function sendFollowRequestToInbox(e){
             follow_object.actor = currentUserObject;
 
             follow_object.object = foreignUserObject
-
+            
 
             // console.log(follow_object);
 
@@ -181,7 +181,8 @@ function sendFollowRequestToInbox(e){
 
             const addToSentRequestURL = new URL("add-to-sent", `${window.location.protocol}//` + window.location.host);
 
-            const sentRequestObject = {user_id:user_id, author_id:author_id};
+            const sentRequestObject = {user_id:user_id, author_id:author_id, foreign_user_object: foreignUserObject};
+
 
             fetch(addToSentRequestURL, {
                 method: "POST",
