@@ -22,7 +22,7 @@ $(document).ready(function() {
         followersUrl = new URL("authors/" + uuidToHex(author_id) + "/followers", author_host);
     }
     console.log(auth_headers);
-    fetch(followersUrl, {method: "GET", headers: auth_headers}).then((response) => {
+    fetch(followersUrl, {method: "GET", redirect: "follow", headers: auth_headers}).then((response) => {
         if (response.status === 200) { // OK
             return response.json();
         } else {
@@ -46,7 +46,7 @@ function getAndSetProfileCard() {
 
     console.log(author_host);
     // set profile card info
-    fetch(authorProfileUrl, {method: "GET", headers: auth_headers}).then((response) => {
+    fetch(authorProfileUrl, {method: "GET", redirect: "follow", headers: auth_headers}).then((response) => {
         if (response.status === 200) { // OK
             return response.json();
         } else {
@@ -67,7 +67,7 @@ function getAndSetProfileCard() {
         authorIsFollowingUrl = new URL("authors/" + uuidToHex(author_id) + "/followers/" + uuidToHex(user_id), author_host);
     }
 
-    fetch(authorIsFollowingUrl, {method: "GET", headers: auth_headers}).then((response) => {
+    fetch(authorIsFollowingUrl, {method: "GET", redirect: "follow", headers: auth_headers}).then((response) => {
         // console.log(response.json().is_following);
         if (response.status === 200) { // OK
             let temp = response.json();
@@ -173,6 +173,7 @@ function sendFollowRequestToInbox(e){
             fetch(foreignAuthorURL, {
                 method: "POST",
                 headers: auth_headers, 
+                redirect: "follow",
                 body: JSON.stringify(follow_object)
             }).then(response => {
                 console.log("-------------Response: ", response.status);
@@ -184,6 +185,7 @@ function sendFollowRequestToInbox(e){
 
             fetch(addToSentRequestURL, {
                 method: "POST",
+                redirect: "follow",
                 headers: new Headers({
                 'Authorization': 'Basic '+btoa('server1:123'),
                 'Content-Type': 'application/json'
@@ -202,7 +204,7 @@ async function getSingleAuthorInfo(url, auth_headers){
     const currentAuthorURL = url;
 
     const currentAuthorResponse = await fetch(currentAuthorURL, {
-        headers: auth_headers});
+        headers: auth_headers, redirect: "follow"});
 
     const currentAuthorResponseJSON = await currentAuthorResponse.json();
 
@@ -284,7 +286,7 @@ function setFriends(followers, author_id) {
                 var url = new URL("authors/" + uuidToHex(extractUUID(follower.id)) + "/followers/" + uuidToHex(author_id), author_host);
             }
             //const url = new URL("authors/" + uuidToHex(extractUUID(follower.id)) + "/followers/" + uuidToHex(author_id), author_host);
-            fetch(url, {method: "GET", headers: auth_headers}).then((response) => {
+            fetch(url, {method: "GET", redirect: "follow", headers: auth_headers}).then((response) => {
                 if (response.status === 200) { // OK
                     let temp = response.json();
                     //console.log(temp);
