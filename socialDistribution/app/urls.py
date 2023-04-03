@@ -43,11 +43,14 @@ urlpatterns = [
     path('logout', views.signout, name='logout'),
     path('add-to-sent', views.add_to_sent_request, name='add-to-sent'),
 
+
+    # path('posts', views.post_detail, name='post_detail'),
+    path('posts/<str:node>/<str:author_id>/<str:post_id>', ajax_views.post_details, name='node-post-detail'),
     path('github/<str:username>', views.github_activity, name='github'),
 
     path('posts/<str:post_id>', views.post_detail, name='post_detail'),
     path('posts/<str:post_id>/edit', views.post_edit, name='post_edit'),
-    path('posts/<str:post_id>/comment', views.add_comment, name='comment-form'),
+    path('comment', views.add_comment, name='comment-form'),
     path('posts/<str:post_id>/like', views.add_like_post, name='add_like_post'),
     path('posts/<str:post_id>/comments/<str:comment_id>/like', views.add_like_comment, name='add_like_comment'),
     path('delete-post/<str:post_id>/', views.delete_post, name='delete_post'),
@@ -62,7 +65,7 @@ urlpatterns = [
 
     path('authors/<str:author_id>/sent', views.sent_requests, name='sent_requests'),
     path('authors/<str:server_name>/<str:author_id>', views.profile, name='profile'),
-   
+
 
 
     #Template Urls (returns HTML)
@@ -71,8 +74,9 @@ urlpatterns = [
     path('comment.html', template_views.get_comment_template, name='post_detail.html'),
 
     #Ajax Urls (returns JSON response)
-    path('posts', ajax_views.explore_posts, name='posts'),
-    path('post-details', ajax_views.post_details, name='post-details'),
+    path('public_posts', ajax_views.public_posts, name='posts-explore'),
+    path('home_posts', ajax_views.home_posts, name='posts-home'),
+    path('profile_posts/<str:author_id>', ajax_views.profile_posts, name='posts-profile'),
 
 
     #API urls
@@ -103,7 +107,7 @@ urlpatterns = [
     path('api/authors/<str:author_id>/posts/<str:post_id>/likes', LikesPostView.as_view(), name ='api-post-likes'),
     path('api/authors/<str:author_id>/posts/<str:post_id>/comments/<str:comment_id>', CommentView.as_view(), name ='api-post-comment'),
     path('api/authors/<str:author_id>/posts/<str:post_id>/comments/<str:comment_id>/likes', LikesCommentView.as_view(), name ='api-post-comment-likes'),
-    
+
     # image server
     path('server/authors/<str:author_id>/posts/<str:post_id>/image', PostImageView.as_view(), name ='server-post-image'),
 ]

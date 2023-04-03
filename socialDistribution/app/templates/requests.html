@@ -45,7 +45,7 @@
                             <div class="btn-group" role="group" aria-label="Basic example">
 
                                 <a type="button" class="btn btn-primary"
-                                    href=""><i
+                                    href="{% url 'profile' server_name=request.host|get_server_name author_id=request.id %}"><i
                                         class="bi bi-person-fill">&nbsp;Profile</i></a>
                                 <a type="button" href="{{request.github}}" target="_blank" class="btn btn-secondary"><i
                                         class="bi bi-github">&nbsp;GitHub</i></a>

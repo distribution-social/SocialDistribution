@@ -8,11 +8,11 @@
       $('#new-comment-{{post.uuid}}').on('hidden.bs.modal', function () {
         $(this).find('#comment_form').trigger('reset');
       })
-    }); 
+    });
 
     $(function () {
         $('#new-comment-{{post.uuid}}').on('shown.bs.modal', function () {
-            $(this).find('#id_comment').focus();    
+            $(this).find('#id_comment').focus();
         })
     });
 
@@ -20,17 +20,17 @@
     function addCommentHandler(event,user, post){
         // prevent default form submission
         event.preventDefault();
-        
+
         // remove bad control characters
         let cleanedJsonStr = post.replace(/[\x00-\x1F\x7F-\x9F]/g, '');
 
         let parsedPost = JSON.parse(cleanedJsonStr)
         const textarea = document.getElementById(`comment-textarea-${parsedPost.uuid}`);
-        
+
         parsedActor = JSON.parse(document.getElementById('my-author').dataset.myAuthor);
-        
+
         data =  {
-              "summary": `${parsedActor.displayName} commented on your post`,         
+              "summary": `${parsedActor.displayName} commented on your post`,
               "type": "comment",
               "author": {...parsedActor},
               "object": parsedPost.id,
@@ -51,6 +51,9 @@
               "Authorization": 'Basic '+parsedPost.auth_token,
             "Content-Type": 'application/json; charset=utf-8'
             },
+            xhrFields: {
+              withCredentials: true
+            },
             success: function (result) {
               $.ajax({
                   url: '/comment.html',
@@ -59,6 +62,9 @@
                   contentType: 'application/json',
                   headers: {
                       'X-CSRFToken': '{{ csrf_token }}'
+                  },
+                  xhrFields: {
+                    withCredentials: true
                   },
                   success: function(template) {
                     //creates and sets a cardfooter element
@@ -71,15 +77,15 @@
                     let value = parseInt($(`#comment-count-${parsedPost.uuid}`).html());
                     value++;
                     $(`#comment-count-${parsedPost.uuid}`).html(value);
-                  
+
                     commentSpinner.setAttribute("hidden", true);
                     $(`#new-comment-${parsedPost.uuid}`).modal('hide');
-                          
+
                     const commentList = document.getElementById(`collapse_${parsedPost.uuid}`)
                     commentList.classList.remove('collapse');
 
                     textarea.value = ""
-                    
+
 
                   },
                   error: function(xhr, status, error) {
@@ -87,8 +93,8 @@
                       textarea.value = ""
                   }
               });
-          
-            
+
+
 
             },
             error: function (xhr, exception) {
@@ -109,10 +115,10 @@
               showAndDismissAlert("error",error_message)
             }
 
-            
+
         });
 
-        
+
     };
 
   </script>
@@ -128,13 +134,13 @@
         </div>
         <div class="modal-body" id="comment-modal-body">
           <div class="form-group" id="comment_form">
-            
+
             <label for="exampleFormControlTextarea1">Comment</label>
             <textarea class="form-control" id="comment-textarea-{{post.uuid}}" rows="4"></textarea>
             <div style="margin-top: 6px;">
               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
               <button id="comment-btn" class="btn btn-success"  onClick="event.preventDefault(); addCommentHandler(event,`{{user}}`, `{{post|convert_to_json}}`)">
-                
+
                 Comment
                 <span id="comment-spinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true" hidden></span>
               </button>

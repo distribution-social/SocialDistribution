@@ -54,7 +54,7 @@ class PostForm(forms.ModelForm):
 
                 # Add the auth token to the option element data attribute
                 receiver.auth_token = auth_token
-            
+
             self.fields['receivers'].queryset = receivers
             #  # Add the necessary JavaScript code to the form's media definition
             # self.media += forms.Media(
@@ -65,7 +65,6 @@ class PostForm(forms.ModelForm):
             # )
 
     def save(self, user,receiver_list = None,commit=True):
-        print('save method called')
         post = super().save(commit=False)
         post.made_by = user
         if self.cleaned_data['content_type'] == 'image/png;base64' or self.cleaned_data['content_type'] == 'image/jpeg;base64':
@@ -82,7 +81,7 @@ class PostForm(forms.ModelForm):
 
         return post
 
-      
+
 
 class CommentForm(forms.ModelForm):
     class Meta:
@@ -94,7 +93,6 @@ class CommentForm(forms.ModelForm):
         }
 
     def save(self, user, post,commit=True):
-        print('save method called')
         comment = super().save(commit=False)
         comment.author = user
         comment.post = post
@@ -102,7 +100,7 @@ class CommentForm(forms.ModelForm):
             comment.save()
 
         return comment
-    
+
 
 class EditProfileForm(forms.ModelForm):
      class Meta:
@@ -116,7 +114,6 @@ class EditProfileForm(forms.ModelForm):
          }
 
      def save(self,commit=True):
-         print('save method called')
          author = super().save(commit=False)
          if commit:
              author.save()
