@@ -41,8 +41,7 @@
         commentSpinner = document.getElementById('comment-spinner')
         commentSpinner.removeAttribute("hidden");
         commentContainer = document.getElementById(`collapse_${parsedPost.uuid}`)
-        const url = `${parsedPost.author.url}/inbox`
-
+        const url = `${parsedPost.author.url}/inbox/`
 
         $.ajax({
             type: 'POST',

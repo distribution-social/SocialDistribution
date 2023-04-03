@@ -63,6 +63,17 @@ def convert_uuid_to_hex(uuid_string):
 def convert_to_json(obj):
   # import pdb; pdb.set_trace()
   # Convert the dictionary to a JSON string
+
+  json_string = json.dumps(obj, default=str)
+
+  # # Replace "False" with "false" in the JSON string
+  # json_string = json_string.replace("False", "false")
+  return json_string
+
+@register.filter
+def convert_to_json2(obj):
+  # Convert the dictionary to a JSON string
+
   json_string = json.dumps(obj, default=str)
 
   # # Replace "False" with "false" in the JSON string

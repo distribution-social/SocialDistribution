@@ -9,6 +9,8 @@ Link: https://www.bootdey.com/snippets/view/bs4-s
 -->
 
 <!doctype html>
+{% load static %}
+{% load extra_tags %}
 <script type="module" src="https://md-block.verou.me/md-block.js"></script>
 <html lang="en">
   {% block css %}<link rel="stylesheet" type="text/css" href="{% static 'app/posts.css' %}">{% endblock %}
@@ -75,6 +77,11 @@ Link: https://www.bootdey.com/snippets/view/bs4-s
           <strong>Reply</strong>
         </a>
 
+        <a type="button" class="d-inline-flex text-muted mx-2" data-bs-toggle="modal" data-bs-target="#share-post-modal-{{post.uuid|convert_uuid_to_hex}}" style="text-decoration: none;">
+          <i class="bi bi-share"></i>
+          <strong style="margin-left: 0.5rem">Share</strong>
+        </a>
+
         {% if user.username|convert_username_to_id|stringformat:"s" == post.author.id|convert_uuid_to_hex|stringformat:"s" %}
           <a type="button" class="d-inline-flex text-muted mx-2 delete-button" style="text-decoration: none;" id="delete-post-{{post.uuid|convert_uuid_to_hex}}" data-bs-toggle="modal" data-bs-target="#delete-post-modal-{{post.uuid|convert_uuid_to_hex}}">
             <i class="bi bi-trash"></i>
@@ -134,3 +141,6 @@ Link: https://www.bootdey.com/snippets/view/bs4-s
     {% include "new_comment_modal.html" %}
     {% endif %}
   </div>
+
+    {% include "share_post_modal.html" %}
+</html>

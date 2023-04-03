@@ -1,5 +1,6 @@
 from django import forms
 from .models import *
+from django.core import serializers
 import base64
 
 class SignupForm(forms.Form):
@@ -21,9 +22,10 @@ class SigninForm(forms.Form):
 
 class PostForm(forms.ModelForm):
     post_image = forms.ImageField(widget=forms.FileInput, required=False)
+    receivers = forms.ModelMultipleChoiceField(queryset=Author.objects.all(), widget=forms.CheckboxSelectMultiple, label='Select which followers to send to:', required=False, help_text='')
     class Meta:
         model = Post
-        fields = ('title', 'description', 'content_type', 'content', 'post_image' , 'visibility','receivers', 'unlisted' )
+        fields = ('title', 'description', 'content', 'content_type', 'visibility','receivers', 'post_image', 'unlisted')
 
         widget = {
             'title' : forms.TextInput(attrs={'class': 'form-control'}),
@@ -31,9 +33,36 @@ class PostForm(forms.ModelForm):
             'content' : forms.Textarea(attrs={'class': 'form-control'}),
             'content_type' : forms.Select(attrs={'class': 'form-control'}),
             'visibility' : forms.TextInput(attrs={'class': 'form-control'}),
-            'receivers' : forms.SelectMultiple(attrs={'class': 'form-control'}),
+            # 'receivers' : forms.CheckboxSelectMultiple(attrs={'class': 'form-control'}),
             'unlisted' : forms.TextInput(attrs={'class': 'form-control'}),
         }
+
+    def __init__(self, *args, **kwargs):
+        author = kwargs.pop('author', None)
+        super(PostForm, self).__init__(*args, **kwargs)
+
+        if author:
+            # import pdb; pdb.set_trace()
+            receivers = author.followers.all()
+            for receiver in receivers:
+                # Get the auth token for this receiver
+                try:
+                    foreign_api_node = ForeignAPINodes.objects.get(base_url=receiver.host)
+                    auth_token = foreign_api_node.getToken()
+                except ForeignAPINodes.DoesNotExist:
+                    auth_token = ''
+
+                # Add the auth token to the option element data attribute
+                receiver.auth_token = auth_token
+
+            self.fields['receivers'].queryset = receivers
+            #  # Add the necessary JavaScript code to the form's media definition
+            # self.media += forms.Media(
+            #     js=(
+            #         'https://code.jquery.com/jquery-3.6.0.min.js',  # You can use a local copy of jQuery instead if you prefer
+            #         'post_form.js',
+            #     )
+            # )
 
     def save(self, user,receiver_list = None,commit=True):
         post = super().save(commit=False)
@@ -51,6 +80,8 @@ class PostForm(forms.ModelForm):
                     post.receivers.add(author)
 
         return post
+
+
 
 class CommentForm(forms.ModelForm):
     class Meta:
