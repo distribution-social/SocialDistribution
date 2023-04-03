@@ -3,9 +3,9 @@ import { makeAjaxCall, makeAjaxCallAsync } from "./ajax.js";
 //post card scripts
 
 export function getPostLikes(post){
-  const uuid = extractUUID(post.origin)
+  const uuid = extractUUID(post.id)
   const like_count = $(`#like-count-${uuid}`)
-  const like_url = `${post.origin}/likes`
+  const like_url = `${post.id}/likes`
   makeAjaxCallAsync(like_url,'GET',null,{Authorization: 'Basic '+post.auth_token},
   function (response,status){
     const count = response.items.length
@@ -22,10 +22,10 @@ export function addPostLikeEventListener(post,author){
     type: 'like',
     author,
     summary: `${author.displayName} liked your post`,
-    object: post.origin
+    object: post.id
   }
 
-  const uuid = extractUUID(post.origin)
+  const uuid = extractUUID(post.id)
   $(`#like-post-${uuid}`).click(function(e) {
       e.preventDefault();
       const url = `${post.author.url}/inbox`
@@ -39,10 +39,10 @@ export function addPostLikeEventListener(post,author){
           xhrFields: {
             withCredentials: true
           },
-          success: function (result) {
+          success: function (result, statusText, xhr) {
+            console.log(statusText)
             showAndDismissAlert("info",result)
-            // console.log(result)
-            if(result.toLowerCase() === "liked"){
+            if(xhr.status == 201 || xhr.status == 200){
               let value = parseInt($(`#like-count-${uuid}`).html());
               value++;
               $(`#like-count-${uuid}`).html(value);
@@ -93,10 +93,10 @@ export function addCommentLikeEventListener(comment,author){
           xhrFields: {
             withCredentials: true
           },
-          success: function (result) {
+          success: function (result, statusText, xhr) {
             showAndDismissAlert("info",result)
             // console.log(result)
-            if(result.toLowerCase() === "liked"){
+            if(xhr.status == 201 || xhr.status == 200){
               let value = parseInt($(`#like-count-${uuid}`).html());
               value++;
               $(`#like-count-${uuid}`).html(value);

@@ -13,7 +13,7 @@ $(document).ready(function() {
 
     spinner.style.display = 'display';
     data = {
-        origin: post.origin
+        id: post.id
     }
 
     makeAjaxCallAsync("/post_details","GET",data,headers,

@@ -117,11 +117,11 @@ def get_posts(authors):
             except:
                 pass
     for post in posts:
-        post['auth_token'] = get_auth_token(post.get('origin'))
+        post['auth_token'] = get_auth_token(post.get('id'))
     return posts
 
 def get_like_count(post):
-    origin = post.get('origin')
+    origin = post.get('id')
     url = urljoin(origin,f'likes')
     if 'localhost' not in url:
         try:
@@ -236,8 +236,6 @@ def post_details(request,node,author_id,post_id):
         response.status_code = 500
         return response
     post = json.loads(res.text)
-    url = urljoin(post.get('origin'),f'likes')
-    origin = post.get('origin')
     if not post.get('likeCount'):
         post = get_like_count(post)
     post['tag'] = node
