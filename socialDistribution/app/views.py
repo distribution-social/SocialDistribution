@@ -641,11 +641,11 @@ def inbox(request, author_id):
     context = {"type": "inbox"}
 
     if request.method == "GET":
-        all = author.my_inbox.all().order_by("-date")
-        likes = all.filter(object__type="like")
-        comments = all.filter(object__type="comment")
-        posts = all.filter(object__type="post")
-        requests = all.filter(object__type="follow")
+        all = []
+        likes = []
+        comments = []
+        posts = []
+        requests = []
         context.update({"items": all, "likes": likes,
                        "comments": comments, "posts": posts, "requests": requests})
 
