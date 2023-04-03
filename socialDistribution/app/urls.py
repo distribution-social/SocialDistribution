@@ -105,4 +105,7 @@ urlpatterns = [
     path('api/authors/<str:author_id>/posts/<str:post_id>/likes', LikesPostView.as_view(), name ='api-post-likes'),
     path('api/authors/<str:author_id>/posts/<str:post_id>/comments/<str:comment_id>', CommentView.as_view(), name ='api-post-comment'),
     path('api/authors/<str:author_id>/posts/<str:post_id>/comments/<str:comment_id>/likes', LikesCommentView.as_view(), name ='api-post-comment-likes'),
+    
+    # image server
+    path('server/authors/<str:author_id>/posts/<str:post_id>/image', PostImageView.as_view(), name ='server-post-image'),
 ]

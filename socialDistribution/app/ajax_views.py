@@ -40,7 +40,7 @@ async def fetch_url(url:URL):
 
     async with aiohttp.ClientSession() as session:
         try:
-            async with session.request(url=url.url,method=url.method,headers=url.headers,params=url.params,timeout=3) as response:
+            async with session.request(url=url.url,method=url.method,headers=url.headers,params=url.params) as response:
                 try:
                     return await response.json()
                 except aiohttp.ContentTypeError:
@@ -72,7 +72,7 @@ def get_authors():
             }
         params = {
             'page': '1',
-            'size': '100'
+            'size': '10000'
         }
         url = urljoin(base_url,'authors')
         urls.append(URL(url,'get',headers,params))

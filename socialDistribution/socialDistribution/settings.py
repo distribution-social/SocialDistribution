@@ -110,6 +110,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'app',
     'crispy_forms',
+    'markdownify',
     'crispy_bootstrap5',
     'rest_framework',
     'generic_relations',

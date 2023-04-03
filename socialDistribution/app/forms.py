@@ -1,5 +1,6 @@
 from django import forms
 from .models import *
+import base64
 
 class SignupForm(forms.Form):
     display_name = forms.CharField(label='Display Name', max_length=50, required=True)
@@ -19,9 +20,10 @@ class SigninForm(forms.Form):
         label='Password', widget=forms.PasswordInput, required=True)
 
 class PostForm(forms.ModelForm):
+    post_image = forms.ImageField(widget=forms.FileInput, required=False)
     class Meta:
         model = Post
-        fields = ('title', 'description', 'content', 'content_type', 'visibility','receivers', 'unlisted', 'image' )
+        fields = ('title', 'description', 'content_type', 'content', 'post_image' , 'visibility','receivers', 'unlisted' )
 
         widget = {
             'title' : forms.TextInput(attrs={'class': 'form-control'}),
@@ -36,6 +38,11 @@ class PostForm(forms.ModelForm):
     def save(self, user,receiver_list = None,commit=True):
         post = super().save(commit=False)
         post.made_by = user
+        if self.cleaned_data['content_type'] == 'image/png;base64' or self.cleaned_data['content_type'] == 'image/jpeg;base64':
+            img_file = self.cleaned_data['post_image']
+            img_data = img_file.read()
+            img_base64 = base64.b64encode(img_data).decode('utf-8')
+            post.content = img_base64
         if commit:
             post.save()
             if receiver_list:
@@ -44,10 +51,6 @@ class PostForm(forms.ModelForm):
                     post.receivers.add(author)
 
         return post
-
-        def __init__(self, *args, **kwargs):
-            super().__init__(*args, **kwargs)
-            self.fields['receiver'].widget.attrs.update({'class': 'form-control'})
 
 class CommentForm(forms.ModelForm):
     class Meta:

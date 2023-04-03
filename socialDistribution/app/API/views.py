@@ -12,6 +12,10 @@ from .mixins import BasicAuthMixin
 from rest_framework.permissions import AllowAny
 from django.conf import settings
 import json
+import base64
+from PIL import Image
+import io
+from django.http import FileResponse
 
 class AuthorListAPIView(BasicAuthMixin,APIView):
     """ Used for Author based actions."""
@@ -455,6 +459,23 @@ class LikedView(BasicAuthMixin,APIView):
         }
 
         return Response(response,status=status.HTTP_200_OK)
+    
+class PostImageView(BasicAuthMixin, APIView):
+     def get(self,request,author_id,post_id):
+        """Gets a image for image post."""
+        try:
+            post = Post.objects.get(uuid=post_id)
+        except Post.DoesNotExist:
+            return Response({"error": "Post does not exist."}, status=status.HTTP_404_NOT_FOUND)
+        if post.content_type == "image/png;base64":
+            with open("PostImage.png", "wb") as fh:
+                fh.write(base64.decodebytes(post.content.encode()))
+            return FileResponse(open("PostImage.png", 'rb'), status=status.HTTP_200_OK, content_type="image/png")
+        elif post.content_type == "image/jpeg;base64":
+            content = post.content
+            return Response(content, status=status.HTTP_200_OK)
+        
+        return Response({"error": "Image does not exist."}, status=status.HTTP_404_NOT_FOUND)
 
 class InboxView(BasicAuthMixin,APIView):
     def get(self,request,author_id):
