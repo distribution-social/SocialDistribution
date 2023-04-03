@@ -62,7 +62,7 @@ def send_post_request(type, actor, object):
 
     json = {
         "type": type,
-        "summary": f"{actor.displayName} wants to follow {object.displayName}",
+        "summary": f"{actor.displayName} {type}ed {object.displayName}'s request",
         "actor": {
             "type": "author",
             "id": actor.url,
