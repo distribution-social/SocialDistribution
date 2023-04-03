@@ -1,17 +1,61 @@
 import { extractUUID } from "./utility.js";
+import { makeAjaxCall, makeAjaxCallAsync } from "./ajax.js";
 //post card scripts
 
+export function getPostLikes(post){
+  const uuid = extractUUID(post.id)
+  const like_count = $(`#like-count-${uuid}`)
+  const like_url = `${post.id}/likes`
+  makeAjaxCallAsync(like_url,'GET',null,{Authorization: 'Basic '+post.auth_token},
+  function (response,status){
+    const count = response.items.length
+    like_count.html(count);
+  },
+  function (error,status){
+    console.log(error)
+  })
+}
+
+export function getComments(post){
+  const uuid = extractUUID(post.id)
+  const comments = $(`#collapse_${uuid}`)
+  const comment_url = `${post.id}/comments?page=1&size=10`
+  makeAjaxCallAsync(comment_url,'GET',null,{Authorization: 'Basic '+post.auth_token},
+  function (response,status){
+    $.each(response.comments, function(index,comment){
+      const commentData = {
+        ...comment
+      }
+      let headers = {
+        'X-CSRFToken': '{{ csrf_token }}'
+      }
+      makeAjaxCallAsync('/comment.html','POST',JSON.stringify(commentData),headers,
+      function (response,status){
+        let new_com = document.createElement('div');
+        new_com.classList.add('card-footer');
+        new_com.innerHTML = response
+        comments.append(new_com)
+      },
+      function (error,status){
+        console.log(error)
+      })
+    })
+  },
+  function (error,status){
+    console.log(error)
+  })
+}
+
 export function addPostLikeEventListener(post,author){
-  author = JSON.parse(author)
 
   const data = {
     type: 'like',
     author,
     summary: `${author.displayName} liked your post`,
-    object: post.origin
+    object: post.id
   }
 
-  const uuid = extractUUID(post.origin)
+  const uuid = extractUUID(post.id)
   $(`#like-post-${uuid}`).click(function(e) {
       e.preventDefault();
       const url = `${post.author.url}/inbox`
@@ -22,10 +66,12 @@ export function addPostLikeEventListener(post,author){
           headers: {
             Authorization: 'Basic '+post.auth_token
           },
-          success: function (result) {
+          xhrFields: {
+            withCredentials: true
+          },
+          success: function (result, statusText, xhr) {
             showAndDismissAlert("info",result)
-            // console.log(result)
-            if(result.toLowerCase() === "liked"){
+            if(xhr.status == 201 || xhr.status == 200){
               let value = parseInt($(`#like-count-${uuid}`).html());
               value++;
               $(`#like-count-${uuid}`).html(value);
@@ -73,10 +119,13 @@ export function addCommentLikeEventListener(comment,author){
           headers: {
             Authorization: 'Basic '+comment.auth_token
           },
-          success: function (result) {
+          xhrFields: {
+            withCredentials: true
+          },
+          success: function (result, statusText, xhr) {
             showAndDismissAlert("info",result)
             // console.log(result)
-            if(result.toLowerCase() === "liked"){
+            if(xhr.status == 201 || xhr.status == 200){
               let value = parseInt($(`#like-count-${uuid}`).html());
               value++;
               $(`#like-count-${uuid}`).html(value);
@@ -124,6 +173,9 @@ export function addDeletePostListener(uuid){
                 csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
                 action: 'delete_post'
             },
+            xhrFields: {
+              withCredentials: true
+            },
             success: function (result) {
 
               $(`#delete-post-modal-${uuid}`).hide()
@@ -154,3 +206,31 @@ export function addDeletePostListener(uuid){
     });
   });
 }
+
+
+
+// function addCommentHandler(event, comment){
+//   // add submit event listener to comment form
+//     // prevent default form submission
+//     event.preventDefault();
+//     console.log(comment)
+//     // console.log(post)
+
+//     // serialize form data
+//     // var formData = $(this).serialize();
+
+//     // // send AJAX request to submit form data
+//     // $.ajax({
+//     //   type: "POST",
+//     //   url: $(this).attr("action"),
+//     //   data: formData,
+//     //   success: function(response) {
+//     //     // update comment section with AJAX response
+//     //     $("#comment-section").html(response);
+//     //   },
+//     //   error: function(xhr, status, error) {
+//     //     // handle AJAX error
+//     //     console.error(xhr);
+//     //   }
+//     // });
+// };

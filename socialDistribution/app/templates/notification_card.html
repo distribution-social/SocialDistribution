@@ -5,9 +5,9 @@
       <div class="media">
         <div class="d-flex flex-row align-items-center">
           <div class="m-2">
-            <a class="d-flex" href="{% url 'profile' author_id=item.from_author.username|convert_username_to_id %}">
+            <a class="d-flex" href="{% url 'profile' server_name=item.from_author.host|get_server_name author_id=item.from_author.username|convert_username_to_id %}">
               {% if item.from_author.profileImage %}
-              <img src="{{item.from_author.profileImage}}" class="user-avatar-circle rounded-circle my-1" alt=""></img>
+              <img src="{{item.from_author.profileImage}}" class="object-fit-cover user-avatar-circle rounded-circle my-1" alt=""></img>
               {% else %}
               <i class="bi bi-person text-muted" style="font-size: 40px; text-align: center;" alt=""></i>
               {% endif %}
@@ -15,22 +15,22 @@
           </div>
           <div class="m-2">
             <h4>
-              <a class="text-muted" href="{% url 'profile' author_id=item.from_author.username|convert_username_to_id %}" style="text-decoration: none; color:grey;">
+              <a class="text-muted" href="{% url 'profile' server_name=item.from_author.host|get_server_name author_id=item.from_author.id %}" style="text-decoration: none; color:grey;">
                 {{item.from_author.displayName}}
               </a>
               {% if item.object.type == "post" %}
               <span style="color:grey;">posted</span>
-              <a class="card-title" href="{% url 'post_detail' post_id=item.object.content_object.uuid %}" style="text-decoration: none;">{{item.object.content_object.title}}</a>
+              <a class="card-title" href="{% url 'node-post-detail' node=item.object.content_object.made_by.host|get_server_name author_id=item.object.content_object.made_by.id post_id=item.object.content_object.uuid %}" style="text-decoration: none;">{{item.object.content_object.title}}</a>
               {% elif item.object.type == "comment" %}
               <span style="color:grey;">commented on</span>
-              <a class="card-title" href="{% url 'post_detail' post_id=item.object.content_object.uuid %}" style="text-decoration: none;">"{{item.object.content_object.title}}".</a>
+              <a class="card-title" href="{% url 'node-post-detail' node=item.object.content_object.post.made_by.host|get_server_name author_id=item.object.content_object.post.made_by.id post_id=item.object.content_object.post.uuid %}" style="text-decoration: none;">"{{item.object.content_object.post.title}}".</a>
               {% elif item.object.type == "like" %}
                 {% if item.object.content_object|classname == "Post" %}
                   <span style="color:grey;">liked</span>
-                  <a class="card-title" href="{% url 'post_detail' post_id=item.object.content_object.uuid %}" style="text-decoration: none;">"{{item.object.content_object.title}}".</a>
+                  <a class="card-title" href="{% url 'node-post-detail' node=item.object.content_object.made_by.host|get_server_name author_id=item.object.content_object.made_by.id post_id=item.object.content_object.uuid %}" style="text-decoration: none;">"{{item.object.content_object.title}}".</a>
                 {% elif item.object.content_object|classname == "Comment" %}
                   <span style="color:grey;">liked your comment on</span>
-                  <a class="card-title" href="{% url 'post_detail' post_id=item.object.content_object.post.uuid %}" style="text-decoration: none;">"{{item.object.content_object.post.title}}".</a>
+                  <a class="card-title" href="{% url 'node-post-detail' node=item.object.content_object.post.post.made_by.host|get_server_name author_id=item.object.content_object.post.made_by.id post_id=item.object.content_object.post.uuid %}" style="text-decoration: none;">"{{item.object.content_object.post.title}}".</a>
                 {% endif %}
               {% elif item.object.type == "follow" %}
                 {% if user.username|convert_username_to_id|isRequest:item.object.content_object.id %}

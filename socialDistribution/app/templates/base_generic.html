@@ -1,6 +1,7 @@
+<!doctype html>
 {% load static %}
 {% load extra_tags %}
-<!doctype html>
+
 <html lang="en">
   {% block css %}<link rel="stylesheet" type="text/css" href="{% static 'app/posts.css' %}">{% endblock %}
   <head>
@@ -21,7 +22,12 @@
     <div id="my-author" data-my-author="{{current_author}}"></div>
     <nav class="navbar bg-dark navbar-expand-lg bg-body-tertiary" data-bs-theme="dark">
       <div class="container-fluid">
-        <a class="navbar-brand" href="{% url 'home' %}">Social Distribution (@{{user.username}})</a>
+
+        <a class="navbar-brand" href="{% url 'home' %}">Social Distribution
+          {% if user.username %}
+          (@{{user.username}})
+          {% endif %}
+        </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
         </button>
@@ -34,39 +40,26 @@
                 </a>
               </li>
               <li class="nav-item">
-
-                        <li class="nav-item">
                 <a class="nav-link" href="{% url 'authors' %}">
                   <i class="bi bi-people-fill">&nbsp;Authors</i></a>
               </li>
 
-                      <li class="nav-item">
+              <li class="nav-item">
 
                 <a class="nav-link" href="{% url 'explore' %}">
                   <i class="bi bi-globe">&nbsp;Explore</i>
                 </a>
               </li>
-
+              {% if user.username %}
               <li class="nav-item">
                 <a class="nav-link" href="{% url 'profile' server_name='Local' author_id=user.username|convert_username_to_id %}">
                   <i class="bi bi-person-fill">&nbsp;Profile</i></a>
               </li>
-
-              <!--<li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="true">
-                  Requests
-                </a>
-                <ul class="dropdown-menu">
-                  <li><a class="dropdown-item" href="{% url 'sent_requests' author_id=user.username|convert_username_to_id %}">Sent</a></li>
-                  <li><a class="dropdown-item" href="{% url 'requests' author_id=user.username|convert_username_to_id %}">Received</a></li>
-                </ul>
-              </li>-->
-
               <li class="nav-item" style="vertical-align: baseline;">
                 <a class="nav-link" href="{% url 'post-form' %}"><i
                   class="bi bi-pencil-square">&nbsp;Create a post</i></a>
               </li>
-              {% if user %}
+
               <li class="nav-item" style="vertical-align: baseline;">
                 <a class="nav-link" href="{% url 'inbox' author_id=user.username|convert_username_to_id %}"><i
                   class="bi bi-inbox-fill">&nbsp;My Inbox</i></a>
@@ -87,13 +80,16 @@
           <div class="m-3">
 
 
-          <form name="form" method="post" action="{% url 'logout' %}">
-              {% csrf_token %}
-             <button id="logout" class="btn btn-success" type="submit">
-              <span id="spinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true" hidden></span>
-              Logout</button>
-          </form>
-
+          {% if user.username %}
+            <form name="form" method="post" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button id="logout" class="btn btn-success" type="submit">
+                <span id="spinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true" hidden></span>
+                Logout</button>
+            </form>
+          {% else %}
+          <a href="/login" class="btn btn-success">Login</a>
+          {% endif %}
            </div>
 
 
@@ -182,16 +178,16 @@
 
     <div id="alert-container">
       <div id="alert-success" class="alert alert-success alert-dismissible fade in show">
-        <p><strong>Success! </strong><p>
+        <p><strong>Success! </strong></p>
       </div>
       <div id="alert-error" class="alert alert-danger alert-dismissible fade in show">
-        <p><strong>Error! </strong><p>
+        <p><strong>Error! </strong></p>
       </div>
       <div id="alert-warning" class="alert alert-warning alert-dismissible fade in show">
-        <p><strong>Warning! </strong><p>
+        <p><strong>Warning! </strong></p>
       </div>
       <div id="alert-info" class="alert alert-info alert-dismissible fade in show">
-        <p><strong>Info! </strong><p>
+        <p><strong>Info! </strong></p>
       </div>
     </div>
     <script type="text/javascript">
@@ -208,7 +204,5 @@
           spinner.removeAttribute("hidden");
         })
     </script>
-
-
   </body>
 </html>

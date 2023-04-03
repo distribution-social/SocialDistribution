@@ -14,7 +14,7 @@
 {% endblock %}
 
 {% block content %}
-<script> 
+<script>
 //var author_id = '{{author.id}}';
 var author_id = '{{author_id}}'
 //var author_host = '{{author.host}}';
@@ -22,16 +22,14 @@ var author_host = '{{server_url}}'
 var user_id = '{{user.id}}';
 //var user_url ='{{user.url}}'
 var auth_headers = JSON.parse("{{auth_headers|escapejs}}");
+
+var local_auth_headers = JSON.parse("{{local_auth_headers|escapejs}}");
+
 //var serialized_followings = JSON.parse("{{serialized_followings|escapejs}}");
 var server_host = "{{local_server_host}}";
 var user_url = '{{user.url}}';
 var nickname_table = JSON.parse("{{nicknameTable|escapejs}}");
 var token_table = JSON.parse("{{tokenTable|escapejs}}");
-//var author_url = '{{author.url}}';
-//var user_display_name = '{{user.displayName}}';
-//var author_display_name = '{{author.displayName}}';
-//var foreign_node_token = '{{foreign_node_token}}';
-//var local_node_token = '{{local_node_token}}';
 </script>
 <script type="module" src="{% static '../static/app/js/profile.js' %}"></script>
 
@@ -48,13 +46,13 @@ var token_table = JSON.parse("{{tokenTable|escapejs}}");
                         <div class="card-body">
                             <div class="d-flex flex-md-row justify-content-between">
                                 <div class="">
-                                    <h1 class="profile_display_name card-title"></h1>
+                                    <h1 class="profile_display_name card-title">{{author.displayName}}</h1>
                                 </div>
                                 <div class="p-2">
                                     {% if user_id != author_id %}
                                     <form class="mt-3" action="{% url 'profile' server_name='Local' author_id=author_id %}" method="post">
                                         {% csrf_token %}
-                                            
+
                                           {% if user_is_following == "False" and user_pending_following == "False" %}
                                             <button id="follow_unfollow_button" type="submit" name="" value=""
                                                 class="btn btn-outline-primary btn-lg"></button>
@@ -86,14 +84,18 @@ var token_table = JSON.parse("{{tokenTable|escapejs}}");
                 </div>
             </div>
         </div>
-        
+
         <div class="p-2" style="max-width: 1000px;">
                         <nav>
                             <div class="nav nav-tabs justify-content-center border-bottom-0" id="nav-tab" role="tablist">
                                 <button class="nav-link active"
                                     id="nav-public-posts-tab" data-bs-toggle="tab" href="#"
                                     data-bs-target="#nav-public-posts" type="button" role="tab"
-                                    aria-controls="nav-public-posts" aria-selected="true">Posts</button>
+                                    aria-controls="nav-public-posts" aria-selected="true"><i class="bi bi-globe"></i> Public Posts</button>
+                                <button class="nav-link"
+                                    id="nav-github-tab" data-bs-toggle="tab" href="#"
+                                    data-bs-target="#nav-github" type="button" role="tab"
+                                    aria-controls="nav-github" aria-selected="true"><i class="bi bi-github"></i> GitHub Activity</button>
                                 <button class="nav-link"
                                     id="nav-followers-tab" data-bs-toggle="tab" href="#" data-bs-target="#nav-followers"
                                     type="button" role="tab" aria-controls="nav-followers"
@@ -120,26 +122,37 @@ var token_table = JSON.parse("{{tokenTable|escapejs}}");
                         <div class="tab-content" id="nav-tabContent">
                             <div class="tab-pane fade show active"
                                 id="nav-public-posts" role="tabpanel" aria-labelledby="nav-public-posts-tab" tabindex="0">
-                                <!--{% include 'posts_tab.html' %}-->
+                                <div class="d-flex justify-content-center">
+                                    <div id="spinner2" class="spinner-border text-primary mt-2" style="display: block;" role="status"></div>
+                                </div>
+                                <div id="post-stream" class="container-fluid d-flex align-items-center flex-column p-3" style="max-width: 1000px;">
+                                </div>
                             </div>
+
                             <div class="tab-pane fade"
-                                id="nav-followers" role="tabpanel" aria-labelledby="nav-followers-tab" tabindex="1">
+                                id="nav-github" role="tabpanel" aria-labelledby="nav-github-tab" tabindex="1">
+
+                                {% include 'github.html' %}
+                            </div>
+
+                            <div class="tab-pane fade"
+                                id="nav-followers" role="tabpanel" aria-labelledby="nav-followers-tab" tabindex="2">
                                 <!--{% include 'followerstab.html' %}-->
                                 {% include 'followers_tab_ajax.html' %}
                             </div>
-                            <!--<div class="tab-pane fade"
-                                id="nav-following" role="tabpanel" aria-labelledby="nav-following-tab" tabindex="2">
-                                {% include 'followingtab.html' %}
-                                {% include 'following_tab_ajax.html' %}
-                            </div>-->
                             <div class="tab-pane fade"
-                                id="nav-friends" role="tabpanel" aria-labelledby="nav-friends-tab" tabindex="2">
+                                id="nav-following" role="tabpanel" aria-labelledby="nav-following-tab" tabindex="3">
+                                <!--{% include 'followingtab.html' %}-->
+                                {% include 'following_tab_ajax.html' %}
+                            </div>
+                            <div class="tab-pane fade"
+                                id="nav-friends" role="tabpanel" aria-labelledby="nav-friends-tab" tabindex="4">
                                 <!--{% include 'friendstab.html' %}-->
                                 {% include 'friends_tab_ajax.html' %}
                             </div>
                             {% if user_id == author_id %}
                             <div class="tab-pane fade"
-                                id="nav-requests" role="tabpanel" aria-labelledby="nav-requests-tab" tabindex="3">
+                                id="nav-requests" role="tabpanel" aria-labelledby="nav-requests-tab" tabindex="5">
                                 {% include 'requests_tab.html' %}
                             </div>
                             {% endif %}

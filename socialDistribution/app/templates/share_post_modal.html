@@ -1,0 +1,43 @@
+<!doctype html>
+{% load static %}
+<!-- Share Post Modal -->
+{% block css %}<link rel="stylesheet" type="text/css" href="{% static 'app/share_post_modal.css' %}">{% endblock %}
+<script src="{% static '../static/app/js/sharePost.js' %}"></script>
+<div class="modal fade" id="share-post-modal-{{post.uuid|convert_uuid_to_hex}}" tabindex="-1" role="dialog" aria-labelledby="share-post-modal-label-{{post.uuid|convert_uuid_to_hex}}" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+            <h5 class="modal-title" id="share-post-modal-label-{{post.uuid|convert_uuid_to_hex}}">Share post</h5>
+            <button type="button" class="close btn btn-secondary" data-bs-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+            </div>
+            <div class="modal-body">
+                <p>Select who you want to share with:</p>
+                <form id="share-form-{{post.uuid|convert_uuid_to_hex}}">
+                    <div class="follower-list">
+                        {% for follower in followers %}
+
+
+                        <div class="follower-container">
+                                {% if follower.obj.profileImage %}
+                                <img src="{{follower.obj.profileImage}}" class="object-fit-cover user-avatar-circle rounded-circle my-1" alt=""></img>
+                                {% else %}
+                                <i class="bi bi-person text-muted" style="font-size: 40px; text-align: center;" alt=""></i>
+                                {% endif %}
+                                <div>{{follower.obj.displayName}}</div>
+                                <input type="checkbox" name="follower" value="{{follower|convert_to_json2}}">
+
+                            
+                        </div>
+                        {% endfor %}
+                    </div>
+                </form>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="sharePost(`{{post|convert_to_json}}`)">Share</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

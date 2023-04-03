@@ -34,10 +34,10 @@ if not DOMAIN:
     DOMAIN = socket.gethostbyname(socket.gethostname())
 
 if not SCHEME:
-    SCHEME = 'http://'
+    SCHEME = 'https://'
 
 HOST = SCHEME + DOMAIN
-
+print('Host:',HOST)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -82,12 +82,12 @@ CSRF_COOKIE_HTTPONLY = True
 
 CSRF_COOKIE_SAMESITE = 'Secure'
 
-CSRF_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = False
 
 # Session Cookies
 SESSION_COOKIE_SAME = 'Secure'
 
-SESSION_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = False
 
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
@@ -110,6 +110,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'app',
     'crispy_forms',
+    'markdownify',
     'crispy_bootstrap5',
     'rest_framework',
     'generic_relations',
@@ -118,6 +119,8 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'django.middleware.gzip.GZipMiddleware',
+    'django.middleware.http.ConditionalGetMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -126,6 +129,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "app.middleware.RemoveTrailingSlashMiddleware",
 ]
 
 ROOT_URLCONF = 'socialDistribution.urls'
@@ -204,7 +208,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'America/Edmonton'
+TIME_ZONE = 'UTC'
 
 USE_I18N = True
 
@@ -230,11 +234,15 @@ REST_FRAMEWORK = {
 }
 
 #remove it once we make it https
-SECURE_SSL_REDIRECT = True
+SECURE_SSL_REDIRECT = False
 SECURE_CROSS_ORIGIN_OPENER_POLICY = None
 
 django_on_heroku.settings(locals())  # bottom of the file
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
+
+# SESSION_COOKIE_SECURE = False
+# CSRF_COOKIE_SECURE = False
+# SECURE_SSL_REDIRECT = False
 
