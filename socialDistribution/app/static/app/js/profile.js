@@ -52,7 +52,7 @@ $(document).ready(function() {
 });
 
 function getAndSetProfileCard() {
-    let authorProfileUrl;
+    var authorProfileUrl;
     if (author_host.includes("p2psd")) {
         authorProfileUrl = new URL("authors/" + author_id + "/", author_host);
     } else if (author_host.includes("bigger-yoshi")){
