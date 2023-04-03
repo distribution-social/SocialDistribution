@@ -166,6 +166,7 @@ def add_post(request):
             
             if request.POST['visibility'] == 'PRIVATE':
                 for receiver_id in request.POST.getlist('receivers'):
+                    # import pdb; pdb.set_trace()
                     author = Author.objects.get(id=receiver_id)
                     foreign_node = get_foreign_API_node(author.host)
                     if foreign_node:
