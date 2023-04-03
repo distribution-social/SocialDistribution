@@ -35,9 +35,6 @@ function sharePost(post) {
             "Authorization": 'Basic '+followerObj.auth_token,
           "Content-Type": 'application/json; charset=utf-8'
           },
-          xhrFields: {
-            withCredentials: true
-          },
           success: function (result) {
            pendingRequests--
            checkPendingRequests()
