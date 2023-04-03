@@ -17,24 +17,28 @@
 {% endif %}
 {% endblock %}
 
+
 {% block content %}
 <script> 
-var author_id = '{{author.id}}';
-var author_host = '{{author.host}}';
+//var author_id = '{{author.id}}';
+var author_id = '{{author_id}}'
+//var author_host = '{{author.host}}';
+var author_host = '{{server_url}}'
 var user_id = '{{user.id}}';
 //var user_url ='{{user.url}}'
 var auth_headers = JSON.parse("{{auth_headers|escapejs}}");
-var serialized_followings = JSON.parse("{{serialized_followings|escapejs}}");
-var server_host = "{{server_host}}";
+
+var local_auth_headers = JSON.parse("{{local_auth_headers|escapejs}}");
+
+//var serialized_followings = JSON.parse("{{serialized_followings|escapejs}}");
+var server_host = "{{local_server_host}}";
 var user_url = '{{user.url}}';
-var author_url = '{{author.url}}';
-var user_display_name = '{{user.displayName}}';
-var author_display_name = '{{author.displayName}}';
-var foreign_node_token = '{{foreign_node_token}}';
-var local_node_token = '{{local_node_token}}';
-//console.log("uuid: {{author.id}}, url: {{author.url}}");
-var github_url = '{{author.github}}'
-console.log(github_url)
+var nickname_table = JSON.parse("{{nicknameTable|escapejs}}");
+//var author_url = '{{author.url}}';
+//var user_display_name = '{{user.displayName}}';
+//var author_display_name = '{{author.displayName}}';
+//var foreign_node_token = '{{foreign_node_token}}';
+//var local_node_token = '{{local_node_token}}';
 </script>
 <script type="module" src="{% static '../static/app/js/profile.js' %}"></script>
 
@@ -54,8 +58,8 @@ console.log(github_url)
                                     <h1 class="profile_display_name card-title"></h1>
                                 </div>
                                 <div class="p-2">
-                                    {% if user.id != author.id %}
-                                    <form class="mt-3" action="{% url 'profile' author_id=author.id %}" method="post">
+                                    {% if user_id != author_id %}
+                                    <form class="mt-3" action="{% url 'profile' server_name='Local' author_id=author_id %}" method="post">
                                         {% csrf_token %}
                                             
                                           {% if user_is_following == "False" and user_pending_following == "False" %}
@@ -70,7 +74,6 @@ console.log(github_url)
 
                                             {% endif %}
 
-
                                     {% endif %}
                                 </div>
                             </div>
@@ -78,7 +81,7 @@ console.log(github_url)
                                 <a type="button" class="profile_github btn btn-secondary" href="" target="_blank"><i
                                         class="bi bi-github">&nbsp;GitHub</i></a>
                             </div>
-                            {% if user.id == author.id %}
+                            {% if user_id == author_id %}
                             <div class="p-2">
                                 <a type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#edit-profile-{{author.id}}">
                                     Edit Profile
@@ -106,15 +109,15 @@ console.log(github_url)
                                     id="nav-followers-tab" data-bs-toggle="tab" href="#" data-bs-target="#nav-followers"
                                     type="button" role="tab" aria-controls="nav-followers"
                                     aria-selected="false">Followers</button>
-                                <button class="nav-link"
+                                <!--<button class="nav-link"
                                     id="nav-following-tab" data-bs-toggle="tab" data-bs-target="#nav-following"
                                     type="button" role="tab" href="#" aria-controls="nav-following"
-                                    aria-selected="false">{{following|length}} Following</button>
+                                    aria-selected="false">{{following|length}} Following</button>-->
                                 <button class="nav-link"
                                     id="nav-friends-tab" data-bs-toggle="tab" data-bs-target="#nav-friends"
                                     type="button" role="tab" href="#" aria-controls="nav-friends"
                                     aria-selected="false">True Friends</button>
-                                {% if user.id == author.id %}
+                                {% if user_id == author_id %}
                                 <button class="nav-link"
                                     id="nav-requests-tab" data-bs-toggle="tab" data-bs-target="#nav-requests"
                                     type="button" role="tab" href="#" aria-controls="nav-requests"
@@ -152,7 +155,7 @@ console.log(github_url)
                                 <!--{% include 'friendstab.html' %}-->
                                 {% include 'friends_tab_ajax.html' %}
                             </div>
-                            {% if user.id == author.id %}
+                            {% if user_id == author_id %}
                             <div class="tab-pane fade"
                                 id="nav-requests" role="tabpanel" aria-labelledby="nav-requests-tab" tabindex="5">
                                 {% include 'requests_tab.html' %}
@@ -163,7 +166,7 @@ console.log(github_url)
 
         </div>
     </div>
-    {% if user.id == author.id %}
+    {% if user_id == author_id %}
     {% include "edit_profile_modal.html" %}
     {% endif %}
 </div>

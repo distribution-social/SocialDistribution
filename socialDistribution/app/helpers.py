@@ -65,7 +65,13 @@ def get_foreign_API_node(host):
 
     return foreignNode
 
+<<<<<<< HEAD
 def send_post_request(type, actor, object):
+=======
+
+def send_post_request(type, actor, object):
+
+>>>>>>> a415da2066000e69f4982f5e442d9cc4ab7d2f09
     foreign_api_node = ForeignAPINodes.objects.get(base_url=actor.host)
     username = foreign_api_node.username
     password = foreign_api_node.password
@@ -128,4 +134,3 @@ def send_post_request(type, actor, object):
         print("Timeout Error:", errt)
     except requests.exceptions.RequestException as err:
         print("OOps: Something Else", err)
-
