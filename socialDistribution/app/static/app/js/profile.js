@@ -69,7 +69,10 @@ function getAndSetProfileCard() {
             target.innerHTML += html_element;
             }
         });
-        makeAjaxCallAsync("/profile_posts/"+author_id,"GET",null,auth_headers,
+        let headers = {
+            'X-CSRFToken': '{{ csrf_token }}'
+        }
+        makeAjaxCallAsync("/profile_posts/"+author_id,"GET",null,headers,
         function (response,status){
             spinner.style.display = 'none';
             if(response.posts.length == 0){
@@ -81,31 +84,19 @@ function getAndSetProfileCard() {
                         uuid: extractUUID(post.id),
                         ...post
                     }
-                    let headers = {
-                        'X-CSRFToken': '{{ csrf_token }}'
-                    }
                     postData.author.id = extractUUID(post.author.id)
-                    var promises = [];
-                    promises.push(
-                        $.ajax({
-                            url: '/post_card.html',
-                            type: 'POST',
-                            data: JSON.stringify(postData),
-                            contentType: 'application/json',
-                            headers: headers
-                        }))
-                Promise.all(promises).then(function(datas){
-
-                    for(var y = 0; y < datas.length; y++){
-                            // Append the new item to the list
-                            $('#post-stream').append(datas[y]);
-                            addPostLikeEventListener(postData,current_author)
-                            addDeletePostListener(postData.uuid)
-                    }
-                });
+                    makeAjaxCallAsync('/post_card.html','POST',JSON.stringify(postData),headers,
+                    function(response,status){
+                        $('#post-stream').append(response);
+                        spinner.style.display = 'none';
+                        addPostLikeEventListener(postData,current_author)
+                        addDeletePostListener(postData.uuid)
+                    },
+                    function (error,status){
+                        console.log(error)
+                    })
                 });
             }
-            spinner.style.display = 'none';
         },
         function (error,status){
             console.log(error)
