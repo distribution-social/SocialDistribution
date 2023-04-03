@@ -160,9 +160,9 @@ def add_post(request):
     if request.method == "POST":
         form = PostForm(request.POST, request.FILES)
         if form.is_valid():
-       
+
             post = form.save(user=user)
-            
+
             if request.POST['visibility'] == 'PRIVATE':
                 for receiver_id in request.POST.getlist('receivers'):
                     author = Author.objects.get(id=receiver_id)

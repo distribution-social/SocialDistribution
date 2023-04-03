@@ -1,6 +1,3 @@
-const myAuthorElement = document.getElementById('my-author');
-const current_author = myAuthorElement.dataset.myAuthor;
-console.log(current_author)
 function sharePost(post) {
     // Get the form element
     // remove bad control characters
@@ -15,7 +12,7 @@ function sharePost(post) {
     var checkboxes = form.elements['follower'];
     var pendingRequests = 0;
     const data = {
-      ...parsedPost, 
+      ...parsedPost,
 
     }
 
@@ -25,10 +22,10 @@ function sharePost(post) {
         // const followerUrl = checkboxes[i].value + "/inbox"
         followerObj = JSON.parse(checkboxes[i].value)
         url = followerObj.url + "/inbox"
-  
+
         // url = 'http://127.0.0.1:8000/api/authors/78bc8cfc-58c5-442c-a668-966eaded48fd/inbox'
 
-        
+
         pendingRequests++
         $.ajax({
           type: 'POST',
@@ -40,7 +37,7 @@ function sharePost(post) {
           },
           success: function (result) {
            pendingRequests--
-           checkPendingRequests()    
+           checkPendingRequests()
           },
           error: function (xhr, exception) {
             pendingRequests--
@@ -61,8 +58,8 @@ function sharePost(post) {
             }
             showAndDismissAlert("error",error_message)
           }
-    
-          
+
+
       });
       }
     }
@@ -76,7 +73,7 @@ function sharePost(post) {
 
     }
 
-  
+
     // Do something with the selected followers
     console.log(selectedFollowers);
 }

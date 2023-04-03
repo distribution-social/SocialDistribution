@@ -6,7 +6,7 @@ export function getPostLikes(post){
   const uuid = extractUUID(post.origin)
   const like_count = $(`#like-count-${uuid}`)
   const like_url = `${post.origin}/likes`
-  makeAjaxCallAsync(like_url,'GET',null,{Authorization: 'Basic '+post.auth_token}.Authorization,
+  makeAjaxCallAsync(like_url,'GET',null,{Authorization: 'Basic '+post.auth_token},
   function (response,status){
     const count = response.items.length
     like_count.html(count);

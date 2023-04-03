@@ -59,8 +59,8 @@ urlpatterns = [
     path('authors/<str:author_id>/inbox', views.inbox, name='inbox'),
     path('unfollow', views.unfollow, name='unfollow'),
     path('removefollower', views.removeFollower, name='removefollower'),
-    path('authors/<str:server_name>/<str:author_id>', views.profile2, name='profile'),
     path('authors/<str:author_id>/edit', views.edit_profile, name='edit-profile'),
+    path('authors/<str:server_name>/<str:author_id>', views.profile2, name='profile'),
     path('<str:username>/true-friends', views.true_friends, name='true-friends'),
     path('authors/<str:author_id>/received', views.received_requests, name='requests'),
     path('authors/<str:author_id>/sent', views.sent_requests, name='sent_requests'),
@@ -105,7 +105,7 @@ urlpatterns = [
     path('api/authors/<str:author_id>/posts/<str:post_id>/likes', LikesPostView.as_view(), name ='api-post-likes'),
     path('api/authors/<str:author_id>/posts/<str:post_id>/comments/<str:comment_id>', CommentView.as_view(), name ='api-post-comment'),
     path('api/authors/<str:author_id>/posts/<str:post_id>/comments/<str:comment_id>/likes', LikesCommentView.as_view(), name ='api-post-comment-likes'),
-    
+
     # image server
     path('server/authors/<str:author_id>/posts/<str:post_id>/image', PostImageView.as_view(), name ='server-post-image'),
 ]
