@@ -43,6 +43,8 @@ urlpatterns = [
     path('logout', views.signout, name='logout'),
     path('add-to-sent', views.add_to_sent_request, name='add-to-sent'),
 
+    path('github/<str:username>', views.github_activity, name='github'),
+
     path('posts/<str:post_id>', views.post_detail, name='post_detail'),
     path('posts/<str:post_id>/edit', views.post_edit, name='post_edit'),
     path('posts/<str:post_id>/comment', views.add_comment, name='comment-form'),
@@ -99,4 +101,7 @@ urlpatterns = [
     path('api/authors/<str:author_id>/posts/<str:post_id>/likes', LikesPostView.as_view(), name ='api-post-likes'),
     path('api/authors/<str:author_id>/posts/<str:post_id>/comments/<str:comment_id>', CommentView.as_view(), name ='api-post-comment'),
     path('api/authors/<str:author_id>/posts/<str:post_id>/comments/<str:comment_id>/likes', LikesCommentView.as_view(), name ='api-post-comment-likes'),
+    
+    # image server
+    path('server/authors/<str:author_id>/posts/<str:post_id>/image', PostImageView.as_view(), name ='server-post-image'),
 ]

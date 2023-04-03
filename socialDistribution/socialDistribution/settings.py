@@ -110,6 +110,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'app',
     'crispy_forms',
+    'markdownify',
     'crispy_bootstrap5',
     'rest_framework',
     'generic_relations',
@@ -128,6 +129,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "app.middleware.RemoveTrailingSlashMiddleware",
 ]
 
 ROOT_URLCONF = 'socialDistribution.urls'

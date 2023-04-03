@@ -46,6 +46,7 @@ def get_post_card_template(request):
         return HttpResponse(html)
     else:
         return HttpResponse('Error: Missing post data')
+    
 
 def get_post_details_template(request):
     post_data = request.body

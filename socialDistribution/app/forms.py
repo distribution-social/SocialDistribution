@@ -1,6 +1,7 @@
 from django import forms
 from .models import *
 from django.core import serializers
+import base64
 
 class SignupForm(forms.Form):
     display_name = forms.CharField(label='Display Name', max_length=50, required=True)
@@ -20,10 +21,11 @@ class SigninForm(forms.Form):
         label='Password', widget=forms.PasswordInput, required=True)
 
 class PostForm(forms.ModelForm):
+    post_image = forms.ImageField(widget=forms.FileInput, required=False)
     receivers = forms.ModelMultipleChoiceField(queryset=Author.objects.all(), widget=forms.CheckboxSelectMultiple, label='Select which followers to send to:', required=False, help_text='')
     class Meta:
         model = Post
-        fields = ('title', 'description', 'content', 'content_type', 'visibility','receivers','image', 'unlisted')
+        fields = ('title', 'description', 'content', 'content_type', 'visibility','receivers', 'post_image', 'unlisted')
 
         widget = {
             'title' : forms.TextInput(attrs={'class': 'form-control'}),
@@ -66,6 +68,11 @@ class PostForm(forms.ModelForm):
         print('save method called')
         post = super().save(commit=False)
         post.made_by = user
+        if self.cleaned_data['content_type'] == 'image/png;base64' or self.cleaned_data['content_type'] == 'image/jpeg;base64':
+            img_file = self.cleaned_data['post_image']
+            img_data = img_file.read()
+            img_base64 = base64.b64encode(img_data).decode('utf-8')
+            post.content = img_base64
         if commit:
             post.save()
             if receiver_list:

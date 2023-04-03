@@ -130,17 +130,17 @@ class Post(models.Model):
     date_published = models.DateTimeField(default=timezone.now)
     PLAIN = "text/plain"
     MARKDOWN = "text/markdown"
-    PNG = "image/png"
-    JPG = "image/jpeg"
+    PNG = "image/png;base64"
+    JPG = "image/jpeg;base64"
     CONTENT_TYPE_CHOICES = [
-        (MARKDOWN, "markdown"),
-        (PLAIN, "plain"),
-        (PNG, "image-png"),
-        (JPG, "image-jpeg"),
+        (MARKDOWN, "text/markdown"),
+        (PLAIN, "text/plain"),
+        (PNG, "image/png;base64"),
+        (JPG, "image/jpeg;base64"),
     ]
 
     content_type = models.CharField(max_length=18, choices=CONTENT_TYPE_CHOICES)
-    content = models.TextField()
+    content = models.TextField(blank=True, null=True)
     comments_url = models.URLField()
     VISIBILITY_CHOICES = [
         ('PUBLIC', 'public'),
