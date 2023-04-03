@@ -489,6 +489,9 @@ def true_friends(request, username):
 def received_requests(request, author_id):
     user = request.user
 
+    author = Author.objects.get(id=author_id)
+    node = ForeignAPINodes.objects.get(base_url=author.host)
+
     if request.method == 'GET':
 
         follow_requests = Author.objects.get(
@@ -544,7 +547,7 @@ def received_requests(request, author_id):
         if inbox:
             return redirect(reverse("inbox", kwargs={'author_id': convert_username_to_id(user.username)}))
         elif profile:
-            return redirect(reverse("profile", kwargs={'author_id': convert_username_to_id(user.username)}))
+            return redirect(reverse("profile", kwargs={'server_name': node.nickname, 'author_id': convert_username_to_id(user.username)}))
         return redirect(reverse("requests", kwargs={'author_id': convert_username_to_id(user.username)}))
 
 
