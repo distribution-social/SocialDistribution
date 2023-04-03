@@ -63,9 +63,10 @@ class CommentForm(forms.ModelForm):
     
 
 class EditProfileForm(forms.ModelForm):
+    
      class Meta:
          model = Author
-         fields = ('displayName', 'email', 'github')
+         fields = ('displayName', 'profileImage', 'email', 'github')
 
          widgets = {
              'displayName' : forms.TextInput(attrs={'class': 'form-control'}),

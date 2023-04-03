@@ -17,14 +17,14 @@
 </script>
 <div class="modal fade" id="edit-profile-{{author.id}}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
-    <div class="modal-dialog">
+    <div class="modal-dialog" style="width: 500px;">
         <div class="modal-content">
         <div class="modal-header">
             <h5 class="modal-title" id="exampleModalLabel">Edit Your Profile</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-        <div class="modal-body">
-            <form id="edit_profile_from" method="POST" action="{% url 'edit-profile' author_id=author.id %}">
+        <div class="modal-body" style="width: 450px;">
+            <form id="edit_profile_from" method="POST" action="{% url 'edit-profile' author_id=author.id %}" style="width: 450px;">
 
             {% csrf_token %}
             {{ edit_profile_form|crispy }}

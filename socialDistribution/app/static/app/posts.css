@@ -73,3 +73,7 @@ body {
   border: none;
   background: none;
 }
+
+.md-block img {
+  max-width: 100%;
+}
