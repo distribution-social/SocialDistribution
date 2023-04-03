@@ -1,8 +1,15 @@
+import { addPostLikeEventListener, addDeletePostListener, getPostLikes } from "./postCard.js"
 import { extractUUID } from "./utility.js";
 import { makeAjaxCall, makeAjaxCallAsync } from "./ajax.js";
 
 const myAuthorElement = document.getElementById('my-author');
-const current_author = myAuthorElement.dataset.myAuthor;
+let current_author = null
+try{
+    current_author = JSON.parse(myAuthorElement.dataset.myAuthor);
+}
+catch{
+    current_author = null;
+}
 
 const spinner = document.getElementById("spinner2")
 // fetches the post when document loads.
@@ -30,8 +37,11 @@ $(document).ready(function() {
                 function(response,status){
                     $('#post-stream').append(response);
                     spinner.style.display = 'none';
-                    addPostLikeEventListener(postData,current_author)
-                    addDeletePostListener(postData.uuid)
+                    getPostLikes(postData)
+                    if(current_author != null){
+                        addPostLikeEventListener(postData,current_author)
+                        addDeletePostListener(postData.uuid)
+                    }
                 },
                 function (error,status){
                     console.log(error)

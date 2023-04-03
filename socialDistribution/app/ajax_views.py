@@ -23,10 +23,9 @@ from .API.helpers import *
 from .API.serializers import *
 from django.db.models import Q
 
-
 import aiohttp
 import asyncio
-loop = asyncio.get_event_loop()
+import sys
 
 class URL():
     def __init__(self,url,method='get',headers=None,params=None,data=None):
@@ -37,7 +36,6 @@ class URL():
         self.data=data
 
 async def fetch_url(url:URL):
-
     async with aiohttp.ClientSession() as session:
         try:
             async with session.request(url=url.url,method=url.method,headers=url.headers,params=url.params) as response:
@@ -51,13 +49,20 @@ async def fetch_url(url:URL):
             print(f'Error getting request: {url.url} - {str(e)}')
             return None
 
-async def make_requests_async(url_list):
-    tasks = [asyncio.create_task(fetch_url(url)) for url in url_list]
+async def make_requests_async(url_list,future):
+    loop = asyncio.get_running_loop()
+    tasks = [loop.create_task(fetch_url(url)) for url in url_list]
     responses = await asyncio.gather(*tasks)
-    return responses
+    future.set_result(responses)
 
 def make_http_calls(url_list):
-    return loop.run_until_complete(make_requests_async(url_list))
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    future = asyncio.Future()
+    loop.create_task(make_requests_async(url_list,future))
+    loop.run_until_complete(future)
+    loop.close()
+    return future.result()
 
 def get_authors():
     foreignNodes = ForeignAPINodes.objects.all()

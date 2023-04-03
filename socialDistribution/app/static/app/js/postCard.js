@@ -1,8 +1,22 @@
 import { extractUUID } from "./utility.js";
+import { makeAjaxCall, makeAjaxCallAsync } from "./ajax.js";
 //post card scripts
 
+export function getPostLikes(post){
+  const uuid = extractUUID(post.origin)
+  const like_count = $(`#like-count-${uuid}`)
+  const like_url = `${post.origin}/likes`
+  makeAjaxCallAsync(like_url,'GET',null,{Authorization: 'Basic '+post.auth_token}.Authorization,
+  function (response,status){
+    const count = response.items.length
+    like_count.html(count);
+  },
+  function (error,status){
+    console.log(error)
+  })
+}
+
 export function addPostLikeEventListener(post,author){
-  author = JSON.parse(author)
 
   const data = {
     type: 'like',
@@ -64,6 +78,7 @@ export function addCommentLikeEventListener(comment,author){
   $(`#like-comment-${uuid}`).click(function(e) {
       e.preventDefault();
       const url = `${comment.author.url}/inbox`
+      console.log('Tried like:'+url)
       $.ajax({
           type: 'POST',
           url: url,
