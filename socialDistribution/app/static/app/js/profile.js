@@ -71,6 +71,8 @@ function getAndSetProfileCard() {
         if (data.profileImage !== null && data.profileImage !== "") {$(profileCard).find(".profile_image").attr("src", data.profileImage);}
         $(profileCard).find(".profile_github").attr("href", data.github);
         $(profileCard).find(".profile_display_name").text(data.displayName);
+        $("#edit_profile_from").attr("action","/authors/"+author_id+"/edit");
+
         try{
             var github_username = getGitHubUsername(data.github);
             fetchActivitiesJSON(github_username).then(activities => {

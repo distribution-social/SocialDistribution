@@ -151,7 +151,7 @@ def filter_authors_following(actor,authors):
     return authors
 
 def filter_authors_profile(author_id,authors):
-    authors = [d for d in authors if author_id in d['id']]
+    authors = [d for d in authors if author_id in d['id'] or author_id.replace('-','') in d['id']]
     return authors
 
 def filter_posts(posts,visibility=['PUBLIC']):
