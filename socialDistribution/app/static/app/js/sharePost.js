@@ -18,15 +18,15 @@ function sharePost(post) {
       ...parsedPost, 
 
     }
-    debugger;
+
     for (var i = 0; i < checkboxes.length; i++) {
       if (checkboxes[i].checked) {
         // selectedFollowers.push(checkboxes[i].value);
         // const followerUrl = checkboxes[i].value + "/inbox"
         followerObj = JSON.parse(checkboxes[i].value)
-        // url = followerObj.url + "/inbox"
-
-        url = 'http://127.0.0.1:8000/api/authors/78bc8cfc-58c5-442c-a668-966eaded48fd/inbox'
+        url = followerObj.url + "/inbox"
+  
+        // url = 'http://127.0.0.1:8000/api/authors/78bc8cfc-58c5-442c-a668-966eaded48fd/inbox'
 
         
         pendingRequests++
@@ -40,11 +40,7 @@ function sharePost(post) {
           },
           success: function (result) {
            pendingRequests--
-           checkPendingRequests()
-           debugger;
-        
-          
-    
+           checkPendingRequests()    
           },
           error: function (xhr, exception) {
             pendingRequests--

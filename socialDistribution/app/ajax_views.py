@@ -64,6 +64,9 @@ def explore_posts(request):
                             author_obj['id'] = uuid
                             author_obj['confirmed'] = True
 
+                            if not author['github']:
+                                author['github'] = ''
+
 
                             Author.objects.create(**author_obj,username=uuid)
                 except Exception as e:

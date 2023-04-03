@@ -21,7 +21,7 @@ class Author(models.Model):
     # Max Length: 35 (First Name) + 35 (Last Name)
     displayName = models.CharField(max_length=255)
 
-    github = models.URLField(max_length=255)
+    github = models.URLField(max_length=255, null=True)
 
     profileImage = models.URLField(max_length=2048,blank=True, null=True)
 

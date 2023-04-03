@@ -20,10 +20,10 @@ class SigninForm(forms.Form):
         label='Password', widget=forms.PasswordInput, required=True)
 
 class PostForm(forms.ModelForm):
-    receivers = forms.ModelMultipleChoiceField(queryset=Author.objects.all(), widget=forms.CheckboxSelectMultiple, label='Select receivers', required=False, help_text='')
+    receivers = forms.ModelMultipleChoiceField(queryset=Author.objects.all(), widget=forms.CheckboxSelectMultiple, label='Select which followers to send to:', required=False, help_text='')
     class Meta:
         model = Post
-        fields = ('title', 'description', 'content', 'content_type', 'visibility','receivers', 'unlisted', 'image' )
+        fields = ('title', 'description', 'content', 'content_type', 'visibility','receivers','image', 'unlisted')
 
         widget = {
             'title' : forms.TextInput(attrs={'class': 'form-control'}),
@@ -40,7 +40,8 @@ class PostForm(forms.ModelForm):
         super(PostForm, self).__init__(*args, **kwargs)
 
         if author:
-            receivers = Author.objects.filter(followers=author)
+            # import pdb; pdb.set_trace()
+            receivers = author.followers.all()
             for receiver in receivers:
                 # Get the auth token for this receiver
                 try:
@@ -53,6 +54,13 @@ class PostForm(forms.ModelForm):
                 receiver.auth_token = auth_token
             
             self.fields['receivers'].queryset = receivers
+            #  # Add the necessary JavaScript code to the form's media definition
+            # self.media += forms.Media(
+            #     js=(
+            #         'https://code.jquery.com/jquery-3.6.0.min.js',  # You can use a local copy of jQuery instead if you prefer
+            #         'post_form.js',
+            #     )
+            # )
 
     def save(self, user,receiver_list = None,commit=True):
         print('save method called')
