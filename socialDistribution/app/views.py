@@ -164,45 +164,46 @@ def add_post(request):
        
             post = form.save(user=user)
             
-            if request.POST['visibility'] == 'PRIVATE':
-                for receiver_id in request.POST.getlist('receivers'):
-                    author = Author.objects.get(id=receiver_id)
-                    foreign_node = get_foreign_API_node(author.host)
-                    if foreign_node:
-                        auth_token = ''
-                        if foreign_node.username:
-                            auth_token = foreign_node.getToken()
+            # if request.POST['visibility'] == 'PRIVATE':
+            for receiver_id in request.POST.getlist('receivers'):
+                author = Author.objects.get(id=receiver_id)
+                foreign_node = get_foreign_API_node(author.host)
+                if foreign_node:
+                    auth_token = ''
+                    if foreign_node.username:
+                        auth_token = foreign_node.getToken()
 
-                        serializer = PostSerializer(post, context={'request':request,'kwargs':{'author_id':receiver_id,'post_id':post.uuid}})
-                        data = serializer.data
+                    serializer = PostSerializer(post, context={'request':request,'kwargs':{'author_id':user.id,'post_id':post.uuid}})
+                    data = serializer.data
 
-                        comments = post.comments.all().order_by('-published')
-                        # paginator = CustomPaginator()
-                        # commentResultPage = paginator.paginate_queryset(comments, request)
-                        context = {'request':request,'kwargs':{'author_id':receiver_id,'post_id':data['id'].split("/")[-1]}}
-                        comment_serializer = CommentSerializer(comments, many=True, context=context)
+                    comments = post.comments.all().order_by('-published')
+                    # paginator = CustomPaginator()
+                    # commentResultPage = paginator.paginate_queryset(comments, request)
+                    context = {'request':request,'kwargs':{'author_id':user.id,'post_id':data['id'].split("/")[-1]}}
+                    comment_serializer = CommentSerializer(comments, many=True, context=context)
 
-                        response = {
-                            "type": "comments",
-                            "post": get_full_uri(request,'api-post-detail',context['kwargs']),
-                            "id": get_full_uri(request,'api-post-comments',context['kwargs']),
-                            "comments": comment_serializer.data,
-                        }
+                    response = {
+                        "type": "comments",
+                        "post": get_full_uri(request,'api-post-detail',context['kwargs']),
+                        "id": get_full_uri(request,'api-post-comments',context['kwargs']),
+                        "comments": comment_serializer.data,
+                    }
 
-                        data["commentSrc"] = response
-                        data['count'] = len(comments)
+                    data["commentSrc"] = response
+                    data['count'] = len(comments)
 
-                        url = f"{author.url}/inbox"
-                        headers = {
-                            "Authorization": f"Basic {auth_token}",
-                            "Content-Type": 'application/json; charset=utf-8',
+                    url = f"{author.url}/inbox"
+                    headers = {
+                        "Authorization": f"Basic {auth_token}",
+                        "Content-Type": 'application/json; charset=utf-8',
 
-                        }
-                        response = requests.post(url, data=json.dumps(data), headers=headers)
-                        response.raise_for_status()
+                    }
+                   
+                    response = requests.post(url, data=json.dumps(data), headers=headers)
+                    response.raise_for_status()
 
-                    else:
-                        raise("Error finding foreign Node")
+                else:
+                    raise("Error finding foreign Node")
 
 
             return redirect(reverse('post_detail', kwargs={'post_id': post.uuid}))
