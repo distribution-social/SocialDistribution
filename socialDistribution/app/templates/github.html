@@ -14,15 +14,41 @@
 
 </div>
 
-<script>
+<script type="text/javascript">
+
+const uuidToHex = (uuid) => {
+    const hex = uuid.replaceAll("-",'');
+    return hex;
+}
+
+async function getSingleAuthorInfo(url, auth_headers){
+
+    const currentAuthorURL = url;
+
+    const currentAuthorResponse = await fetch(currentAuthorURL, {
+        headers: auth_headers, redirect: "follow"});
+
+    const currentAuthorResponseJSON = await currentAuthorResponse.json();
+
+    return currentAuthorResponseJSON;
+
+}
+
+let author_url;
+
+if (author_host.includes("p2psd") || author_host.includes("bigger-yoshi")){
+      author_url = new URL("authors/" + author_id, author_host);
+} else {
+    author_url = new URL("authors/" + uuidToHex(author_id), author_host);
+}
+
+getSingleAuthorInfo(author_url, auth_headers).then(foreignUserData => {
+            foreignUserObject = foreignUserData;
+            github_url = foreignUserObject.github;
+
 
 var github_username = getGitHubUsername(github_url);
 
-async function fetchActivitiesJSON(username) {
-  const response = await fetch(`${window.location.protocol}//${window.location.host}/github/${username}`);
-  const activities = await response.json();
-  return activities;
-}
 
 fetchActivitiesJSON(github_username).then(activities => {
   const target = document.getElementById("github_activity_stream");
@@ -31,6 +57,16 @@ fetchActivitiesJSON(github_username).then(activities => {
     target.innerHTML += html_element;
   }
 });
+
+})
+
+async function fetchActivitiesJSON(username) {
+  const response = await fetch(`${window.location.protocol}//${window.location.host}/github/${username}`);
+  const activities = await response.json();
+  return activities;
+}
+
+
 
 function getGitHubUsername(github_url){
     const url_array = github_url.split("/");
@@ -87,6 +123,7 @@ function createHTMLCard(event, link, title, published, updated, authors) {
 `;
     return html_element
 }
+
 
 
 </script>
