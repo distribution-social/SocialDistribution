@@ -321,8 +321,11 @@ def add_to_following(request):
         except:
             current_user_author.following.add(author_object_to_add_to_following)
 
+        try:
             # Remove from sent_requests
             current_user_author.sent_requests.remove(author_object_to_add_to_following)
+        except:
+            pass
 
         return HttpResponse("Success")
     else:
