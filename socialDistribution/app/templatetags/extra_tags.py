@@ -44,7 +44,7 @@ def extract_uuid(id):
 @register.filter
 def readable_time(time):
   date = parse(time)
-  return date.strftime('%B %d, %Y | %I:%M %p')
+  return date.strftime('%B %d, %Y %I:%M %p')
 
 @register.filter
 def convert_uuid_to_hex(uuid_string):
