@@ -221,8 +221,6 @@ def author_posts(request):
 
     author = json.loads(request.body).get('author')
     filter = json.loads(request.body).get('filter')
-    print(author)
-    print(filter)
     posts = get_posts([author,])
     posts = filter_posts(posts,filter)
     posts = sort_and_tag_posts(posts)
