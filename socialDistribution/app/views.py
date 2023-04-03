@@ -316,7 +316,9 @@ def add_to_sent_request(request):
 @login_required(login_url="/login")
 @require_http_methods(["GET", "POST"])
 def profile(request, server_name, author_id):
+    # import pdb; pdb.set_trace()
     user = request.user
+
     userAuthor = Author.objects.get(username=request.user.username)
     if request.method == 'GET':
 
@@ -376,6 +378,7 @@ def profile(request, server_name, author_id):
 
     elif request.method == "POST":
         author_for_action = Author.objects.get(id=author_id)
+        foreignNode = getApiNodeWrapper(userAuthor.host)
         if author_for_action in userAuthor.following.all():
             # Remove the author from the following of the current user
             userAuthor.following.remove(author_for_action)
@@ -383,7 +386,7 @@ def profile(request, server_name, author_id):
             # Add the author object to our sent_request list (Need to send this to inbox in the future to get approval on the other end)
             userAuthor.sent_requests.add(author_for_action)
 
-        return redirect(reverse("profile", kwargs={"author_id": userAuthor.id}))
+        return redirect(reverse("profile", kwargs={"server_name": foreignNode.nickname ,"author_id": userAuthor.id}))
 
 def getNicknameTable():
     nodes = ForeignAPINodes.objects.all()
@@ -487,6 +490,7 @@ def true_friends(request, username):
 @login_required(login_url="/login")
 @require_http_methods(["GET", "POST"])
 def received_requests(request, author_id):
+    # import pdb; pdb.set_trace()
     user = request.user
 
     author = Author.objects.get(id=author_id)
