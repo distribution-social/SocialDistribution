@@ -16,7 +16,7 @@ $(document).ready(function() {
 
     // get followers from server and use data to set followers and true friends
     var followersUrl;
-    if (author_host.includes("p2psd")){
+    if (author_host.includes("p2psd") || author_host.includes("bigger-yoshi")){
         followersUrl = new URL("authors/" + author_id + "/followers", author_host);
     } else {
         followersUrl = new URL("authors/" + uuidToHex(author_id) + "/followers", author_host);
@@ -38,7 +38,7 @@ $(document).ready(function() {
 
 function getAndSetProfileCard() {
     let authorProfileUrl;
-    if (author_host.includes("p2psd")){
+    if (author_host.includes("p2psd") || author_host.includes("bigger-yoshi")){
         authorProfileUrl = new URL("authors/" + author_id, author_host);
     } else {
         authorProfileUrl = new URL("authors/" + uuidToHex(author_id), author_host);
@@ -61,7 +61,7 @@ function getAndSetProfileCard() {
     })
     // handle follow unfollow button
     let authorIsFollowingUrl;
-    if (author_host.includes("p2psd")){
+    if (author_host.includes("p2psd") || author_host.includes("bigger-yoshi")){
         authorIsFollowingUrl = new URL("authors/" + author_id + "/followers/" + user_id, author_host);
     } else {
         authorIsFollowingUrl = new URL("authors/" + uuidToHex(author_id) + "/followers/" + uuidToHex(user_id), author_host);
@@ -245,7 +245,7 @@ function setFriends(followers, author_id) {
         $("#friends_tab_stream").text("No True Friends");
     } else {
         for (let follower of followers) {
-            if (author_host.includes("p2psd")){
+            if (author_host.includes("p2psd") || author_host.includes("bigger-yoshi")){
                 var url = new URL("authors/" + uuidToHex(extractUUID(follower.id)) + "/followers/" + author_id, author_host);
             } else {
                 var url = new URL("authors/" + uuidToHex(extractUUID(follower.id)) + "/followers/" + uuidToHex(author_id), author_host);
