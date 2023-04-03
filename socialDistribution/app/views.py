@@ -284,9 +284,6 @@ def profile(request, server_name, author_id):
         context.update({"auth_headers": headers, "local_server_host": request.get_host(), "server_url": node.base_url})
         context.update({"nicknameTable": getNicknameTable()})
         context.update({"tokenTable": getTokenTable()})
-        print("user.id:", userAuthor.id)
-        print("author_id:", author_id)
-        print(str(userAuthor.id) == str(author_id))
     
         id_to_follow = author_id
 
