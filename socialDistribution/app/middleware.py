@@ -18,6 +18,7 @@ class RemoveTrailingSlashMiddleware:
             # Redirect to the new URL
             response = redirect(new_url, permanent=False)
             response.status_code = 307
+            response["Access-Control-Allow-Origin"] = '*'
             return response
 
         response = self.get_response(request)
