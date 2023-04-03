@@ -10,13 +10,8 @@
 {% load static %}
 
 {% block title %}
-{% if user.username == author.username %}
 <title>Profile</title>
-{% else %}
-<title>{{author.displayName}}</title>
-{% endif %}
 {% endblock %}
-
 
 {% block content %}
 <script>
@@ -34,6 +29,7 @@ var local_auth_headers = JSON.parse("{{local_auth_headers|escapejs}}");
 var server_host = "{{local_server_host}}";
 var user_url = '{{user.url}}';
 var nickname_table = JSON.parse("{{nicknameTable|escapejs}}");
+var token_table = JSON.parse("{{tokenTable|escapejs}}");
 </script>
 <script type="module" src="{% static '../static/app/js/profile.js' %}"></script>
 
