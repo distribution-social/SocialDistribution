@@ -109,50 +109,69 @@ function sendFollowRequestToInbox(e){
 
         element.setAttribute('disabled', '');
 
-        const user_name_list = user_display_name.split(" ");
+        // const user_name_list = user_display_name.split(" ");
 
-        const author_name_list = author_display_name.split(" ");
+        // const author_name_list = author_display_name.split(" ");
 
-        var user_first_name = user_name_list[0];
+        // var user_first_name = user_name_list[0];
 
-        var author_first_name = author_name_list[0];
+        // var author_first_name = author_name_list[0];
 
-        console.log(user_first_name, author_first_name);
+        // console.log(user_first_name, author_first_name);
 
-        getSingleAuthorInfo(user_url, local_node_token).then(currentUserData => {
+        getSingleAuthorInfo(user_url, local_auth_headers).then(currentUserData => {
         var currentUserObject = currentUserData;
         var foreignUserObject;
+        // var follow_object = {
+        //     type: "follow",      
+        //     summary: `${user_first_name} wants to follow ${author_first_name}`,
+        // }
+
         var follow_object = {
             type: "follow",      
-            summary: `${user_first_name} wants to follow ${author_first_name}`,
         }
 
-        follow_object.actor = currentUserObject;
+        // follow_object.actor = currentUserObject;
 
-        getSingleAuthorInfo(author_url, foreign_node_token).then(foreignUserData => {
+        let author_url;
+
+        if (author_host.includes("p2psd") || author_host.includes("bigger-yoshi")){
+             author_url = new URL("authors/" + author_id, author_host);
+        } else {
+            author_url = new URL("authors/" + uuidToHex(author_id), author_host);
+        }
+
+        getSingleAuthorInfo(author_url, auth_headers).then(foreignUserData => {
             foreignUserObject = foreignUserData;
+
+            follow_object.summary = `${user_first_name} wants to follow ${author_first_name}`
+
+            follow_object.actor = currentUserObject;
+
             follow_object.object = foreignUserObject
+
+
             // console.log(follow_object);
 
             // const foreignAuthorURL = new URL("api/authors/" + author_id + "/inbox", "http://127.0.0.1:8000");
             const foreignAuthorURL = author_url + "/inbox"
 
-            var headers;
-
-            if (foreign_node_token){
-                headers = new Headers({
-                'Authorization': 'Basic '+foreign_node_token, 
-                'Content-Type': 'application/json'
-                })
-            } else {
-                headers = new Headers({
-                'Content-Type': 'application/json'
-                })
-            }
+            // var headers;
+            
+            // if (foreign_node_token){
+            //     headers = new Headers({
+            //     'Authorization': 'Basic '+foreign_node_token, 
+            //     'Content-Type': 'application/json'
+            //     })
+            // } else {
+            //     headers = new Headers({
+            //     'Content-Type': 'application/json'
+            //     })
+            // }
             
             fetch(foreignAuthorURL, {
                 method: "POST",
-                headers: headers, 
+                headers: auth_headers, 
                 body: JSON.stringify(follow_object)
             }).then(response => {
                 console.log("-------------Response: ", response.status);
@@ -177,35 +196,48 @@ function sendFollowRequestToInbox(e){
     });
 }
 
-async function getSingleAuthorInfo(url, token){
+async function getSingleAuthorInfo(url, auth_headers){
 
     const currentAuthorURL = url;
 
-    // console.log(currentAuthorURL);
-
-    // const currentAuthorURL = new URL("api/authors/" + author_id, "http://127.0.0.1:8000");
-
-    var headers;
-
-    if (token){
-        headers = new Headers({
-                'Authorization': 'Basic '+token, 
-                'Content-Type': 'application/json'
-        })
-    } else {
-        headers = new Headers({
-                'Content-Type': 'application/json'
-        })
-    }
-
     const currentAuthorResponse = await fetch(currentAuthorURL, {
-        headers: headers});
+        headers: auth_headers});
 
     const currentAuthorResponseJSON = await currentAuthorResponse.json();
 
     return currentAuthorResponseJSON;
   
 }
+
+// async function getSingleAuthorInfo(url, token){
+
+//     const currentAuthorURL = url;
+
+//     // console.log(currentAuthorURL);
+
+//     // const currentAuthorURL = new URL("api/authors/" + author_id, "http://127.0.0.1:8000");
+
+//     var headers;
+
+//     if (token){
+//         headers = new Headers({
+//                 'Authorization': 'Basic '+token, 
+//                 'Content-Type': 'application/json'
+//         })
+//     } else {
+//         headers = new Headers({
+//                 'Content-Type': 'application/json'
+//         })
+//     }
+
+//     const currentAuthorResponse = await fetch(currentAuthorURL, {
+//         headers: headers});
+
+//     const currentAuthorResponseJSON = await currentAuthorResponse.json();
+
+//     return currentAuthorResponseJSON;
+  
+// }
 
 function setFollowers(followers, user_id, author_id, author_host, nickname_table) {
     let num = 0;
