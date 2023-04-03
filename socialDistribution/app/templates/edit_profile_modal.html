@@ -24,7 +24,7 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-            <form id="edit_profile_from" method="POST" action="{% url 'edit-profile' author_id=author.id %}">
+            <form id="edit_profile_from" method="POST" action="{% url 'edit-profile' author_id=author_id %}">
 
             {% csrf_token %}
             {{ edit_profile_form|crispy }}
