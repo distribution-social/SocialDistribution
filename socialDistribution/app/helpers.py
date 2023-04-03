@@ -2,6 +2,8 @@ from django.contrib.auth.models import User
 from .models import *
 from django.contrib import messages
 from app.models import *
+import requests
+from requests.auth import HTTPBasicAuth
 
 
 def username_exists(username):
@@ -62,4 +64,68 @@ def get_foreign_API_node(host):
             print("Something wrong w foreign node")
 
     return foreignNode
+
+def send_post_request(type, actor, object):
+    foreign_api_node = ForeignAPINodes.objects.get(base_url=actor.host)
+    username = foreign_api_node.username
+    password = foreign_api_node.password
+    # token = f"{foreign_api_node.username}:{foreign_api_node.password}"
+
+    print("*" * 1000, username, password)
+
+    headers = {
+            'Content-Type': 'application/json'
+    }
+
+    json = {
+        "type": type,
+        "summary": f"{actor.displayName} {type}ed {object.displayName}'s request",
+        "actor": {
+            "type": "author",
+            "id": actor.url,
+            "url": actor.url,
+            "host": actor.host,
+            "displayName": actor.displayName,
+            "github": actor.github,
+            "profileImage": actor.profileImage
+        },
+        "object": {
+            "type": "author",
+            "id": object.url,
+            "host": object.host,
+            "displayName": object.displayName,
+            "url": object.url,
+            "github": object.github,
+            "profileImage": object.profileImage
+        }
+    }
+
+    # Set the URL to the actor's API Inbox URL
+
+    # url = actor.url.replace("https://www.distribution.social", "http://127.0.0.1:8000") + "/inbox"
+
+    url = actor.url + "/inbox"
+
+    print("Sending!!!!!!")
+
+    print(json, url)
+
+    try:
+        request = requests.post(url, auth=HTTPBasicAuth(username, password), headers=headers,json=json)
+
+        print(request.status_code)
+        print(request.text)
+        print(request.json())
+        print(request.reason)
+
+        request.raise_for_status()
+
+    except requests.exceptions.HTTPError as errh:
+        print("Http Error:", errh)
+    except requests.exceptions.ConnectionError as errc:
+        print("Error Connecting:", errc)
+    except requests.exceptions.Timeout as errt:
+        print("Timeout Error:", errt)
+    except requests.exceptions.RequestException as err:
+        print("OOps: Something Else", err)
 
