@@ -161,7 +161,7 @@ def filter_posts(posts,visibility=['PUBLIC']):
     return posts
 
 def sort_and_tag_posts(posts:list):
-    posts.sort(key=lambda x: parse(str(x['published'])).replace(tzinfo=timezone.get_current_timezone()),reverse=True)
+    # posts.sort(key=lambda x: parse(str(x['published'])).replace(tzinfo=timezone.get_current_timezone()),reverse=True)
     for post in posts:
         post['tag'] = get_node_nickname(post['author']['host'])
         post['uuid'] = post['id'].split("/")[-1]
