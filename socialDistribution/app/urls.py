@@ -75,6 +75,11 @@ urlpatterns = [
 
     #Ajax Urls (returns JSON response)
     path('public_posts', ajax_views.public_posts, name='posts-explore'),
+    path('public_authors', ajax_views.public_authors, name='authors-explore'),
+    path('profile_authors/<str:author_id>', ajax_views.profile_authors, name='authors-profile'),
+    path('home_authors', ajax_views.home_authors, name='authors-home'),
+    path('author_posts', ajax_views.author_posts, name='author-posts'),
+
     path('home_posts', ajax_views.home_posts, name='posts-home'),
     path('profile_posts/<str:author_id>', ajax_views.profile_posts, name='posts-profile'),
 

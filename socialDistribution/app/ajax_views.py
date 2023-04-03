@@ -92,6 +92,8 @@ def get_authors():
                 print(f'Skipping an authors response since it doesnt have items. {response}')
             except:
                 pass
+    for author in authors:
+        author['auth_token'] = get_auth_token(author['id'])
     return authors
 
 def get_posts(authors):
@@ -196,6 +198,37 @@ def public_posts(request):
     context = {'user': request.user,'posts': posts, "comment_form": CommentForm()}
     return JsonResponse({'posts': posts})
     # return render(request, 'post_stream.html', context)
+
+@require_http_methods(["GET"])
+def public_authors(request):
+    authors = get_authors()
+    return JsonResponse({'authors': authors})
+
+@require_http_methods(["GET"])
+def home_authors(request):
+    authors = get_authors()
+    authors = filter_authors_following(request.user,authors)
+    return JsonResponse({'authors': authors})
+
+@require_http_methods(["GET"])
+def profile_authors(request,author_id):
+    authors = get_authors()
+    authors = filter_authors_profile(author_id,authors)
+    return JsonResponse({'authors': authors})
+
+@login_required(login_url="/login")
+@require_http_methods(["POST"])
+def author_posts(request):
+
+    author = json.loads(request.body).get('author')
+    filter = json.loads(request.body).get('filter')
+    print(author)
+    print(filter)
+    posts = get_posts([author,])
+    posts = filter_posts(posts,filter)
+    posts = sort_and_tag_posts(posts)
+    context = {'user': request.user,'posts': posts, "comment_form": CommentForm()}
+    return JsonResponse({'posts': posts})
 
 @login_required(login_url="/login")
 @require_http_methods(["GET"])

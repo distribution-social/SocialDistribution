@@ -89,35 +89,57 @@ function getAndSetProfileCard() {
         let headers = {
             'X-CSRFToken': '{{ csrf_token }}'
         }
-        makeAjaxCallAsync("/profile_posts/"+author_id,"GET",null,headers,
+        makeAjaxCallAsync(`/profile_authors/${author_id}`,"GET",null,headers,
         function (response,status){
-            spinner.style.display = 'none';
-            if(response.posts.length == 0){
-                $('#post-stream').html('No public posts to show')
-            }else{
-                $.each(response.posts, function(index, post) {
-                    // console.log(post)
-                    const postData = {
-                        uuid: extractUUID(post.id),
-                        ...post
-                    }
-                    postData.author.id = extractUUID(post.author.id)
-                    makeAjaxCallAsync('/post_card.html','POST',JSON.stringify(postData),headers,
-                    function(response,status){
-                        $('#post-stream').append(response);
-                        spinner.style.display = 'none';
-                        getPostLikes(postData);
-                        getComments(postData);
-                        if(current_author != null){
-                            addPostLikeEventListener(postData,current_author)
-                            addDeletePostListener(postData.uuid)
+            $.each(response.authors, function(index,author){
+                const authorData = {
+                    author: author,
+                    filter: ["PUBLIC"]
+                }
+                makeAjaxCallAsync(`/author_posts`,'POST',JSON.stringify(authorData),headers,
+                function(response,status){
+                    spinner.style.display = 'none';
+                    $.each(response.posts, function(index, post) {
+                        // console.log(post)
+                        const postData = {
+                            uuid: extractUUID(post.id),
+                            ...post
                         }
-                    },
-                    function (error,status){
-                        console.log(error)
-                    })
-                });
-            }
+                        postData.author.id = extractUUID(post.author.id)
+                        makeAjaxCallAsync('/post_card.html','POST',JSON.stringify(postData),headers,
+                        function(response,status){
+                            console.log(`<div data-sort=${postData['published']}>${response}</div>`)
+                            $('#post-stream').append(`<div style="width: 100%" data-sort=${postData['published']}>${response}</div>`)
+                            .children()
+                            // sort the object collection based on data-sort value
+                            .sort(function(a, b) {
+                            // get difference for sorting based on number
+                            let first = new Date($(a).data('sort'))
+                            let sec = new Date($(b).data('sort'))
+                            return sec - first;
+                            // append back to parent for updating order
+                            }).appendTo('#post-stream');
+                            spinner.style.display = 'none';
+                            getPostLikes(postData);
+                            getComments(postData);
+                            if(current_author != null){
+                                addPostLikeEventListener(postData,current_author)
+                                addDeletePostListener(postData.uuid)
+                            }
+
+                        },
+                        function (error,status){
+                            console.log(error)
+                        })
+                    });
+
+                },
+                function(error,status){
+                    console.log(error);
+                })
+            })
+
+
         },
         function (error,status){
             console.log(error)
