@@ -124,13 +124,6 @@ Link: https://www.bootdey.com/snippets/view/bs4-s
 
     <div class="collapse" id="collapse_{{post.uuid}}">
 
-      {% for comment in post.commentSrc.comments %}
-
-      <div class="card-footer">
-        {% include "comment.html" %}
-      </div>
-
-      {% endfor %}
 
     </div>
     {% if user.username %}

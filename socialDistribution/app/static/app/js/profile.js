@@ -4,7 +4,7 @@
 //  https://stackoverflow.com/questions/3216013/get-the-last-item-in-an-array
 //  https://www.w3schools.com/jsref/prop_element_childelementcount.asp
 
-import { addPostLikeEventListener, addDeletePostListener, getPostLikes } from "./postCard.js"
+import { addPostLikeEventListener, addDeletePostListener, getPostLikes, getComments } from "./postCard.js"
 import { extractUUID, uuidToHex } from "./utility.js";
 import { getGitHubUsername, fetchActivitiesJSON, createHTMLCard } from "./github.js";
 import { makeAjaxCall, makeAjaxCallAsync } from "./ajax.js";
@@ -106,7 +106,8 @@ function getAndSetProfileCard() {
                     function(response,status){
                         $('#post-stream').append(response);
                         spinner.style.display = 'none';
-                        getPostLikes(postData)
+                        getPostLikes(postData);
+                        getComments(postData);
                         if(current_author != null){
                             addPostLikeEventListener(postData,current_author)
                             addDeletePostListener(postData.uuid)

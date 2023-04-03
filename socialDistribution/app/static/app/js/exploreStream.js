@@ -1,4 +1,4 @@
-import { addPostLikeEventListener, addDeletePostListener, getPostLikes } from "./postCard.js"
+import { addPostLikeEventListener, addDeletePostListener, getPostLikes, getComments } from "./postCard.js"
 import { extractUUID } from "./utility.js";
 import { makeAjaxCall, makeAjaxCallAsync } from "./ajax.js";
 
@@ -37,7 +37,8 @@ $(document).ready(function() {
                 function(response,status){
                     $('#post-stream').append(response);
                     spinner.style.display = 'none';
-                    getPostLikes(postData)
+                    getPostLikes(postData);
+                    getComments(postData);
                     if(current_author != null){
                         addPostLikeEventListener(postData,current_author)
                         addDeletePostListener(postData.uuid)

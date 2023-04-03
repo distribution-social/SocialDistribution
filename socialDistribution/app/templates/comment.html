@@ -3,9 +3,6 @@
 {% load extra_tags %}
 
 <html lang="en">
-  <script>
-
-  </script>
   <div class="card">
     <div class="card-header">
       <a class="d-inline-flex align-middle" href="{% url 'profile' server_name=comment.author.host|get_server_name author_id=comment.author.url|extract_uuid %}">

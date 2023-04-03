@@ -16,6 +16,36 @@ export function getPostLikes(post){
   })
 }
 
+export function getComments(post){
+  const uuid = extractUUID(post.id)
+  const comments = $(`#collapse_${uuid}`)
+  const comment_url = `${post.id}/comments?page=1&size=10`
+  makeAjaxCallAsync(comment_url,'GET',null,{Authorization: 'Basic '+post.auth_token},
+  function (response,status){
+    $.each(response.comments, function(index,comment){
+      const commentData = {
+        ...comment
+      }
+      let headers = {
+        'X-CSRFToken': '{{ csrf_token }}'
+      }
+      makeAjaxCallAsync('/comment.html','POST',JSON.stringify(commentData),headers,
+      function (response,status){
+        let new_com = document.createElement('div');
+        new_com.classList.add('card-footer');
+        new_com.innerHTML = response
+        comments.append(new_com)
+      },
+      function (error,status){
+        console.log(error)
+      })
+    })
+  },
+  function (error,status){
+    console.log(error)
+  })
+}
+
 export function addPostLikeEventListener(post,author){
 
   const data = {
@@ -40,7 +70,6 @@ export function addPostLikeEventListener(post,author){
             withCredentials: true
           },
           success: function (result, statusText, xhr) {
-            console.log(statusText)
             showAndDismissAlert("info",result)
             if(xhr.status == 201 || xhr.status == 200){
               let value = parseInt($(`#like-count-${uuid}`).html());
