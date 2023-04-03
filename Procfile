@@ -1,1 +1,1 @@
-web: gunicorn --pythonpath socialDistribution socialDistribution.wsgi
+web: gunicorn --pythonpath socialDistribution socialDistribution.wsgi --timeout 120
