@@ -86,7 +86,7 @@ function getAndSetProfileCard() {
         function (response,status){
             spinner.style.display = 'none';
             if(response.posts.length == 0){
-                $('#post-stream').html('No posts to show, use the \'Explore\' tab to find people to follow.')
+                $('#post-stream').html('No public posts to show')
             }else{
                 $.each(response.posts, function(index, post) {
                     // console.log(post)

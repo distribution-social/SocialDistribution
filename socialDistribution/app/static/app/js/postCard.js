@@ -78,7 +78,6 @@ export function addCommentLikeEventListener(comment,author){
   $(`#like-comment-${uuid}`).click(function(e) {
       e.preventDefault();
       const url = `${comment.author.url}/inbox`
-      console.log('Tried like:'+url)
       $.ajax({
           type: 'POST',
           url: url,

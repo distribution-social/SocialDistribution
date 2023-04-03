@@ -14,10 +14,6 @@ Link: https://www.bootdey.com/snippets/view/bs4-s
 <script type="module" src="https://md-block.verou.me/md-block.js"></script>
 <html lang="en">
   {% block css %}<link rel="stylesheet" type="text/css" href="{% static 'app/posts.css' %}">{% endblock %}
-  <script>
-    var post = "{{ post|escapejs }}";
-  </script>
-  <script type="module" src="{% static '../static/app/js/postCard.js' %}"></script>
   {% if user.username %}
   {% csrf_token %}
   {% endif %}

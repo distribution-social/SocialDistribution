@@ -3,7 +3,6 @@ import { extractUUID } from "./utility.js";
 
 const myDataElement = document.getElementById('my-data');
 const post = myDataElement.dataset.myData;
-console.log(post)
 
 const myAuthorElement = document.getElementById('my-author');
 const current_author = myAuthorElement.dataset.myAuthor;

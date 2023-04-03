@@ -1,4 +1,5 @@
 export function makeAjaxCallAsync(url, method, data, headers, successCallback, errorCallback) {
+
   return $.ajax({
     url: url,
     method: method,
@@ -22,6 +23,7 @@ export function makeAjaxCallAsync(url, method, data, headers, successCallback, e
 }
 
 export function makeAjaxCall(url, method, data, headers, successCallback, errorCallback) {
+
   return $.ajax({
     url: url,
     method: method,

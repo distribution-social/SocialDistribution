@@ -16,6 +16,7 @@ import json
 from datetime import datetime, timezone
 from dateutil.parser import parse
 from posixpath import join as urljoin
+from urllib.parse import urlparse
 
 from django.contrib.auth.models import User
 from .helpers import *
@@ -96,7 +97,7 @@ def get_authors():
 def get_posts(authors):
     urls = []
     for author in authors:
-        token = get_auth_token(author['host'])
+        token = get_auth_token(author.get('url'))
         if not token:
             continue
         headers = {
@@ -116,7 +117,7 @@ def get_posts(authors):
             except:
                 pass
     for post in posts:
-        post['auth_token'] = get_auth_token(post.get('author').get('host'))
+        post['auth_token'] = get_auth_token(post.get('origin'))
     return posts
 
 def get_like_count(post):
@@ -125,7 +126,7 @@ def get_like_count(post):
     if 'localhost' not in url:
         try:
             headers = {
-                'Authorization': f"Basic {get_auth_token(post.get('author').get('host'))}",
+                'Authorization': f"Basic {get_auth_token(post.get('author').get('url'))}",
                 'Content-Type': 'application/json'
             }
             res = requests.get(url,headers=headers,timeout=2)
@@ -164,9 +165,10 @@ def sort_and_tag_posts(posts:list):
         post['uuid'] = post['id'].split("/")[-1]
     return posts
 
-def get_auth_token(host):
+def get_auth_token(url):
+    parsed = urlparse(url)
     try:
-        foreignNode = ForeignAPINodes.objects.get(base_url__contains=host)
+        foreignNode = ForeignAPINodes.objects.get(base_url__contains=parsed.netloc)
     except:
         return None
     return foreignNode.getToken()
