@@ -133,10 +133,10 @@ class Post(models.Model):
     PNG = "image/png;base64"
     JPG = "image/jpeg;base64"
     CONTENT_TYPE_CHOICES = [
-        (MARKDOWN, "text/markdown"),
-        (PLAIN, "text/plain"),
-        (PNG, "image/png;base64"),
-        (JPG, "image/jpeg;base64"),
+        (MARKDOWN, "Markdown"),
+        (PLAIN, "Plain Text"),
+        (PNG, "PNG"),
+        (JPG, "JPG/JEPG"),
     ]
 
     content_type = models.CharField(max_length=18, choices=CONTENT_TYPE_CHOICES)
