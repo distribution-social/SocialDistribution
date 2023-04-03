@@ -251,13 +251,23 @@ function setFriends(followers, author_id) {
         $("#friends_tab_stream").text("No True Friends");
     } else {
         for (let follower of followers) {
+            var url;
             if (follower.host.includes("p2psd")) {
-                var url = new URL(follower.url + "/followers/" + author_id + "/");
+                if (follower.url.at(-1) == "/") 
+                    url = new URL(follower.url + "followers/" + author_id + "/");
+                else
+                    url = new URL(follower.url + "/followers/" + author_id + "/");
             } else if (follower.host.includes("bigger-yoshi")){
                 //var url = new URL("authors/" + extractUUID(follower.id) + "/followers/" + author_id, author_host);
-                var url = new URL(follower.url + "/" + author_host + "/authors/" + author_id);
+                if (follower.url.at(-1) == "/") 
+                    url = new URL(follower.url + author_host + "authors/" + author_id);
+                else
+                    url = new URL(follower.url + "/" + author_host + "authors/" + author_id);
             } else {
-                var url = new URL(follower.url + "/followers/" + uuidToHex(author_id));
+                if (follower.url.at(-1) == "/") 
+                    url = new URL(follower.url + "followers/" + uuidToHex(author_id));
+                else 
+                    url = new URL(follower.url + "/followers/" + uuidToHex(author_id));
             }
             let hostUrl = new URL (follower.host);
             let hostname = hostUrl.hostname;
@@ -290,7 +300,6 @@ function setFriends(followers, author_id) {
                     let host = follower.host;
                     let hostUrl = new URL(host);
                     let nickname = nickname_table[hostUrl.host];
-                    console.log("Nickname: "+nickname);
                     if (follower.profileImage !== null && follower.profileImage !== "") {$(instance).find(".friend_image").attr("src", follower.profileImage);}
                     $(instance).find(".friend_profile_link").attr("href", "http://"+server_host+"/authors/"+nickname+"/"+uuid);
                     $(instance).find(".friend_github").attr("href", follower.github);
