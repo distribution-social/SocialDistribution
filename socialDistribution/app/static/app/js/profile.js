@@ -109,16 +109,6 @@ function sendFollowRequestToInbox(e){
 
         element.setAttribute('disabled', '');
 
-        // const user_name_list = user_display_name.split(" ");
-
-        // const author_name_list = author_display_name.split(" ");
-
-        // var user_first_name = user_name_list[0];
-
-        // var author_first_name = author_name_list[0];
-
-        // console.log(user_first_name, author_first_name);
-
         getSingleAuthorInfo(user_url, local_auth_headers).then(currentUserData => {
         var currentUserObject = currentUserData;
         var foreignUserObject;
@@ -143,6 +133,17 @@ function sendFollowRequestToInbox(e){
 
         getSingleAuthorInfo(author_url, auth_headers).then(foreignUserData => {
             foreignUserObject = foreignUserData;
+
+
+            const user_name_list = currentUserData.displayName.split(" ");
+
+            const author_name_list = foreignUserData.displayName.split(" ");
+
+            var user_first_name = user_name_list[0];
+
+            var author_first_name = author_name_list[0];
+
+            console.log(user_first_name, author_first_name);
 
             follow_object.summary = `${user_first_name} wants to follow ${author_first_name}`
 
