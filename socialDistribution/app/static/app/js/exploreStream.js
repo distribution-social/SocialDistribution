@@ -39,7 +39,7 @@ $(document).ready(function() {
                     postData.author.id = extractUUID(post.author.id)
                     makeAjaxCallAsync('/post_card.html','POST',JSON.stringify(postData),headers,
                     function(response,status){
-                        console.log(`<div data-sort=${postData['published']}>${response}</div>`)
+                        // console.log(`<div data-sort=${postData['published']}>${response}</div>`)
                         $('#post-stream').append(`<div style="width: 100%" data-sort=${postData['published']}>${response}</div>`)
                         .children()
                         // sort the object collection based on data-sort value
