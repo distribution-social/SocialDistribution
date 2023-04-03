@@ -27,17 +27,13 @@ var author_host = '{{server_url}}'
 var user_id = '{{user.id}}';
 //var user_url ='{{user.url}}'
 var auth_headers = JSON.parse("{{auth_headers|escapejs}}");
+
+var local_auth_headers = JSON.parse("{{local_auth_headers|escapejs}}");
+
 //var serialized_followings = JSON.parse("{{serialized_followings|escapejs}}");
 var server_host = "{{local_server_host}}";
 var user_url = '{{user.url}}';
 var nickname_table = JSON.parse("{{nicknameTable|escapejs}}");
-var author_url = '{{author.url}}';
-var user_display_name = '{{user.displayName}}';
-var author_display_name = '{{author.displayName}}';
-var foreign_node_token = '{{foreign_node_token}}';
-var local_node_token = '{{local_node_token}}';
-//console.log("uuid: {{author.id}}, url: {{author.url}}");
-var github_url = '{{author.github}}'
 </script>
 <script type="module" src="{% static '../static/app/js/profile.js' %}"></script>
 
@@ -58,7 +54,7 @@ var github_url = '{{author.github}}'
                                 </div>
                                 <div class="p-2">
                                     {% if user_id != author_id %}
-                                    <!--<form class="mt-3" action="{% url 'profile' server_name='Local' author_id=author_id %}" method="post">
+                                    <form class="mt-3" action="{% url 'profile' server_name='Local' author_id=author_id %}" method="post">
                                         {% csrf_token %}
 
                                           {% if user_is_following == "False" and user_pending_following == "False" %}
@@ -73,7 +69,6 @@ var github_url = '{{author.github}}'
 
                                             {% endif %}
 
-                                    -->
                                     {% endif %}
                                 </div>
                             </div>

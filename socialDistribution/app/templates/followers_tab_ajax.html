@@ -51,14 +51,6 @@
                                         class="bi bi-github">&nbsp;GitHub</i></a>
                             </div>
 
-                            <form class="mt-3" action="{% url 'removefollower' %}" method="post">
-                                {% csrf_token %}
-
-                                <button type="submit" name="removefollower" value=""
-                                    class="btn btn-danger removefollower"><i
-                                        class="bi bi-x-circle-fill">&nbsp;Remove</i></button>
-                            </form>
-
                         </div>
                         <div class="card-footer"><a class="follower_host" href="" class="text-decoration-none"></a>
                         </div>

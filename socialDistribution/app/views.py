@@ -163,50 +163,51 @@ def add_post(request):
 
             post = form.save(user=user)
 
-            if request.POST['visibility'] == 'PRIVATE':
-                for receiver_id in request.POST.getlist('receivers'):
-                    author = Author.objects.get(id=receiver_id)
-                    foreign_node = get_foreign_API_node(author.host)
-                    if foreign_node:
-                        auth_token = ''
-                        if foreign_node.username:
-                            auth_token = foreign_node.getToken()
+            # if request.POST['visibility'] == 'PRIVATE':
+            for receiver_id in request.POST.getlist('receivers'):
+                author = Author.objects.get(id=receiver_id)
+                foreign_node = get_foreign_API_node(author.host)
+                if foreign_node:
+                    auth_token = ''
+                    if foreign_node.username:
+                        auth_token = foreign_node.getToken()
 
-                        serializer = PostSerializer(post, context={'request':request,'kwargs':{'author_id':receiver_id,'post_id':post.uuid}})
-                        data = serializer.data
+                    serializer = PostSerializer(post, context={'request':request,'kwargs':{'author_id':user.id,'post_id':post.uuid}})
+                    data = serializer.data
 
-                        comments = post.comments.all().order_by('-published')
-                        # paginator = CustomPaginator()
-                        # commentResultPage = paginator.paginate_queryset(comments, request)
-                        context = {'request':request,'kwargs':{'author_id':receiver_id,'post_id':data['id'].split("/")[-1]}}
-                        comment_serializer = CommentSerializer(comments, many=True, context=context)
+                    comments = post.comments.all().order_by('-published')
+                    # paginator = CustomPaginator()
+                    # commentResultPage = paginator.paginate_queryset(comments, request)
+                    context = {'request':request,'kwargs':{'author_id':user.id,'post_id':data['id'].split("/")[-1]}}
+                    comment_serializer = CommentSerializer(comments, many=True, context=context)
 
-                        response = {
-                            "type": "comments",
-                            "post": get_full_uri(request,'api-post-detail',context['kwargs']),
-                            "id": get_full_uri(request,'api-post-comments',context['kwargs']),
-                            "comments": comment_serializer.data,
-                        }
+                    response = {
+                        "type": "comments",
+                        "post": get_full_uri(request,'api-post-detail',context['kwargs']),
+                        "id": get_full_uri(request,'api-post-comments',context['kwargs']),
+                        "comments": comment_serializer.data,
+                    }
 
-                        data["commentSrc"] = response
-                        data['count'] = len(comments)
+                    data["commentSrc"] = response
+                    data['count'] = len(comments)
 
-                        url = f"{author.url}/inbox"
-                        headers = {
-                            "Authorization": f"Basic {auth_token}",
-                            "Content-Type": 'application/json; charset=utf-8',
+                    url = f"{author.url}/inbox"
+                    headers = {
+                        "Authorization": f"Basic {auth_token}",
+                        "Content-Type": 'application/json; charset=utf-8',
 
-                        }
-                        response = requests.post(url, data=json.dumps(data), headers=headers)
-                        response.raise_for_status()
+                    }
 
-                    else:
-                        raise("Error finding foreign Node")
+                    response = requests.post(url, data=json.dumps(data), headers=headers)
+                    response.raise_for_status()
 
+                else:
+                    raise("Error finding foreign Node")
 
             return redirect(reverse('node-post-detail', kwargs={'node': 'Local','author_id': user.id,'post_id': post.uuid}))
     elif request.method == "GET":
-        context = {"title": "Create a Post", "form": PostForm(author=user), "action": "PUBLISH"}
+        context = {"title": "Create a Post", "form": PostForm(
+            author=user), "action": "PUBLISH"}
         return render(request, 'post.html', context)
 
 
@@ -297,8 +298,18 @@ def add_to_sent_request(request):
         body_dict = json.loads(request.body)
         id_to_follow = body_dict.get('author_id')
 
-        # Get the author object
-        author_to_follow = Author.objects.get(id=id_to_follow)
+        # ForeignUserObject
+        foreign_user_object = body_dict.get('foreign_user_object')
+
+        try:
+            # Get the foreign author's object
+            author_to_follow = Author.objects.get(id=id_to_follow)
+        except Author.DoesNotExist:
+            random_uuid = uuid.uuid4()
+            author_to_follow = Author(id=random_uuid, host=foreign_user_object.host, url=foreign_user_object.url, displayName=foreign_user_object.displayName,
+                                      github=foreign_user_object.github, profileImage=foreign_user_object.profileImage, username=str(random_uuid))
+
+            author_to_follow.save()
 
         # Get our author object
         current_user_author = Author.objects.get(
@@ -314,34 +325,41 @@ def add_to_sent_request(request):
 
 @login_required(login_url="/login")
 @require_http_methods(["GET", "POST"])
-def profile(request,author_id):
-
+def profile(request, server_name, author_id):
+    # import pdb; pdb.set_trace()
     user = request.user
+
     userAuthor = Author.objects.get(username=request.user.username)
     if request.method == 'GET':
 
-        author = Author.objects.get(id=author_id)
-        username = author.username
-        following = author.following.all().order_by('displayName')
-        followers = author.followers.all().order_by('displayName')
-        friends = list(following & followers)
-        requests = Author.objects.get(id=author.id).follow_requests.all()
-        posts = get_posts_visible_to_user(userAuthor, author, friends)
-        context = {"posts": posts, "comment_form": CommentForm()}
-        context.update({"requests": requests, "mode": "received"})
-        context.update({"author": author, "following": following, "followers": followers, "friends": friends,
-                       "user": userAuthor, "active_tab": "posts", "edit_profile_form": EditProfileForm(instance=author)})
-        context.update({"auth_headers": getAuthHeadersJson(
-            author.host), "server_host": request.get_host()})
-        serializedFollowings = AuthorSerializer(following, many=True, context={
-                                                'request': request, 'kwargs': {}}).data
-        context.update(
-            {"serialized_followings": json.dumps(serializedFollowings)})
-        try:
-            userFollows = userAuthor.following.get(username=username)
-            context.update({"user_is_following": "True"})
-        except:
-            context.update({"user_is_following": "False"})
+        context = {"user": userAuthor, "server_name": server_name,
+                   "author_id": author_id, "user_id": str(userAuthor.id)}
+        if str(userAuthor.id) == author_id:
+            requests = Author.objects.get(
+                id=userAuthor.id).follow_requests.all()
+            context.update({"requests": requests, "mode": "received",
+                           "edit_profile_form": EditProfileForm(instance=userAuthor)})
+        else:
+            try:
+                userFollows = userAuthor.following.get(id=author_id)
+                context.update({"user_is_following": "True"})
+            except:
+                context.update({"user_is_following": "False"})
+        node = ForeignAPINodes.objects.get(nickname=server_name)
+        headers = json.dumps(
+            {'Authorization': f"Basic {node.getToken()}", 'Content-Type': 'application/json'})
+        context.update({"auth_headers": headers, "local_server_host": request.get_host(
+        ), "server_url": node.base_url})
+
+        local_node = ForeignAPINodes.objects.get(nickname="Local")
+        headers = json.dumps(
+            {'Authorization': f"Basic {local_node.getToken()}", 'Content-Type': 'application/json'})
+        context.update({"local_auth_headers": headers})
+
+        context.update({"nicknameTable": getNicknameTable()})
+        print("user.id:", userAuthor.id)
+        print("author_id:", author_id)
+        print(str(userAuthor.id) == str(author_id))
 
         id_to_follow = author_id
 
@@ -358,7 +376,7 @@ def profile(request,author_id):
         else:
             context.update({"user_pending_following": "False"})
 
-        host = author.host
+        host = author_to_follow.host
 
         # foreignNode = ForeignAPINodes.objects.get(base_url=host)
         foreignNode = getApiNodeWrapper(host)
@@ -377,6 +395,7 @@ def profile(request,author_id):
 
     elif request.method == "POST":
         author_for_action = Author.objects.get(id=author_id)
+        foreignNode = getApiNodeWrapper(userAuthor.host)
         if author_for_action in userAuthor.following.all():
             # Remove the author from the following of the current user
             userAuthor.following.remove(author_for_action)
@@ -384,29 +403,8 @@ def profile(request,author_id):
             # Add the author object to our sent_request list (Need to send this to inbox in the future to get approval on the other end)
             userAuthor.sent_requests.add(author_for_action)
 
-        return redirect(reverse("profile_old", kwargs={"author_id": userAuthor.id}))
+        return redirect(reverse("profile", kwargs={"server_name": foreignNode.nickname, "author_id": userAuthor.id}))
 
-@login_required(login_url="/login")
-@require_http_methods(["GET", "POST"])
-def profile2(request, server_name, author_id):
-    user = request.user
-    userAuthor = Author.objects.get(username=request.user.username)
-    if request.method == 'GET':
-        context = {"user": userAuthor, "server_name": server_name, "author_id": author_id, "user_id": str(userAuthor.id)}
-        if str(userAuthor.id) == author_id:
-            requests = Author.objects.get(id=userAuthor.id).follow_requests.all()
-            context.update({"requests": requests, "mode": "received", "edit_profile_form": EditProfileForm(instance=userAuthor)})
-        else:
-            try:
-                userFollows = userAuthor.following.get(id=author_id)
-                context.update({"user_is_following": "True"})
-            except:
-                context.update({"user_is_following": "False"})
-        node = ForeignAPINodes.objects.get(nickname=server_name)
-        headers = json.dumps({'Authorization': f"Basic {node.getToken()}", 'Content-Type': 'application/json'})
-        context.update({"auth_headers": headers, "local_server_host": request.get_host(), "server_url": node.base_url})
-        context.update({"nicknameTable": getNicknameTable()})
-        return render(request, 'profile.html', context)
 
 def getNicknameTable():
     nodes = ForeignAPINodes.objects.all()
@@ -416,9 +414,11 @@ def getNicknameTable():
         table.update({str(parsedHost.hostname): node.nickname})
     return json.dumps(table)
 
+
 def getServerNickname(request, url):
     parsedHost = urllib.parse.urlparse(url)
-    node = ForeignAPINodes.objects.get(base_url__contains="//"+parsedHost.hostname)
+    node = ForeignAPINodes.objects.get(
+        base_url__contains="//"+parsedHost.hostname)
     return node.nickname
 
 
@@ -506,13 +506,14 @@ def true_friends(request, username):
         return render(request, 'true-friends.html', context)
 
 
-
-
-
 @login_required(login_url="/login")
 @require_http_methods(["GET", "POST"])
 def received_requests(request, author_id):
+    # import pdb; pdb.set_trace()
     user = request.user
+
+    author = Author.objects.get(id=author_id)
+    node = ForeignAPINodes.objects.get(base_url=author.host)
 
     if request.method == 'GET':
 
@@ -545,14 +546,14 @@ def received_requests(request, author_id):
 
         if action == "accept":
             # Add ourself to the sender author's following
-            # sender_author.following.add(current_user_author)
+            sender_author.following.add(current_user_author)
 
             # Remove this follow request on the sender side
-            # sender_author.sent_requests.remove(current_user_author)
+            sender_author.sent_requests.remove(current_user_author)
 
             # Remove this follow request on our side
             # current_user_author.follow_requests.remove(sender_author)
-            # response = "Accepted"
+            response = "Accepted"
 
             # Send a type == "accept" to the user's node
             send_post_request("accept", sender_author, current_user_author)
@@ -569,7 +570,7 @@ def received_requests(request, author_id):
         if inbox:
             return redirect(reverse("inbox", kwargs={'author_id': convert_username_to_id(user.username)}))
         elif profile:
-            return redirect(reverse("profile", kwargs={'author_id': convert_username_to_id(user.username)}))
+            return redirect(reverse("profile", kwargs={'server_name': node.nickname, 'author_id': convert_username_to_id(user.username)}))
         return redirect(reverse("requests", kwargs={'author_id': convert_username_to_id(user.username)}))
 
 
