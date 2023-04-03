@@ -161,7 +161,7 @@ def add_post(request):
     if request.method == "POST":
         form = PostForm(request.POST, request.FILES)
         if form.is_valid():
-       
+
             post = form.save(user=user)
             
             # if request.POST['visibility'] == 'PRIVATE':
@@ -205,10 +205,10 @@ def add_post(request):
                 else:
                     raise("Error finding foreign Node")
 
-
             return redirect(reverse('post_detail', kwargs={'post_id': post.uuid}))
     elif request.method == "GET":
-        context = {"title": "Create a Post", "form": PostForm(author=user), "action": "PUBLISH"}
+        context = {"title": "Create a Post", "form": PostForm(
+            author=user), "action": "PUBLISH"}
         return render(request, 'post.html', context)
 
 
@@ -299,8 +299,18 @@ def add_to_sent_request(request):
         body_dict = json.loads(request.body)
         id_to_follow = body_dict.get('author_id')
 
-        # Get the author object
-        author_to_follow = Author.objects.get(id=id_to_follow)
+        # ForeignUserObject
+        foreign_user_object = body_dict.get('foreign_user_object')
+
+        try:
+            # Get the foreign author's object
+            author_to_follow = Author.objects.get(id=id_to_follow)
+        except Author.DoesNotExist:
+            random_uuid = uuid.uuid4()
+            author_to_follow = Author(id=random_uuid, host=foreign_user_object.host, url=foreign_user_object.url, displayName=foreign_user_object.displayName,
+                                      github=foreign_user_object.github, profileImage=foreign_user_object.profileImage, username=str(random_uuid))
+
+            author_to_follow.save()
 
         # Get our author object
         current_user_author = Author.objects.get(
@@ -323,10 +333,13 @@ def profile(request, server_name, author_id):
     userAuthor = Author.objects.get(username=request.user.username)
     if request.method == 'GET':
 
-        context = {"user": userAuthor, "server_name": server_name, "author_id": author_id, "user_id": str(userAuthor.id)}
+        context = {"user": userAuthor, "server_name": server_name,
+                   "author_id": author_id, "user_id": str(userAuthor.id)}
         if str(userAuthor.id) == author_id:
-            requests = Author.objects.get(id=userAuthor.id).follow_requests.all()
-            context.update({"requests": requests, "mode": "received", "edit_profile_form": EditProfileForm(instance=userAuthor)})
+            requests = Author.objects.get(
+                id=userAuthor.id).follow_requests.all()
+            context.update({"requests": requests, "mode": "received",
+                           "edit_profile_form": EditProfileForm(instance=userAuthor)})
         else:
             try:
                 userFollows = userAuthor.following.get(id=author_id)
@@ -334,18 +347,21 @@ def profile(request, server_name, author_id):
             except:
                 context.update({"user_is_following": "False"})
         node = ForeignAPINodes.objects.get(nickname=server_name)
-        headers = json.dumps({'Authorization': f"Basic {node.getToken()}", 'Content-Type': 'application/json'})
-        context.update({"auth_headers": headers, "local_server_host": request.get_host(), "server_url": node.base_url})
+        headers = json.dumps(
+            {'Authorization': f"Basic {node.getToken()}", 'Content-Type': 'application/json'})
+        context.update({"auth_headers": headers, "local_server_host": request.get_host(
+        ), "server_url": node.base_url})
 
         local_node = ForeignAPINodes.objects.get(nickname="Local")
-        headers = json.dumps({'Authorization': f"Basic {local_node.getToken()}", 'Content-Type': 'application/json'})
+        headers = json.dumps(
+            {'Authorization': f"Basic {local_node.getToken()}", 'Content-Type': 'application/json'})
         context.update({"local_auth_headers": headers})
 
         context.update({"nicknameTable": getNicknameTable()})
         print("user.id:", userAuthor.id)
         print("author_id:", author_id)
         print(str(userAuthor.id) == str(author_id))
-    
+
         id_to_follow = author_id
 
         # Get the author object
@@ -387,7 +403,8 @@ def profile(request, server_name, author_id):
             # Add the author object to our sent_request list (Need to send this to inbox in the future to get approval on the other end)
             userAuthor.sent_requests.add(author_for_action)
 
-        return redirect(reverse("profile", kwargs={"server_name": foreignNode.nickname ,"author_id": userAuthor.id}))
+        return redirect(reverse("profile", kwargs={"server_name": foreignNode.nickname, "author_id": userAuthor.id}))
+
 
 def getNicknameTable():
     nodes = ForeignAPINodes.objects.all()
@@ -397,9 +414,11 @@ def getNicknameTable():
         table.update({str(parsedHost.hostname): node.nickname})
     return json.dumps(table)
 
+
 def getServerNickname(request, url):
     parsedHost = urllib.parse.urlparse(url)
-    node = ForeignAPINodes.objects.get(base_url__contains="//"+parsedHost.hostname)    
+    node = ForeignAPINodes.objects.get(
+        base_url__contains="//"+parsedHost.hostname)
     return node.nickname
 
 
@@ -483,9 +502,6 @@ def true_friends(request, username):
         context = {"friends": true_friends, "author": author}
 
         return render(request, 'true-friends.html', context)
-
-
-
 
 
 @login_required(login_url="/login")
@@ -761,7 +777,7 @@ def github_activity(request, username):
     """
     Returns a JSON string of a user's GitHub activity
     """
-    
+
     feed = feedparser.parse(f"https://github.com/{username}.atom")
 
     activities = []
