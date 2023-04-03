@@ -307,7 +307,7 @@ def add_to_sent_request(request):
         except Author.DoesNotExist:
             random_uuid = uuid.uuid4()
             author_to_follow = Author(id=random_uuid, host=foreign_user_object["host"], url=foreign_user_object["url"], displayName=foreign_user_object["displayName"],
-                                      github=foreign_user_object["github"], profileImage=foreign_user_object["profileImage"], username=str(random_uuid))
+                                      github=foreign_user_object["github"], profileImage=foreign_user_object["profileImage"], username=str(random_uuid), confirmed=True)
 
             author_to_follow.save()
 
