@@ -57,8 +57,8 @@ function getAndSetProfileCard() {
         authorProfileUrl = new URL("authors/" + uuidToHex(author_id), author_host);
     }
 
-    console.log(author_host);
-    console.log(authorProfileUrl);
+    // console.log(author_host);
+    // console.log(authorProfileUrl);
     // set profile card info
     fetch(authorProfileUrl, {method: "GET", redirect: "follow", headers: auth_headers}).then((response) => {
         if (response.status === 200) { // OK
@@ -71,14 +71,19 @@ function getAndSetProfileCard() {
         if (data.profileImage !== null && data.profileImage !== "") {$(profileCard).find(".profile_image").attr("src", data.profileImage);}
         $(profileCard).find(".profile_github").attr("href", data.github);
         $(profileCard).find(".profile_display_name").text(data.displayName);
-        var github_username = getGitHubUsername(data.github);
-        fetchActivitiesJSON(github_username).then(activities => {
-            const target = document.getElementById("github_activity_stream");
-            for (var activity of activities) {
-            let html_element = createHTMLCard(activity.id, activity.link, activity.title, activity.published, activity.updated, activity.authors);
-            target.innerHTML += html_element;
-            }
-        });
+        try{
+            var github_username = getGitHubUsername(data.github);
+            fetchActivitiesJSON(github_username).then(activities => {
+                const target = document.getElementById("github_activity_stream");
+                for (var activity of activities) {
+                let html_element = createHTMLCard(activity.id, activity.link, activity.title, activity.published, activity.updated, activity.authors);
+                target.innerHTML += html_element;
+                }
+            });
+        }
+        catch {
+            console.log('Issue with github.')
+        }
         let headers = {
             'X-CSRFToken': '{{ csrf_token }}'
         }

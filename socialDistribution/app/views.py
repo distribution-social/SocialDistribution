@@ -345,13 +345,16 @@ def profile(request, server_name, author_id):
                 context.update({"user_is_following": "True"})
             except:
                 context.update({"user_is_following": "False"})
-        node = ForeignAPINodes.objects.get(nickname=server_name)
+        local_node = ForeignAPINodes.objects.get(nickname="Local")
+        try:
+            node = ForeignAPINodes.objects.get(nickname=server_name)
+        except:
+            node = local_node
         headers = json.dumps(
             {'Authorization': f"Basic {node.getToken()}", 'Content-Type': 'application/json'})
         context.update({"auth_headers": headers, "local_server_host": request.get_host(
         ), "server_url": node.base_url})
 
-        local_node = ForeignAPINodes.objects.get(nickname="Local")
         headers = json.dumps(
             {'Authorization': f"Basic {local_node.getToken()}", 'Content-Type': 'application/json'})
         context.update({"local_auth_headers": headers})
@@ -364,32 +367,23 @@ def profile(request, server_name, author_id):
         id_to_follow = author_id
 
         # Get the author object
-        author_to_follow = Author.objects.get(id=id_to_follow)
+        try:
+            author_to_follow = Author.objects.get(id=id_to_follow)
 
-        # Get our author object
-        current_user_author = Author.objects.get(
-            username=request.user.username)
+            # Get our author object
+            current_user_author = Author.objects.get(
+                username=request.user.username)
 
-        # Add the author object to our sent_request list (Need to send this to inbox in the future to get approval on the other end)
-        if current_user_author.sent_requests.filter(id=author_to_follow.id).exists():
-            context.update({"user_pending_following": "True"})
-        else:
+            # Add the author object to our sent_request list (Need to send this to inbox in the future to get approval on the other end)
+            if current_user_author.sent_requests.filter(id=author_to_follow.id).exists():
+                context.update({"user_pending_following": "True"})
+            else:
+                context.update({"user_pending_following": "False"})
+        except:
             context.update({"user_pending_following": "False"})
 
-        host = author_to_follow.host
-
-        # foreignNode = ForeignAPINodes.objects.get(base_url=host)
-        foreignNode = getApiNodeWrapper(host)
-
-        context.update({'foreign_node_token': foreignNode.getToken()})
-
-        local_host = userAuthor.host
-
-        # localNode = ForeignAPINodes.objects.get(base_url=local_host)
-        localNode = getApiNodeWrapper(local_host)
-
-        context.update({'local_node_token': localNode.getToken()})
-        print(context)
+        context.update({'foreign_node_token': node.getToken()})
+        context.update({'local_node_token': local_node.getToken()})
 
         return render(request, 'profile.html', context)
 
