@@ -23,14 +23,14 @@
               <a class="card-title" href="{% url 'node-post-detail' node=item.object.content_object.made_by.host|get_server_name author_id=item.object.content_object.made_by.id post_id=item.object.content_object.uuid %}" style="text-decoration: none;">{{item.object.content_object.title}}</a>
               {% elif item.object.type == "comment" %}
               <span style="color:grey;">commented on</span>
-              <a class="card-title" href="{% url 'node-post-detail' node=item.object.content_object.made_by.host|get_server_name author_id=item.object.content_object.made_by.id post_id=item.object.content_object.uuid %}" style="text-decoration: none;">"{{item.object.content_object.title}}".</a>
+              <a class="card-title" href="{% url 'node-post-detail' node=item.object.content_object.post.made_by.host|get_server_name author_id=item.object.content_object.post.made_by.id post_id=item.object.content_object.post.uuid %}" style="text-decoration: none;">"{{item.object.content_object.post.title}}".</a>
               {% elif item.object.type == "like" %}
                 {% if item.object.content_object|classname == "Post" %}
                   <span style="color:grey;">liked</span>
                   <a class="card-title" href="{% url 'node-post-detail' node=item.object.content_object.made_by.host|get_server_name author_id=item.object.content_object.made_by.id post_id=item.object.content_object.uuid %}" style="text-decoration: none;">"{{item.object.content_object.title}}".</a>
                 {% elif item.object.content_object|classname == "Comment" %}
                   <span style="color:grey;">liked your comment on</span>
-                  <a class="card-title" href="{% url 'node-post-detail' node=item.object.content_object.post.made_by.host|get_server_name author_id=item.object.content_object.post.made_by.id post_id=item.object.content_object.post.uuid %}" style="text-decoration: none;">"{{item.object.content_object.post.title}}".</a>
+                  <a class="card-title" href="{% url 'node-post-detail' node=item.object.content_object.post.post.made_by.host|get_server_name author_id=item.object.content_object.post.made_by.id post_id=item.object.content_object.post.uuid %}" style="text-decoration: none;">"{{item.object.content_object.post.title}}".</a>
                 {% endif %}
               {% elif item.object.type == "follow" %}
                 {% if user.username|convert_username_to_id|isRequest:item.object.content_object.id %}

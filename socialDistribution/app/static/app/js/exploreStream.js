@@ -16,6 +16,7 @@ $(document).ready(function() {
     }
     makeAjaxCallAsync("/public_posts","GET",null,headers,
     function (response,status){
+        spinner.style.display = 'none';
         if(response.posts.length == 0){
             $('#post-stream').html('No posts to show.')
         }else{
@@ -46,7 +47,6 @@ $(document).ready(function() {
             });
             });
         }
-        spinner.style.display = 'none';
 
     },
     function (error,status){

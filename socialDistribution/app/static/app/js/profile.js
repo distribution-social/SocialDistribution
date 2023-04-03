@@ -7,7 +7,7 @@
 import { extractUUID, uuidToHex } from "./utility.js";
 import { getGitHubUsername, fetchActivitiesJSON, createHTMLCard } from "./github.js";
 import { makeAjaxCall, makeAjaxCallAsync } from "./ajax.js";
-
+const spinner = document.getElementById("spinner2")
 $(document).ready(function() {
     // console.log("host:"+author_host);
     // console.log(auth_headers)
@@ -71,6 +71,7 @@ function getAndSetProfileCard() {
         });
         makeAjaxCallAsync("/profile_posts/"+author_id,"GET",null,auth_headers,
         function (response,status){
+            spinner.style.display = 'none';
             if(response.posts.length == 0){
                 $('#post-stream').html('No posts to show, use the \'Explore\' tab to find people to follow.')
             }else{
@@ -94,10 +95,10 @@ function getAndSetProfileCard() {
                             headers: headers
                         }))
                 Promise.all(promises).then(function(datas){
+
                     for(var y = 0; y < datas.length; y++){
                             // Append the new item to the list
                             $('#post-stream').append(datas[y]);
-                            spinner.style.display = 'none';
                             addPostLikeEventListener(postData,current_author)
                             addDeletePostListener(postData.uuid)
                     }
