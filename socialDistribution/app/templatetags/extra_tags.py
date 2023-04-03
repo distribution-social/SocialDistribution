@@ -2,7 +2,9 @@
 from django import template
 from ..models import *
 import uuid
+import urllib
 import json
+
 
 register = template.Library()
 
@@ -41,6 +43,16 @@ def convert_uuid_to_hex(uuid_string):
   # except:
   #   # if the conversion fails, the string is not a UUID in hexadecimal representation
   #   return uuid
+
+
+@register.filter
+def getHostNickname(url):
+    parsedHost = urllib.parse.urlparse(url)
+    try:
+      node = ForeignAPINodes.objects.get(base_url__contains="//"+parsedHost.hostname)    
+      return node.nickname
+    except:
+      return "bad_host"
 
 
 @register.filter

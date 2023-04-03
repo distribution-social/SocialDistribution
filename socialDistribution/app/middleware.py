@@ -16,7 +16,9 @@ class RemoveTrailingSlashMiddleware:
                 new_url += '?' + query_params
 
             # Redirect to the new URL
-            return redirect(new_url, permanent=True)
+            response = redirect(new_url, permanent=False)
+            response.status_code = 307
+            return response
 
         response = self.get_response(request)
         return response

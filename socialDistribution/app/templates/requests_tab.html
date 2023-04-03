@@ -2,13 +2,13 @@
 
 <link rel="stylesheet" type="text/css" href="{% static 'app/following.css' %}">
 
-<div class="container-fluid d-flex align-items-center flex-column p-3">
+<div class="container-fluid d-flex align-items-center flex-column">
     {% if requests|length == 0 %}
     No Follow Requests
     {% endif %}
     {% for request in requests %}
 
-    <div class="d-flex flex-column flex-fill" style="max-width: 700px;">
+    <div class="d-flex flex-column mb-3 mt-3 flex-fill" style="max-width: 700px;">
             <div class="card flex-fill" style="width: 700px;">
                 <div class="d-flex">
                     {% if request.profileImage and request.profileImage != '' %}
@@ -26,7 +26,7 @@
                             <div class="btn-group" role="group" aria-label="Basic example">
 
                                 <a type="button" class="btn btn-primary"
-                                    href="{% url 'profile' author_id=request.id %}"><i
+                                    href="none"><i
                                         class="bi bi-person-fill">&nbsp;Profile</i></a>
                                 <a type="button" href="{{request.github}}" target="_blank" class="btn btn-secondary"><i
                                         class="bi bi-github">&nbsp;GitHub</i></a>
