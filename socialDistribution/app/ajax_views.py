@@ -216,7 +216,6 @@ def profile_authors(request,author_id):
     authors = filter_authors_profile(author_id,authors)
     return JsonResponse({'authors': authors})
 
-@login_required(login_url="/login")
 @require_http_methods(["POST"])
 def author_posts(request):
 
