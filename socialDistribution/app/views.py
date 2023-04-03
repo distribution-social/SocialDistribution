@@ -527,14 +527,14 @@ def received_requests(request, author_id):
 
         if action == "accept":
             # Add ourself to the sender author's following
-            # sender_author.following.add(current_user_author)
+            sender_author.following.add(current_user_author)
 
             # Remove this follow request on the sender side
-            # sender_author.sent_requests.remove(current_user_author)
+            sender_author.sent_requests.remove(current_user_author)
 
             # Remove this follow request on our side
             # current_user_author.follow_requests.remove(sender_author)
-            # response = "Accepted"
+            response = "Accepted"
 
             # Send a type == "accept" to the user's node
             send_post_request("accept", sender_author, current_user_author)
