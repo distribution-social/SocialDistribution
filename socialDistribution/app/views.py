@@ -128,7 +128,7 @@ def author_search(request):
 
         if search_term:
             search_term = Author.objects.filter(
-                username__icontains=search_term, host__contains="distribution.social" )[:5]
+                username__icontains=search_term)[:5]
 
             data = serializers.serialize('json', list(
                 search_term), fields=('id', 'username'))
@@ -570,7 +570,7 @@ def received_requests(request, author_id):
             return redirect(reverse("inbox", kwargs={'author_id': convert_username_to_id(user.username)}))
         elif profile:
             return redirect(reverse("profile", kwargs={'server_name': node.nickname, 'author_id': convert_username_to_id(user.username)}))
-        return redirect(reverse("requests", kwargs={'server_name': "Local", 'author_id': convert_username_to_id(user.username)}))
+        return redirect(reverse("requests", kwargs={'author_id': convert_username_to_id(user.username)}))
 
 
 @login_required(login_url="/login")
@@ -603,7 +603,7 @@ def sent_requests(request, author_id):
             # Remove it from the receiver side
             receiver_author.follow_requests.remove(current_user_author)
 
-        return redirect(reverse("profile", kwargs={'server_name': "Local", 'author_id': convert_username_to_id(user.username)}))
+        return redirect(reverse("sent_requests", kwargs={'author_id': convert_username_to_id(user.username)}))
 
 
 # @login_required(login_url="/login")
