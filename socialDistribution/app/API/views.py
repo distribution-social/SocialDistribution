@@ -129,7 +129,31 @@ class FollowerAPIView(BasicAuthMixin,APIView):
         else:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
+class PublicPostsAPIView(BasicAuthMixin,APIView):
+    """Gets all public posts"""
+    def get(self, request):
+        posts = Post.objects.filter(visibility="PUBLIC",made_by__host=settings.HOST+'/api/').order_by('-date_published')
+        serializer = PostSerializer(posts, many=True, context={'request':request,'kwargs':{}})
+        response = {
+            'type': 'public_posts',
+            'items': serializer.data
+        }
+        return Response(response,status=200)
 
+class PublicAuthorPostsAPIView(BasicAuthMixin,APIView):
+    """Gets all author's public posts"""
+    def get(self, request, author_id):
+        try:
+            author = Author.objects.get(id=author_id)
+        except Author.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        posts = Post.objects.filter(visibility="PUBLIC",made_by=author).order_by('-date_published')
+        serializer = PostSerializer(posts, many=True, context={'request':request,'kwargs':{}})
+        response = {
+            'type': 'public_posts',
+            'items': serializer.data
+        }
+        return Response(response,status=200)
 
 class AuthorPostsView(BasicAuthMixin,APIView):
     def get(self, request, author_id):
@@ -473,7 +497,9 @@ class InboxView(BasicAuthMixin,APIView):
 
             try:
                 if actor not in author.followers.all():
+                    # Should be no op if it's handled somewhere
                     actor.sent_requests.add(author)
+                    author.follow_requests.add(actor)
                     add_to_inbox(actor,author,Activity.FOLLOW,actor)
                 else:
                     return Response(f"Already following {author.displayName}",status=status.HTTP_400_BAD_REQUEST)

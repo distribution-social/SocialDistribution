@@ -68,8 +68,35 @@ CORS_ALLOWED_ORIGINS = [
 "https://p2psd.herokuapp.com",
 "http://www.distribution.social",
 "http://nicksnfk.dynns.com",
-"http://localhost:3000"
+"http://localhost:3000",
+"https://d21fo9y212zzon.cloudfront.net"
 ]
+
+CSRF_TRUSTED_ORIGINS = ["https://d21fo9y212zzon.cloudfront.net"]
+
+
+# Cross Site Request Forgery
+CSRF_USE_SESSIONS = True
+
+CSRF_COOKIE_HTTPONLY = True
+
+CSRF_COOKIE_SAMESITE = 'Secure'
+
+CSRF_COOKIE_SECURE = True
+
+# Session Cookies
+SESSION_COOKIE_SAME = 'Secure'
+
+SESSION_COOKIE_SECURE = True
+
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+
+# HTTP Strict Transport Security
+SECURE_HSTS_PRELOAD = True
+
+SECURE_HSTS_SECONDS = 3600
+
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 # Application definition
 
@@ -187,7 +214,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
@@ -203,8 +230,11 @@ REST_FRAMEWORK = {
 }
 
 #remove it once we make it https
-SECURE_SSL_REDIRECT = False
+SECURE_SSL_REDIRECT = True
 SECURE_CROSS_ORIGIN_OPENER_POLICY = None
 
 django_on_heroku.settings(locals())  # bottom of the file
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
 
