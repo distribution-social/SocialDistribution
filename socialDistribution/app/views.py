@@ -292,6 +292,38 @@ def authors(request):
 
 @login_required(login_url="/login")
 @require_http_methods(["GET", "POST"])
+def add_to_following(request):
+    if request.method == "POST":
+        body_dict = json.loads(request.body)
+        id_to_add_to_following = body_dict.get('author_id')
+
+        # ForeignUserObject
+        # foreign_user_object_to_add_to_following = body_dict.get('foreign_user_object')
+
+        try:
+            # Get the foreign author's object
+            author_object_to_add_to_following = Author.objects.get(
+                id=id_to_add_to_following)
+        except Author.DoesNotExist:
+            pass
+
+        # Get our author object
+        current_user_author = Author.objects.get(
+            username=request.user.username)
+
+        # Add the object as one of our current author's following
+        current_user_author.following.add(author_object_to_add_to_following)
+
+        # Remove from sent_requests
+        current_user_author.sent_requests.remove(author_object_to_add_to_following)
+
+        return HttpResponse("Success")
+    else:
+        return HttpResponse("Method Not Allowed")
+
+
+@login_required(login_url="/login")
+@require_http_methods(["GET", "POST"])
 def add_to_sent_request(request):
     if request.method == "POST":
         # print("********************")
