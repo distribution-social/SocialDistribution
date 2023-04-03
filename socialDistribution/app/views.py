@@ -283,6 +283,7 @@ def profile(request, server_name, author_id):
         headers = json.dumps({'Authorization': f"Basic {node.getToken()}", 'Content-Type': 'application/json'})
         context.update({"auth_headers": headers, "local_server_host": request.get_host(), "server_url": node.base_url})
         context.update({"nicknameTable": getNicknameTable()})
+        context.update({"tokenTable": getTokenTable()})
         print("user.id:", userAuthor.id)
         print("author_id:", author_id)
         print(str(userAuthor.id) == str(author_id))
@@ -335,6 +336,14 @@ def getNicknameTable():
     for node in nodes:
         parsedHost = urllib.parse.urlparse(node.base_url)
         table.update({str(parsedHost.hostname): node.nickname})
+    return json.dumps(table)
+
+def getTokenTable():
+    nodes = ForeignAPINodes.objects.all()
+    table = {}
+    for node in nodes:
+        parsedHost = urllib.parse.urlparse(node.base_url)
+        table.update({str(parsedHost.hostname): node.getToken()})
     return json.dumps(table)
 
 def getServerNickname(request, url):
