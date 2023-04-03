@@ -329,9 +329,16 @@ function setFollowers(followers, user_id, author_id, author_host, nickname_table
             num++;
             const instance = document.importNode(cardTemplate.content, true);
             let uuid = extractUUID(follower.id);
-            if (follower.profileImage !== null && follower.profileImage !== "") {$(instance).find(".follower_image").attr("src", follower.profileImage);}
+            
+            if (follower.profileImage !== null && follower.profileImage !== "") $(instance).find(".follower_image").attr("src", follower.profileImage);
+            if (follower.github) {
+                $(instance).find(".follower_github").attr("href", follower.github);
+            } else {
+               //$(instance).find(".follower_github").addClass("disabled").css("background-color", "#6E757C");
+               $(instance).find(".follower_github").parent().parent().append("<a type='button' class='btn btn-primary follower_profile_link'><i class='bi bi-person-fill'>&nbsp;Profile</i></a>");
+               $(instance).find(".follower_github").parent().remove();
+            }
             $(instance).find(".follower_profile_link").attr("href", "http://"+server_host+"/authors/"+nickname+"/"+uuid);
-            $(instance).find(".follower_github").attr("href", follower.github);
             $(instance).find(".follower_display_name").text(follower.displayName);
             $(instance).find(".follower_host").attr("href", host).text(host.replace("http://",''));
             $(instance).find(".removefollower").val(uuid);
@@ -406,8 +413,14 @@ function setFriends(followers, author_id) {
                         let hostUrl = new URL(host);
                         let nickname = nickname_table[hostUrl.host];
                         if (follower.profileImage !== null && follower.profileImage !== "") {$(instance).find(".friend_image").attr("src", follower.profileImage);}
+                        if (follower.github) {
+                            $(instance).find(".friend_github").attr("href", follower.github);
+                        } else {
+                           //$(instance).find(".follower_github").addClass("disabled").css("background-color", "#6E757C");
+                           $(instance).find(".friend_github").parent().parent().append("<a type='button' class='btn btn-primary friend_profile_link'><i class='bi bi-person-fill'>&nbsp;Profile</i></a>");
+                           $(instance).find(".friend_github").parent().remove();
+                        }
                         $(instance).find(".friend_profile_link").attr("href", "http://"+server_host+"/authors/"+nickname+"/"+uuid);
-                        $(instance).find(".friend_github").attr("href", follower.github);
                         $(instance).find(".friend_display_name").text(follower.displayName);
                         $(instance).find(".friend_host").attr("href", host).text(host.replace("http://", ''));
                         $("#friends_tab_stream").append(instance);
