@@ -298,24 +298,31 @@ def add_to_following(request):
         id_to_add_to_following = body_dict.get('author_id')
 
         # ForeignUserObject
-        # foreign_user_object_to_add_to_following = body_dict.get('foreign_user_object')
+        foreign_user_object = body_dict.get('foreign_user_object')
 
         try:
             # Get the foreign author's object
             author_object_to_add_to_following = Author.objects.get(
                 id=id_to_add_to_following)
         except Author.DoesNotExist:
-            pass
+            random_uuid = uuid.uuid4()
+            author_to_follow = Author(id=random_uuid, host=foreign_user_object["host"], url=foreign_user_object["url"], displayName=foreign_user_object["displayName"],
+                                      github=foreign_user_object["github"], profileImage=foreign_user_object["profileImage"], username=str(random_uuid), confirmed=True)
+
+            author_to_follow.save()
 
         # Get our author object
         current_user_author = Author.objects.get(
             username=request.user.username)
 
         # Add the object as one of our current author's following
-        current_user_author.following.add(author_object_to_add_to_following)
+        try:
+            current_user_author.following.get(id=id_to_add_to_following)
+        except:
+            current_user_author.following.add(author_object_to_add_to_following)
 
-        # Remove from sent_requests
-        current_user_author.sent_requests.remove(author_object_to_add_to_following)
+            # Remove from sent_requests
+            current_user_author.sent_requests.remove(author_object_to_add_to_following)
 
         return HttpResponse("Success")
     else:
