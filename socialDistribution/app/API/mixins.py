@@ -20,7 +20,7 @@ class BasicAuthMixin:
             response['WWW-Authenticate'] = 'Basic realm="API"'
             return response
 
-        import pdb; pdb.set_trace()
+    
         username_password = base64.b64decode(auth_value.encode('utf-8')).decode('utf-8').split(':')
        
         username = username_password[0]
