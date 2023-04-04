@@ -63,12 +63,13 @@ export function addPostLikeEventListener(post,author){
           type: 'POST',
           url: url,
           data: JSON.stringify(data),
+          contentType: 'application/json',
           headers: {
-            Authorization: 'Basic '+post.auth_token
+            Authorization: 'Basic '+post.auth_token,
           },
-          xhrFields: {
-            withCredentials: true
-          },
+          // xhrFields: {
+          //   withCredentials: true
+          // },
           success: function (result, statusText, xhr) {
             showAndDismissAlert("info",result)
             if(xhr.status == 201 || xhr.status == 200){
@@ -119,9 +120,9 @@ export function addCommentLikeEventListener(comment,author){
           headers: {
             Authorization: 'Basic '+comment.auth_token
           },
-          xhrFields: {
-            withCredentials: true
-          },
+          // xhrFields: {
+          //   withCredentials: true
+          // },
           success: function (result, statusText, xhr) {
             showAndDismissAlert("info",result)
             // console.log(result)
@@ -173,9 +174,9 @@ export function addDeletePostListener(uuid){
                 csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
                 action: 'delete_post'
             },
-            xhrFields: {
-              withCredentials: true
-            },
+            // xhrFields: {
+            //   withCredentials: true
+            // },
             success: function (result) {
 
               $(`#delete-post-modal-${uuid}`).hide()

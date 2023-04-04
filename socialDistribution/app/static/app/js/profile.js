@@ -36,6 +36,7 @@ $(document).ready(function() {
     } else {
         followersUrl = new URL("authors/" + uuidToHex(author_id) + "/followers", author_host);
     }
+
     fetch(followersUrl, {method: "GET", redirect: "follow", headers: auth_headers}).then((response) => {
         if (response.status === 200) { // OK
             return response.json();
