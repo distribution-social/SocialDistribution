@@ -69,7 +69,7 @@ def get_post_details_template(request):
                 # import pdb; pdb.set_trace()
                 print("Something wrong w foreign node")
 
-
+        # import pdb; pdb.set_trace()
         auth_token = ''
         if foreignNode.username:
             auth_token = foreignNode.getToken()

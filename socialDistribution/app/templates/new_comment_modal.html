@@ -41,8 +41,11 @@
         commentSpinner = document.getElementById('comment-spinner')
         commentSpinner.removeAttribute("hidden");
         commentContainer = document.getElementById(`collapse_${parsedPost.uuid}`)
-        const url = `${parsedPost.author.url}/inbox/`
-
+        const url = `${parsedPost.author.url}/inbox`
+        id = parsedPost.author.url.split("/")
+        user_id = id[id.length - 1]
+        // url = `http://127.0.0.1:8000/api/authors/${user_id}/inbox`
+    
         $.ajax({
             type: 'POST',
             url: url,
@@ -51,9 +54,9 @@
               "Authorization": 'Basic '+parsedPost.auth_token,
             "Content-Type": 'application/json; charset=utf-8'
             },
-            xhrFields: {
-              withCredentials: true
-            },
+            // xhrFields: {
+            //   withCredentials: true
+            // },
             success: function (result) {
               $.ajax({
                   url: '/comment.html',
@@ -63,9 +66,9 @@
                   headers: {
                       'X-CSRFToken': '{{ csrf_token }}'
                   },
-                  xhrFields: {
-                    withCredentials: true
-                  },
+                  // xhrFields: {
+                  //   withCredentials: true
+                  // },
                   success: function(template) {
                     //creates and sets a cardfooter element
                     const cardFooter = document.createElement('div');

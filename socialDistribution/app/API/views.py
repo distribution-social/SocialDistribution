@@ -478,6 +478,7 @@ class PostImageView(BasicAuthMixin, APIView):
         return Response({"error": "Image does not exist."}, status=status.HTTP_404_NOT_FOUND)
 
 class InboxView(BasicAuthMixin,APIView):
+
     def get(self,request,author_id):
         """Retrieves the inbox of the author {author_id}"""
         try:
@@ -498,9 +499,13 @@ class InboxView(BasicAuthMixin,APIView):
         return Response(reponse,status=status.HTTP_200_OK)
 
     def post(self,request,author_id):
+
         """Adds the given object to the author\'s {author_id} inbox.
         Objects can be of type \'post\', \'follow\', \'comment\' or \'like\'"""
+        
+        # import pdb; pdb.set_trace()
         data = json.loads(request.body.decode('utf-8'))
+        
         try:
             author = Author.objects.get(id=author_id)
         except Author.DoesNotExist:
