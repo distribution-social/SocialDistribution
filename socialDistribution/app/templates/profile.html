@@ -57,10 +57,10 @@ var token_table = JSON.parse("{{tokenTable|escapejs}}");
                                             <button id="follow_unfollow_button" type="submit" name="" value=""
                                                 class="btn btn-outline-primary btn-lg"></button>
                                             {% elif user_is_following == "False" and user_pending_following == "True" %}
-                                             <button id="" type="submit" name="" value=""
+                                             <button id="follow_unfollow_button" type="submit" name="" value=""
                                                 class="btn btn-outline-primary btn-lg" disabled>Pending Follow Request</button>
                                             {% elif user_is_following == "True" and user_pending_following == "False" %}
-                                               <button id="" type="submit" name="" value=""
+                                               <button id="follow_unfollow_button" type="submit" name="" value=""
                                                 class="btn btn-outline-primary btn-lg" disabled>Following</button>
 
                                             {% endif %}
