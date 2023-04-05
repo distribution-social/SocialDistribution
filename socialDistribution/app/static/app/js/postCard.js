@@ -22,9 +22,24 @@ export function getComments(post,author){
   const comment_url = `${post.id}/comments?page=1&size=10`
   makeAjaxCallAsync(comment_url,'GET',null,{Authorization: 'Basic '+post.auth_token},
   function (response,status){
-    const count = response.comments.length
+    let count = 0
+    let comments_list = []
+    try{
+      count = response.comments.length;
+      comments_list = response.comments;
+    }
+    catch{
+      try{
+        count = response.items.length;
+        comments_list = response.items;
+      }
+      catch{
+        console.log('Issue getting count');
+      }
+
+    }
     $(`#comment-count-${uuid}`).html(count)
-    $.each(response.comments, function(index,comment){
+    $.each(comments_list, function(index,comment){
       const commentData = {
         uuid: extractUUID(comment.id),
         ...comment
