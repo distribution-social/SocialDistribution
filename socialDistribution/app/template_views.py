@@ -48,6 +48,7 @@ def get_post_card_template(request):
 
 
 def get_post_details_template(request):
+    import pdb; pdb.set_trace()
     post_data = request.body
     author = Author.objects.get(username=request.user.username)
     followers = author.followers.all()

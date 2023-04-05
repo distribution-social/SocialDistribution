@@ -275,6 +275,7 @@ def profile_posts(request,author_id):
 
 @require_http_methods(["GET"])
 def post_details(request,node,author_id,post_id):
+    # import pdb; pdb.set_trace()
     url = urljoin(get_node_host(node),'authors',author_id,'posts',post_id)
     headers = {
         'Authorization': f"Basic {get_auth_token(get_node_host(node))}",
@@ -292,7 +293,34 @@ def post_details(request,node,author_id,post_id):
     post['tag'] = node
     post['auth_token'] = get_auth_token(get_node_host(node))
     post['uuid'] = post['id'].split("/")[-1]
-    context = {'user': request.user,'post': post,'post_json': json.dumps(post), "comment_form": CommentForm()}
+   
+
+    jsonFollowers = []
+    try:
+        current_user = Author.objects.get(username =  request.user.username)
+        followers = current_user.followers.all()
+
+        
+        for follower in followers:
+            foreignNode = get_foreign_API_node(follower.host)
+            # import pdb; pdb.set_trace()
+            auth_token = ''
+            if foreignNode.username:
+                auth_token = foreignNode.getToken()
+
+            jsonFollowers.append({
+                'obj': follower,
+                'auth_token': auth_token,
+                'url': follower.url
+            })
+
+    except Exception as e:
+        print("couldn't find author")
+        print(e)
+
+
+    context = {'user': request.user,'post': post,'post_json': json.dumps(post), 'followers': jsonFollowers, "comment_form": CommentForm()}
+
     return render(request,'post_detail.html',context)
 
 
