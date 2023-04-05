@@ -336,7 +336,7 @@ def add_to_following(request):
 @require_http_methods(["GET", "POST"])
 def add_to_sent_request(request):
     if request.method == "POST":
-        # print("********************")
+        print("********************")
         body_dict = json.loads(request.body)
         id_to_follow = body_dict.get('author_id')
 
