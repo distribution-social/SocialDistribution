@@ -2,7 +2,7 @@ import { extractUUID } from "./utility.js";
 import { makeAjaxCall, makeAjaxCallAsync } from "./ajax.js";
 //post card scripts
 
-export function getPostLikes(post){
+export async function getPostLikes(post){
   const uuid = extractUUID(post.id)
   const like_count = $(`#like-count-${uuid}`)
   const like_url = `${post.id}/likes`
@@ -16,7 +16,7 @@ export function getPostLikes(post){
   })
 }
 
-export function getComments(post){
+export async function getComments(post){
   const uuid = extractUUID(post.id)
   const comments = $(`#collapse_${uuid}`)
   const comment_url = `${post.id}/comments?page=1&size=10`

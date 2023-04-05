@@ -13,7 +13,7 @@ catch{
 
 const spinner = document.getElementById("spinner2")
 // fetches the post when document loads.
-$(document).ready(function() {
+$(document).ready(async function() {
     // console.log('{{ csrf_token|length }}');
 
     spinner.style.display = 'block';
@@ -28,9 +28,9 @@ $(document).ready(function() {
                 filter: ["PUBLIC"]
             }
             makeAjaxCallAsync("/author_posts",'POST',JSON.stringify(authorData),headers,
-            function(response,status){
-                spinner.style.display = 'none';
-                $.each(response.posts, function(index, post) {
+            async function(response,status){
+              
+                $.each(response.posts, async function(index, post) {
                     // console.log(post)
                     const postData = {
                         uuid: extractUUID(post.id),
@@ -38,7 +38,7 @@ $(document).ready(function() {
                     }
                     postData.author.id = extractUUID(post.author.id)
                     makeAjaxCallAsync('/post_card.html','POST',JSON.stringify(postData),headers,
-                    function(response,status){
+                    async function(response,status){
                         // console.log(`<div data-sort=${postData['published']}>${response}</div>`)
                         $('#post-stream').append(`<div style="width: 100%" data-sort=${postData['published']}>${response}</div>`)
                         .children()
@@ -50,13 +50,15 @@ $(document).ready(function() {
                           return sec - first;
                           // append back to parent for updating order
                         }).appendTo('#post-stream');
-                        spinner.style.display = 'none';
-                        getPostLikes(postData);
-                        getComments(postData);
+                    
+                        await getPostLikes(postData);
+                        await getComments(postData);
                         if(current_author != null){
                             addPostLikeEventListener(postData,current_author)
                             addDeletePostListener(postData.uuid)
                         }
+
+                        spinner.style.display = 'none';
 
                     },
                     function (error,status){

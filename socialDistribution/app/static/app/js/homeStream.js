@@ -29,7 +29,6 @@ $(document).ready(function() {
             }
             makeAjaxCallAsync("/author_posts",'POST',JSON.stringify(authorData),headers,
             function(response,status){
-                spinner.style.display = 'none';
                 $.each(response.posts, function(index, post) {
                     // console.log(post)
                     const postData = {
