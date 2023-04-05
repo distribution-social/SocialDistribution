@@ -111,53 +111,55 @@ export function addPostLikeEventListener(post,author){
 
 export function addCommentLikeEventListener(comment,author){
   const uuid = extractUUID(comment.id)
+  const data = {
+    type: 'like',
+    author,
+    summary: `${author.displayName} liked your comment`,
+    object: comment.id
+  }
   $(`#like-comment-${uuid}`).click(function(e) {
       e.preventDefault();
       const url = `${comment.author.url}/inbox`
       $.ajax({
-          type: 'POST',
-          url: url,
-          data: {
-              type: 'like',
-              author: author,
-              summary: `${author.displayName} liked your comment`,
-              object: comment.id
-          },
-          headers: {
-            Authorization: 'Basic '+comment.auth_token
-          },
-          // xhrFields: {
-          //   withCredentials: true
-          // },
-          success: function (result, statusText, xhr) {
-            showAndDismissAlert("info",result)
-            // console.log(result)
-            if(xhr.status == 201 || xhr.status == 200){
-              let value = parseInt($(`#like-count-${uuid}`).html());
-              value++;
-              $(`#like-count-${uuid}`).html(value);
-            }
-
-            showAndDismissAlert("info", result)
-
-          },
-          error: function (xhr, exception) {
-            let error_message = '';
-            if (xhr.status === 0) {
-              error_message = 'No connection to server. Check Network.';
-            } else if (xhr.status == 404) {
-              error_message = 'Requested page not found. [404]';
-            } else if (xhr.status == 500) {
-              error_message = 'Internal Server Error [500].';
-            } else if (exception === 'timeout') {
-              error_message = 'Timed out. Try again.';
-            } else if (exception === 'abort') {
-              error_message = 'Request aborted.';
-            } else {
-              error_message = 'Could not make request. ' + xhr.responseText;
-            }
-            showAndDismissAlert("error",error_message)
+        type: 'POST',
+        url: url,
+        data: JSON.stringify(data),
+        contentType: 'application/json',
+        headers: {
+          Authorization: 'Basic '+comment.auth_token,
+        },
+        // xhrFields: {
+        //   withCredentials: true
+        // },
+        success: function (result, statusText, xhr) {
+          showAndDismissAlert("info",result)
+          // console.log(result)
+          if(xhr.status == 201 || xhr.status == 200){
+            let value = parseInt($(`#like-count-${uuid}`).html());
+            value++;
+            $(`#like-count-${uuid}`).html(value);
           }
+
+          showAndDismissAlert("info", result)
+
+        },
+        error: function (xhr, exception) {
+          let error_message = '';
+          if (xhr.status === 0) {
+            error_message = 'No connection to server. Check Network.';
+          } else if (xhr.status == 404) {
+            error_message = 'Requested page not found. [404]';
+          } else if (xhr.status == 500) {
+            error_message = 'Internal Server Error [500].';
+          } else if (exception === 'timeout') {
+            error_message = 'Timed out. Try again.';
+          } else if (exception === 'abort') {
+            error_message = 'Request aborted.';
+          } else {
+            error_message = 'Could not make request. ' + xhr.responseText;
+          }
+          showAndDismissAlert("error",error_message)
+        }
       });
   }
   )
