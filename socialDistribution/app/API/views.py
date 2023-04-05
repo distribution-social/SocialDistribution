@@ -516,7 +516,9 @@ class InboxView(BasicAuthMixin,APIView):
                 actor_id = data.get('actor').get('url')
                 actor = Author.objects.get(url=actor_id)
             except Author.DoesNotExist:
-                actor = Author(username=uuid.uuid4(),confirmed=True)
+                foreign_uuid = actor_id.split("/")[-1]
+                actor = Author(username=uuid.UUID(
+                    foreign_uuid), confirmed=True)
                 authorSerializer = AuthorSerializer(actor,data.get('actor'))
                 if authorSerializer.is_valid():
                     authorSerializer.save()
