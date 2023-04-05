@@ -75,6 +75,8 @@ urlpatterns = [
     path('comment.html', template_views.get_comment_template, name='post_detail.html'),
 
     #Ajax Urls (returns JSON response)
+
+    path('nodes', ajax_views.get_foreign_nodes, name='nodes'),
     path('public_posts', ajax_views.public_posts, name='posts-explore'),
     path('public_authors', ajax_views.public_authors, name='authors-explore'),
     path('profile_authors/<str:author_id>', ajax_views.profile_authors, name='authors-profile'),

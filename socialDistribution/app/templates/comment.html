@@ -15,9 +15,9 @@
       <a class="d-inline-flex ms-3 text-muted" href="{% url 'profile' server_name=comment.author.host|get_server_name author_id=comment.author.url|extract_uuid %}" style="text-decoration: none;">
         {{comment.author.displayName}}
       </a>
-      <button id="like-comment-{{comment.uuid|extract_uuid|convert_uuid_to_hex}}" class="d-inline-flex text-muted like-button" style="text-decoration: none;">
+      <button id="like-comment-{{comment.uuid|extract_uuid}}" class="d-inline-flex text-muted like-button" style="text-decoration: none;">
         <i class="bi bi-heart mx-1" ></i>
-        <strong id="like-count-{{comment.uuid|extract_uuid|convert_uuid_to_hex}}">0</strong>
+        <strong id="like-count-{{comment.uuid|extract_uuid}}">0</strong>
       </button>
     </div>
     <div class="card-body">

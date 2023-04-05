@@ -10,7 +10,6 @@ from django.urls import reverse
 from django.contrib import messages
 from django.core.serializers import *
 import requests
-from django.core import serializers
 from django.http import JsonResponse
 import json
 from datetime import datetime, timezone
@@ -65,12 +64,12 @@ def make_http_calls(url_list):
     loop.close()
     return future.result()
 
+
 def get_authors():
     foreignNodes = ForeignAPINodes.objects.all()
     urls = []
     for foreignNode in foreignNodes:
         base_url = foreignNode.base_url
-        print(base_url)
         if foreignNode.username:
             headers = {
                     'Authorization': f"Basic {foreignNode.getToken()}",
@@ -94,6 +93,7 @@ def get_authors():
                 pass
     for author in authors:
         author['auth_token'] = get_auth_token(author['id'])
+        author['tag'] = get_node_nickname(author['host'])
     return authors
 
 def get_posts(authors):
@@ -190,6 +190,18 @@ def get_node_host(nickname):
     return foreignNode.base_url
 
 @require_http_methods(["GET"])
+def get_foreign_nodes(request):
+    foreignNodes = ForeignAPINodes.objects.all()
+    data = []
+    for node in foreignNodes:
+        data.append({
+            'base_url': node.base_url,
+            'token': node.getToken()
+        })
+
+    return JsonResponse({'nodes': json.dumps(data)})
+
+@require_http_methods(["GET"])
 def public_posts(request):
     authors = get_authors()
     posts = get_posts(authors)
@@ -206,9 +218,21 @@ def public_authors(request):
 
 @require_http_methods(["GET"])
 def home_authors(request):
-    authors = get_authors()
-    authors = filter_authors_following(request.user,authors)
-    return JsonResponse({'authors': authors})
+    try:
+        user = Author.objects.get(username=request.user.username)
+        authors = user.following.all()
+    except:
+        authors = []
+    final = []
+    for author in authors:
+        final.append({
+            'id': author.url,
+            'host': author.host,
+            'url': author.url,
+            'auth_token': get_auth_token(author.url),
+            'tag': get_node_nickname(author.host),
+        })
+    return JsonResponse({'authors': final})
 
 @require_http_methods(["GET"])
 def profile_authors(request,author_id):
@@ -249,9 +273,9 @@ def profile_posts(request,author_id):
     context = {'user': request.user,'posts': posts, "comment_form": CommentForm()}
     return JsonResponse({'posts': posts})
 
-@login_required(login_url="/login")
 @require_http_methods(["GET"])
 def post_details(request,node,author_id,post_id):
+    # import pdb; pdb.set_trace()
     url = urljoin(get_node_host(node),'authors',author_id,'posts',post_id)
     headers = {
         'Authorization': f"Basic {get_auth_token(get_node_host(node))}",
@@ -260,17 +284,43 @@ def post_details(request,node,author_id,post_id):
     try:
         res = requests.get(url, headers=headers)
         if res.status_code != 200:
-            raise Exception('Post not found.')
+            return HttpResponse('Post not found.')
     except Exception as e:
         response = JsonResponse({'error': str(e)})
         response.status_code = 500
         return response
     post = json.loads(res.text)
-    if not post.get('likeCount'):
-        post = get_like_count(post)
     post['tag'] = node
+    post['auth_token'] = get_auth_token(get_node_host(node))
     post['uuid'] = post['id'].split("/")[-1]
-    context = {'user': request.user,'post': post, "comment_form": CommentForm()}
+   
+
+    jsonFollowers = []
+    try:
+        current_user = Author.objects.get(username =  request.user.username)
+        followers = current_user.followers.all()
+
+        
+        for follower in followers:
+            foreignNode = get_foreign_API_node(follower.host)
+            # import pdb; pdb.set_trace()
+            auth_token = ''
+            if foreignNode.username:
+                auth_token = foreignNode.getToken()
+
+            jsonFollowers.append({
+                'obj': follower,
+                'auth_token': auth_token,
+                'url': follower.url
+            })
+
+    except Exception as e:
+        print("couldn't find author")
+        print(e)
+
+
+    context = {'user': request.user,'post': post,'post_json': json.dumps(post), 'followers': jsonFollowers, "comment_form": CommentForm()}
+
     return render(request,'post_detail.html',context)
 
 

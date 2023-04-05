@@ -95,17 +95,17 @@ function getAndSetProfileCard() {
         makeAjaxCallAsync(`/profile_authors/${author_id}`,"GET",null,headers,
         function (response,status){
             $.each(response.authors, function(index,author){
-                const authorData = {
-                    author: author,
-                    filter: ["PUBLIC"]
-                }
-                makeAjaxCallAsync(`/author_posts`,'POST',JSON.stringify(authorData),headers,
+                makeAjaxCallAsync(`${author.id}/posts`,'GET',null,{Authorization: 'Basic '+author.auth_token},
                 function(response,status){
                     spinner.style.display = 'none';
-                    $.each(response.posts, function(index, post) {
+                    const types = ["PUBLIC"]
+                    const posts = response.items.filter(item => types.includes(item.visibility)&& !Boolean(item.unlisted));
+                    $.each(posts, function(index, post) {
                         // console.log(post)
                         const postData = {
                             uuid: extractUUID(post.id),
+                            auth_token: author.auth_token,
+                            tag: author.tag,
                             ...post
                         }
                         postData.author.id = extractUUID(post.author.id)
@@ -116,15 +116,15 @@ function getAndSetProfileCard() {
                             .children()
                             // sort the object collection based on data-sort value
                             .sort(function(a, b) {
-                            // get difference for sorting based on number
-                            let first = new Date($(a).data('sort'))
-                            let sec = new Date($(b).data('sort'))
-                            return sec - first;
-                            // append back to parent for updating order
+                              // get difference for sorting based on number
+                              let first = new Date($(a).data('sort'))
+                              let sec = new Date($(b).data('sort'))
+                              return sec - first;
+                              // append back to parent for updating order
                             }).appendTo('#post-stream');
                             spinner.style.display = 'none';
                             getPostLikes(postData);
-                            getComments(postData);
+                            getComments(postData,current_author);
                             if(current_author != null){
                                 addPostLikeEventListener(postData,current_author)
                                 addDeletePostListener(postData.uuid)
@@ -142,7 +142,6 @@ function getAndSetProfileCard() {
                 })
             })
 
-
         },
         function (error,status){
             console.log(error)
@@ -153,6 +152,7 @@ function getAndSetProfileCard() {
     let authorIsFollowingUrl;
     if (author_host.includes("p2psd")) {
         authorIsFollowingUrl = new URL("authors/" + author_id + "/followers/" + user_id + "/", author_host);
+        console.log(authorIsFollowingUrl);
     } else if (author_host.includes("bigger-yoshi")){
         authorIsFollowingUrl = new URL("authors/" + author_id + "/followers/https://distribution.social/authors/" + user_id, author_host);
     } else {
@@ -166,20 +166,31 @@ function getAndSetProfileCard() {
             //console.log(temp);
             return temp;
         } else if (response.status === 404) {
+            console.log(response.status);
             return JSON.parse('{"is_following" : "false"}');
         } else {
             alert("Something went wrong: " + response.statusText);
         }
     }).then((data) => {
         //console.log(isFollowing);
-        console.log(data)
+        console.log("*****", data.approved === true);
         let is_following;
-        if (data.is_following != null && String(data.is_following).toLowerCase() === "true") is_following = true;
-        else if (data.accepted != null && String(data.accepted).toLowerCase() === "true") is_following = true;
-        else is_following = false;
+        if (data.is_following != null && String(data.is_following).toLowerCase() === "true"){
+            is_following = true;
+        } 
+        else if (data.accepted != null && String(data.accepted).toLowerCase() === "true"){
+            is_following = true;
+        }
+        else if (data.approved != null && data.approved === true){
+            is_following = true;
+        }
+        else {
+            is_following = false;
+        }
+        console.log("Current is_following....", is_following);
         if (is_following) {
             $("#follow_unfollow_button").attr("name", "unfollow").val(author_id).text("Unfollow");
-            
+
             if (author_host.includes("bigger-yoshi")){
                 fetch(authorProfileUrl, {method: "GET", redirect: "follow", headers: auth_headers}).then((response) => {
             if (response.status === 200) { // OK
@@ -193,7 +204,7 @@ function getAndSetProfileCard() {
                 const addToFollowingURL = new URL("add-to-following", `${window.location.protocol}//` + window.location.host);
 
                 const foreignAuthorObject = {user_id: user_id, author_id: author_id, foreign_user_object: data};
-                
+
                 fetch(addToFollowingURL, {
                     method: "POST",
                     redirect: "follow",
@@ -205,8 +216,8 @@ function getAndSetProfileCard() {
                 });
             })
         }
-            
-        
+
+
 
 
         } else {
@@ -380,7 +391,7 @@ function setFollowers(followers, user_id, author_id, author_host, nickname_table
             num++;
             const instance = document.importNode(cardTemplate.content, true);
             let uuid = extractUUID(follower.id);
-            
+
             if (follower.profileImage !== null && follower.profileImage !== "") $(instance).find(".follower_image").attr("src", follower.profileImage);
             if (follower.github) {
                 $(instance).find(".follower_github").attr("href", follower.github);
@@ -417,26 +428,26 @@ function setFriends(followers, author_id) {
             console.log(token_table[hostname]);
             if (token_table[hostname] != undefined) {
                 let auth_headers = new Headers({
-                    'Authorization': 'Basic '+ token_table[hostname], 
+                    'Authorization': 'Basic '+ token_table[hostname],
                     'Content-Type': 'application/json'
                 })
 
                 var url;
                 if (follower.host.includes("p2psd")) {
-                    if (follower.url.at(-1) == "/") 
+                    if (follower.url.at(-1) == "/")
                         url = new URL(follower.url + "followers/" + author_id + "/");
                     else
                         url = new URL(follower.url + "/followers/" + author_id + "/");
                 } else if (follower.host.includes("bigger-yoshi")){
                     //var url = new URL("authors/" + extractUUID(follower.id) + "/followers/" + author_id, author_host);
-                    if (follower.url.at(-1) == "/") 
+                    if (follower.url.at(-1) == "/")
                         url = new URL(follower.url + author_host + "authors/" + author_id);
                     else
                         url = new URL(follower.url + "/" + author_host + "authors/" + author_id);
                 } else {
-                    if (follower.url.at(-1) == "/") 
+                    if (follower.url.at(-1) == "/")
                         url = new URL(follower.url + "followers/" + uuidToHex(author_id));
-                    else 
+                    else
                         url = new URL(follower.url + "/followers/" + uuidToHex(author_id));
                 }
                 fetch(url, {method: "GET", headers: auth_headers,  redirect: "follow",}).then((response) => {
@@ -455,6 +466,7 @@ function setFriends(followers, author_id) {
                     let is_following;
                     if (data.is_following != null && String(data.is_following).toLowerCase() === "true") is_following = true;
                     else if (data.accepted != null && String(data.accepted).toLowerCase() === "true") is_following = true;
+                    else if (data.approved != null && data.approved === true) is_following = true;
                     else is_following = false;
                     if (is_following) {
                         const cardTemplate = document.getElementById('friends-card');
