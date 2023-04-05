@@ -26,7 +26,7 @@ $(document).ready(function() {
             makeAjaxCallAsync(`${author.id}/posts`,'GET',null,{Authorization: 'Basic '+author.auth_token},
             function(response,status){
                 spinner.style.display = 'none';
-                const posts = response.items.filter(item => item.visibility === "PUBLIC");
+                const posts = response.items.filter(item => item.visibility === "PUBLIC" && !Boolean(item.unlisted));
                 $.each(posts, function(index, post) {
                     // console.log(post)
                     const postData = {

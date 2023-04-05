@@ -99,7 +99,7 @@ function getAndSetProfileCard() {
                 function(response,status){
                     spinner.style.display = 'none';
                     const types = ["PUBLIC"]
-                    const posts = response.items.filter(item => types.includes(item.visibility));
+                    const posts = response.items.filter(item => types.includes(item.visibility)&& !Boolean(item.unlisted));
                     $.each(posts, function(index, post) {
                         // console.log(post)
                         const postData = {
