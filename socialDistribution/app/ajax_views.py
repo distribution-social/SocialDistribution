@@ -10,7 +10,6 @@ from django.urls import reverse
 from django.contrib import messages
 from django.core.serializers import *
 import requests
-from django.core import serializers
 from django.http import JsonResponse
 import json
 from datetime import datetime, timezone
@@ -65,12 +64,12 @@ def make_http_calls(url_list):
     loop.close()
     return future.result()
 
+
 def get_authors():
     foreignNodes = ForeignAPINodes.objects.all()
     urls = []
     for foreignNode in foreignNodes:
         base_url = foreignNode.base_url
-        print(base_url)
         if foreignNode.username:
             headers = {
                     'Authorization': f"Basic {foreignNode.getToken()}",
@@ -94,6 +93,7 @@ def get_authors():
                 pass
     for author in authors:
         author['auth_token'] = get_auth_token(author['id'])
+        author['tag'] = get_node_nickname(author['host'])
     return authors
 
 def get_posts(authors):
@@ -190,6 +190,18 @@ def get_node_host(nickname):
     return foreignNode.base_url
 
 @require_http_methods(["GET"])
+def get_foreign_nodes(request):
+    foreignNodes = ForeignAPINodes.objects.all()
+    data = []
+    for node in foreignNodes:
+        data.append({
+            'base_url': node.base_url,
+            'token': node.getToken()
+        })
+
+    return JsonResponse({'nodes': json.dumps(data)})
+
+@require_http_methods(["GET"])
 def public_posts(request):
     authors = get_authors()
     posts = get_posts(authors)
@@ -206,9 +218,21 @@ def public_authors(request):
 
 @require_http_methods(["GET"])
 def home_authors(request):
-    authors = get_authors()
-    authors = filter_authors_following(request.user,authors)
-    return JsonResponse({'authors': authors})
+    try:
+        user = Author.objects.get(username=request.user.username)
+        authors = user.following.all()
+    except:
+        authors = []
+    final = []
+    for author in authors:
+        final.append({
+            'id': author.url,
+            'host': author.host,
+            'url': author.url,
+            'auth_token': get_auth_token(author.url),
+            'tag': get_node_nickname(author.host),
+        })
+    return JsonResponse({'authors': final})
 
 @require_http_methods(["GET"])
 def profile_authors(request,author_id):

@@ -22,6 +22,8 @@ export function getComments(post){
   const comment_url = `${post.id}/comments?page=1&size=10`
   makeAjaxCallAsync(comment_url,'GET',null,{Authorization: 'Basic '+post.auth_token},
   function (response,status){
+    const count = response.comments.length
+    $(`#comment-count-${uuid}`).html(count)
     $.each(response.comments, function(index,comment){
       const commentData = {
         ...comment

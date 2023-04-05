@@ -23,17 +23,16 @@ $(document).ready(function() {
     makeAjaxCallAsync("/public_authors","GET",null,headers,
     function (response,status){
         $.each(response.authors, function(index,author){
-            const authorData = {
-                author: author,
-                filter: ["PUBLIC"]
-            }
-            makeAjaxCallAsync("/author_posts",'POST',JSON.stringify(authorData),headers,
+            makeAjaxCallAsync(`${author.id}/posts`,'GET',null,{Authorization: 'Basic '+author.auth_token},
             function(response,status){
                 spinner.style.display = 'none';
-                $.each(response.posts, function(index, post) {
+                const posts = response.items.filter(item => item.visibility === "PUBLIC");
+                $.each(posts, function(index, post) {
                     // console.log(post)
                     const postData = {
                         uuid: extractUUID(post.id),
+                        auth_token: author.auth_token,
+                        tag: author.tag,
                         ...post
                     }
                     postData.author.id = extractUUID(post.author.id)
