@@ -8,7 +8,8 @@
 
 {% block content %}
 
-<div id="my-data" data-my-data="{{ post }}"></div>
+<div id="my-data" data-my-data="{{ post_json }}"></div>
+<script type="module" src="{% static '../static/app/js/postDetails.js' %}"></script>
 <div id="post-detail" class="container-fluid d-flex align-items-center flex-column p-3" style="max-width: 1000px;">
     {% include "post_card.html" %}
 </div>

@@ -16,7 +16,7 @@ export function getPostLikes(post){
   })
 }
 
-export function getComments(post){
+export function getComments(post,author){
   const uuid = extractUUID(post.id)
   const comments = $(`#collapse_${uuid}`)
   const comment_url = `${post.id}/comments?page=1&size=10`
@@ -26,6 +26,7 @@ export function getComments(post){
     $(`#comment-count-${uuid}`).html(count)
     $.each(response.comments, function(index,comment){
       const commentData = {
+        uuid: extractUUID(comment.id),
         ...comment
       }
       let headers = {
@@ -37,6 +38,9 @@ export function getComments(post){
         new_com.classList.add('card-footer');
         new_com.innerHTML = response
         comments.append(new_com)
+        if(author != null){
+          addCommentLikeEventListener(commentData,author);
+        }
       },
       function (error,status){
         console.log(error)

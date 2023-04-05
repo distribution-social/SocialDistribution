@@ -124,7 +124,7 @@ function getAndSetProfileCard() {
                             }).appendTo('#post-stream');
                             spinner.style.display = 'none';
                             getPostLikes(postData);
-                            getComments(postData);
+                            getComments(postData,current_author);
                             if(current_author != null){
                                 addPostLikeEventListener(postData,current_author)
                                 addDeletePostListener(postData.uuid)

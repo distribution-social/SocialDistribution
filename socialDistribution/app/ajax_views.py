@@ -273,7 +273,6 @@ def profile_posts(request,author_id):
     context = {'user': request.user,'posts': posts, "comment_form": CommentForm()}
     return JsonResponse({'posts': posts})
 
-@login_required(login_url="/login")
 @require_http_methods(["GET"])
 def post_details(request,node,author_id,post_id):
     url = urljoin(get_node_host(node),'authors',author_id,'posts',post_id)
@@ -284,17 +283,16 @@ def post_details(request,node,author_id,post_id):
     try:
         res = requests.get(url, headers=headers)
         if res.status_code != 200:
-            raise Exception('Post not found.')
+            return HttpResponse('Post not found.')
     except Exception as e:
         response = JsonResponse({'error': str(e)})
         response.status_code = 500
         return response
     post = json.loads(res.text)
-    if not post.get('likeCount'):
-        post = get_like_count(post)
     post['tag'] = node
+    post['auth_token'] = get_auth_token(get_node_host(node))
     post['uuid'] = post['id'].split("/")[-1]
-    context = {'user': request.user,'post': post, "comment_form": CommentForm()}
+    context = {'user': request.user,'post': post,'post_json': json.dumps(post), "comment_form": CommentForm()}
     return render(request,'post_detail.html',context)
 
 
