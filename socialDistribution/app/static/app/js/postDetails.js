@@ -13,7 +13,6 @@ catch{
     current_author = null;
 }
 $(document).ready(function() {
-    $(`#collapse_${post.uuid}`).show()
     getPostLikes(post);
     getComments(post,current_author);
     if(current_author != null){
