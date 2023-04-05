@@ -1,6 +1,16 @@
+
+
 function sharePost(post) {
     // Get the form element
     // remove bad control characters
+    const myAuthorElement = document.getElementById('my-author');
+    let current_author = null
+    try{
+        current_author = JSON.parse(myAuthorElement.dataset.myAuthor);
+    }
+    catch{
+        current_author = null;
+    }
 
     let cleanedJsonStr = post.replace(/[\x00-\x1F\x7F-\x9F]/g, '');
 
@@ -11,6 +21,10 @@ function sharePost(post) {
     var selectedFollowers = [];
     var checkboxes = form.elements['follower'];
     var pendingRequests = 0;
+
+    parsedPost.author.id = parsedPost.author.url
+    parsedPost.source = current_author.url + "/posts/"  + parsedPost.uuid 
+
     const data = {
       ...parsedPost,
 
@@ -71,9 +85,27 @@ function sharePost(post) {
 
       }
 
+      for (var i = 0; i < checkboxes.length; i++)
+        checkboxes[i].checked = false;
+
     }
 
 
     // Do something with the selected followers
     console.log(selectedFollowers);
+}
+
+
+function closePostModal(post) {
+  let cleanedJsonStr = post.replace(/[\x00-\x1F\x7F-\x9F]/g, '');
+
+  let parsedPost = JSON.parse(cleanedJsonStr)
+  var form = document.getElementById(`share-form-${parsedPost.uuid}`);
+  var checkboxes = form.elements['follower'];
+  for (var i = 0; i < checkboxes.length; i++)
+        checkboxes[i].checked = false
+
+
+  $(`#share-post-modal-${parsedPost.uuid}`).modal('hide');
+
 }
