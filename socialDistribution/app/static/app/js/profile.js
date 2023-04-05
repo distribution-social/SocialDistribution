@@ -152,6 +152,7 @@ function getAndSetProfileCard() {
     let authorIsFollowingUrl;
     if (author_host.includes("p2psd")) {
         authorIsFollowingUrl = new URL("authors/" + author_id + "/followers/" + user_id + "/", author_host);
+        console.log(authorIsFollowingUrl);
     } else if (author_host.includes("bigger-yoshi")){
         authorIsFollowingUrl = new URL("authors/" + author_id + "/followers/https://distribution.social/authors/" + user_id, author_host);
     } else {
@@ -165,17 +166,28 @@ function getAndSetProfileCard() {
             //console.log(temp);
             return temp;
         } else if (response.status === 404) {
+            console.log(response.status);
             return JSON.parse('{"is_following" : "false"}');
         } else {
             alert("Something went wrong: " + response.statusText);
         }
     }).then((data) => {
         //console.log(isFollowing);
-        console.log(data)
+        console.log("*****", data.approved === true);
         let is_following;
-        if (data.is_following != null && String(data.is_following).toLowerCase() === "true") is_following = true;
-        else if (data.accepted != null && String(data.accepted).toLowerCase() === "true") is_following = true;
-        else is_following = false;
+        if (data.is_following != null && String(data.is_following).toLowerCase() === "true"){
+            is_following = true;
+        } 
+        else if (data.accepted != null && String(data.accepted).toLowerCase() === "true"){
+            is_following = true;
+        }
+        else if (data.approved != null && data.approved === true){
+            is_following = true;
+        }
+        else {
+            is_following = false;
+        }
+        console.log("Current is_following....", is_following);
         if (is_following) {
             $("#follow_unfollow_button").attr("name", "unfollow").val(author_id).text("Unfollow");
 
@@ -454,6 +466,7 @@ function setFriends(followers, author_id) {
                     let is_following;
                     if (data.is_following != null && String(data.is_following).toLowerCase() === "true") is_following = true;
                     else if (data.accepted != null && String(data.accepted).toLowerCase() === "true") is_following = true;
+                    else if (data.approved != null && data.approved === true) is_following = true;
                     else is_following = false;
                     if (is_following) {
                         const cardTemplate = document.getElementById('friends-card');
