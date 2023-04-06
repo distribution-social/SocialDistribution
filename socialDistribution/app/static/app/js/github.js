@@ -12,7 +12,7 @@ export function getGitHubUsername(github_url){
     } 
     catch(err) {
         // github_username = null;
-        console.log("Github is null");
+        github_username = null;
     }
     finally {  
         return github_username;

@@ -78,13 +78,19 @@ function getAndSetProfileCard() {
 
         try{
             var github_username = getGitHubUsername(data.github);
-            fetchActivitiesJSON(github_username).then(activities => {
+            if (github_username) {
+                fetchActivitiesJSON(github_username).then(activities => {
                 const target = document.getElementById("github_activity_stream");
                 for (var activity of activities) {
                 let html_element = createHTMLCard(activity.id, activity.link, activity.title, activity.published, activity.updated, activity.authors);
                 target.innerHTML += html_element;
                 }
             });
+            } else {
+                const target = document.getElementById("github_activity_stream");
+                target.innerHTML += "GitHub Information Is Unavailable";
+            }
+    
         }
         catch {
             console.log('Issue with github.')
