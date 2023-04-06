@@ -517,12 +517,18 @@ class InboxView(BasicAuthMixin,APIView):
                 actor = Author.objects.get(url=actor_id)
             except Author.DoesNotExist:
                 foreign_uuid = actor_id.split("/")[-1]
-                actor = Author(username=uuid.UUID(
-                    foreign_uuid), confirmed=True)
-                authorSerializer = AuthorSerializer(actor,data.get('actor'))
-                if authorSerializer.is_valid():
-                    authorSerializer.save()
-                else:
+                # actor = Author(username=uuid.UUID(
+                #     foreign_uuid), confirmed=True)
+                # # authorSerializer = AuthorSerializer(actor,data.get('actor'))
+                # # if authorSerializer.is_valid():
+                # #     authorSerializer.save()
+                actor_dict = dict(data.get('actor'))
+
+                try:
+                    actor = Author(id=uuid.UUID(foreign_uuid), host=actor_dict["host"], url=actor_dict["url"], displayName=actor_dict["displayName"],
+                                   github=actor_dict["github"], profileImage=actor_dict["profileImage"], username=uuid.UUID(foreign_uuid), confirmed=True)
+                    actor.save()
+                except:
                     return Response(authorSerializer.errors,status=status.HTTP_400_BAD_REQUEST)
             except AttributeError:
                 return Response("Bad request: needs actor:url field.",status=status.HTTP_400_BAD_REQUEST)
