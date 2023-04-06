@@ -1,5 +1,17 @@
 # SocialDistribution
 
+Web Service Coordination
+=================
+
+Web Service API & Documentation
+=================
+
+Test Cases
+=================
+
+AJAX Documentation
+=================
+
 Instruction
 =================
 To run: `python manage.py runserver`
