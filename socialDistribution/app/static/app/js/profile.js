@@ -242,7 +242,7 @@ function getAndSetProfileCard() {
         } 
         else if (is_pending){
             console.log("IS_PENDING---------------")
-             $("#follow_unfollow_button").attr('disabled', true).text("Pending Follow Request");
+            $("#follow_unfollow_button").attr('disabled', true).text("Pending Follow Request");
         }
         
         else {

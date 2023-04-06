@@ -11,7 +11,6 @@ export function getGitHubUsername(github_url){
         github_username = url_array[3];
     } 
     catch(err) {
-        // github_username = null;
         github_username = null;
     }
     finally {  
