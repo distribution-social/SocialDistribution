@@ -88,7 +88,7 @@ function getAndSetProfileCard() {
             });
             } else {
                 const target = document.getElementById("github_activity_stream");
-                target.innerHTML += "GitHub Information Is Unavailable";
+                target.innerHTML += `GitHub information for <b>${data.displayName}</b> is not available`;
             }
     
         }
