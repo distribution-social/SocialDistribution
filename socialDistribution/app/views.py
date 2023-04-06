@@ -791,6 +791,25 @@ def add_like_post(request, post_id):
 
 
 @login_required(login_url="/login")
+@require_http_methods(["GET"])
+def get_is_pending(request, author_id):
+    
+    current_author = Author.objects.get(username=request.user.username)
+    try:
+        author_to_search = Author.objects.get(id=author_id)
+    except:
+        return JsonResponse({'is_pending': False})
+    else:
+        sent_requests = current_author.sent_requests.all()
+
+        if author_to_search in sent_requests:
+            return JsonResponse({'is_pending': True})
+        else:
+            return JsonResponse({'is_pending': False})
+
+
+
+@login_required(login_url="/login")
 @require_http_methods(["POST"])
 def add_like_comment(request, post_id, comment_id):
     user = Author.objects.get(username=request.user.username)
