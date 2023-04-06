@@ -211,7 +211,7 @@ function getAndSetProfileCard() {
         }
         console.log("Current is_following....", is_following);
         if (is_following) {
-            $("#follow_unfollow_button").attr('disabled', true).text("Unfollow");
+            $("#follow_unfollow_button").attr('disabled', true).text("Following");
 
             if (author_host.includes("bigger-yoshi")){
                 fetch(authorProfileUrl, {method: "GET", redirect: "follow", headers: auth_headers}).then((response) => {
