@@ -611,8 +611,9 @@ def received_requests(request, author_id):
         if inbox:
             return redirect(reverse("inbox", kwargs={'author_id': convert_username_to_id(user.username)}))
         elif profile:
-            return redirect(reverse("profile", kwargs={'server_name': node.nickname, 'author_id': convert_username_to_id(user.username)}))
-        return redirect(reverse("requests", kwargs={'server_name': "Local", 'author_id': convert_username_to_id(user.username)}))
+            return redirect(reverse("profile", kwargs={'server_name': "Local", 'author_id': convert_username_to_id(user.username)}))
+        else:
+            return redirect(reverse("requests", kwargs={'server_name': "Local", 'author_id': convert_username_to_id(user.username)}))
 
 
 @login_required(login_url="/login")
