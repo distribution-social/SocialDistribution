@@ -70,6 +70,7 @@ function getAndSetProfileCard() {
             alert("Something went wrong: " + response.status);
         }
     }).then((data) => {
+        document.title = `Profile (${data.displayName})`;
         let profileCard = document.getElementById("profile_card");
         if (data.profileImage !== null && data.profileImage !== "") {$(profileCard).find(".profile_image").attr("src", data.profileImage);}
         $(profileCard).find(".profile_github").attr("href", data.github);
