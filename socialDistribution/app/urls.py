@@ -43,7 +43,7 @@ urlpatterns = [
     path('logout', views.signout, name='logout'),
     path('add-to-sent', views.add_to_sent_request, name='add-to-sent'),
     path('add-to-following', views.add_to_following, name='add-to-following'),
-
+    path('get-is-pending/<str:author_id>', views.get_is_pending, name='get-is-pending'),
 
     # path('posts', views.post_detail, name='post_detail'),
     path('posts/<str:node>/<str:author_id>/<str:post_id>', ajax_views.post_details, name='node-post-detail'),
