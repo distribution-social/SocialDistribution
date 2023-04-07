@@ -17,9 +17,18 @@ function sharePost(post) {
     let parsedPost = JSON.parse(cleanedJsonStr)
     var form = document.getElementById(`share-form-${parsedPost.uuid}`);
 
+
     // Get all selected followers
     var selectedFollowers = [];
-    var checkboxes = form.elements['follower'];
+    var elements = form.elements['follower'];
+    var checkboxes
+    if (!elements.length){
+      checkboxes = []
+      checkboxes.push(elements)
+    }
+    else{
+      checkboxes = elements
+    }
     var pendingRequests = 0;
 
     parsedPost.author.id = parsedPost.author.url
@@ -41,7 +50,6 @@ function sharePost(post) {
       ...parsedPost,
 
     }
-
     for (var i = 0; i < checkboxes.length; i++) {
       if (checkboxes[i].checked) {
         // selectedFollowers.push(checkboxes[i].value);
