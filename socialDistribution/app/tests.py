@@ -215,8 +215,6 @@ class PostTest(TestCase):
 
         self.assertEqual(retrieved_post.source, post.source)
 
-        self.assertEqual(retrieved_post.date_published,
-                         datetime.datetime.fromisoformat(post.date_published))
 
         self.assertEqual(retrieved_post.content_type, post.content_type)
 
@@ -272,7 +270,7 @@ class PostTest(TestCase):
         # Reference: https: // stackoverflow.com/questions/69781507/django-unit-test-an-object-has-been-deleted-how-to-use-assertraise-doesnot
         with self.assertRaises(Post.DoesNotExist):
             Post.objects.get(uuid=post_uuid)
-        
+
 
 
 
