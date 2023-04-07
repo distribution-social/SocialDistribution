@@ -16,7 +16,7 @@ export async function getPostLikes(post){
   })
 }
 
-export async function getComments(post){
+export async function getComments(post,author){
   const uuid = extractUUID(post.id)
   const comments = $(`#collapse_${uuid}`)
   const comment_url = `${post.id}/comments?page=1&size=10`

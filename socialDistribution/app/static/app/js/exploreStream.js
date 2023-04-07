@@ -48,9 +48,9 @@ $(document).ready(async function() {
                           return sec - first;
                           // append back to parent for updating order
                         }).appendTo('#post-stream');
-                    
+
                         await getPostLikes(postData);
-                        await getComments(postData);
+                        await getComments(postData,current_author);
                         if(current_author != null){
                             addPostLikeEventListener(postData,current_author)
                             addDeletePostListener(postData.uuid)
