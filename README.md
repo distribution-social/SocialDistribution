@@ -49,7 +49,7 @@ Test Cases
 =================
 We have test cases for API and Model testing.
 
-To run tests: `python manage.py tests`<br />
+To run tests: `python manage.py test`<br />
 
 These tests check if our API and models are working properly.<br />
 
@@ -75,7 +75,7 @@ Install the requirements:
 
 To run: `python manage.py runserver`
 
-To run tests: `python manage.py tests`
+To run tests: `python manage.py test`
 
 Deploying to Heroku
 =================
