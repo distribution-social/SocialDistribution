@@ -1,5 +1,6 @@
 from rest_framework.test import APITestCase,APIRequestFactory
 from rest_framework import status
+from .serializers import *
 from .views import *
 from django.urls import reverse
 from ..models import *
@@ -302,5 +303,164 @@ class Inbox(APITestCase):
       )
     self.author_list = create_authors(5)
     self.token = create_api_creds()
+    self.actor = self.author_list.first()
+    self.receiver = self.author_list.last()
 
+  def test_follow(self):
+    payload = {
+        "type": "Follow",
+        "summary":"Greg wants to follow you",
+        "actor":{
+            "type":"author",
+            "id":f"{self.actor.host}authors/{self.actor.id}",
+            "url":f"{self.actor.host}authors/{self.actor.id}",
+            "host":f"{self.actor.host}",
+            "displayName":f"{self.actor.displayName}",
+            "github": f"{self.actor.github}",
+            "profileImage": f"{self.actor.profileImage}"
+        },
+        "object": {
+            "type":"author",
+            "id":f"{self.receiver.host}authors/{self.receiver.id}",
+            "url":f"{self.receiver.host}authors/{self.receiver.id}",
+            "host":f"{self.receiver.host}",
+            "displayName":f"{self.receiver.displayName}",
+            "github": f"{self.receiver.github}",
+            "profileImage": f"{self.receiver.profileImage}"
+        }
+    }
+    kwargs = {
+      'author_id': self.receiver.id,
+    }
+    header = {
+      'HTTP_AUTHORIZATION': f'Basic {self.token}'
+    }
+    response = self.client.post(reverse('api-author-inbox',kwargs=kwargs),payload,format='json',**header)
+    self.assertEquals(response.status_code,status.HTTP_201_CREATED)
+    self.assertEquals(len(self.receiver.my_inbox.all()),1)
 
+  def test_post(self):
+    payload = {
+        "type":"post",
+        # title of a post
+        "title":"A post title about a post about web dev",
+        # id of the post
+        "id":"http://127.0.0.1:5454/authors/9de17f29c12e8f97bcbbd34cc908f1baba40658e/posts/764efa883dda1e11db47671c4a3bbd9e",
+        # where did you get this post from?
+        "source":"http://lastplaceigotthisfrom.com/posts/yyyyy",
+        # where is it actually from
+        "origin":"http://whereitcamefrom.com/posts/zzzzz",
+        # a brief description of the post
+        "description":"This post discusses stuff -- brief",
+        # The content type of the post
+        # assume either
+        # text/markdown -- common mark
+        # text/plain -- UTF-8
+        # application/base64
+        # image/png;base64 # this is an embedded png -- images are POSTS. So you might have a user make 2 posts if a post includes an image!
+        # image/jpeg;base64 # this is an embedded jpeg
+        # for HTML you will want to strip tags before displaying
+        "contentType":"text/plain",
+        "content":"Þā wæs on burgum Bēowulf Scyldinga, lēof lēod-cyning, longe þrāge folcum gefrǣge (fæder ellor hwearf, aldor of earde), oð þæt him eft onwōc hēah Healfdene; hēold þenden lifde, gamol and gūð-rēow, glæde Scyldingas. Þǣm fēower bearn forð-gerīmed in worold wōcun, weoroda rǣswan, Heorogār and Hrōðgār and Hālga til; hȳrde ic, þat Elan cwēn Ongenþēowes wæs Heaðoscilfinges heals-gebedde. Þā wæs Hrōðgāre here-spēd gyfen, wīges weorð-mynd, þæt him his wine-māgas georne hȳrdon, oð þæt sēo geogoð gewēox, mago-driht micel. Him on mōd bearn, þæt heal-reced hātan wolde, medo-ærn micel men gewyrcean, þone yldo bearn ǣfre gefrūnon, and þǣr on innan eall gedǣlan geongum and ealdum, swylc him god sealde, būton folc-scare and feorum gumena. Þā ic wīde gefrægn weorc gebannan manigre mǣgðe geond þisne middan-geard, folc-stede frætwan. Him on fyrste gelomp ǣdre mid yldum, þæt hit wearð eal gearo, heal-ærna mǣst; scōp him Heort naman, sē þe his wordes geweald wīde hæfde. Hē bēot ne ālēh, bēagas dǣlde, sinc æt symle. Sele hlīfade hēah and horn-gēap: heaðo-wylma bād, lāðan līges; ne wæs hit lenge þā gēn þæt se ecg-hete āðum-swerian 85 æfter wæl-nīðe wæcnan scolde. Þā se ellen-gǣst earfoðlīce þrāge geþolode, sē þe in þȳstrum bād, þæt hē dōgora gehwām drēam gehȳrde hlūdne in healle; þǣr wæs hearpan swēg, swutol sang scopes. Sægde sē þe cūðe frum-sceaft fīra feorran reccan",
+        # the author has an ID where by authors can be disambiguated
+        "author":{
+            "type":"author",
+            "id":f"{self.actor.host}authors/{self.actor.id}",
+            "url":f"{self.actor.host}authors/{self.actor.id}",
+            "host":f"{self.actor.host}",
+            "displayName":f"{self.actor.displayName}",
+            "github": f"{self.actor.github}",
+            "profileImage": f"{self.actor.profileImage}"
+        },
+        # categories this post fits into (a list of strings
+        "categories":["web","tutorial"],
+        # comments about the post
+        # return a maximum number of comments
+        # total number of comments for this post
+        "count": 1023,
+        # the first page of comments
+        "comments":"http://127.0.0.1:5454/authors/9de17f29c12e8f97bcbbd34cc908f1baba40658e/posts/de305d54-75b4-431b-adb2-eb6b9e546013/comments",
+        # ISO 8601 TIMESTAMP
+        "published":"2015-03-09T13:07:04+00:00",
+        # visibility ["PUBLIC","FRIENDS"]
+        "visibility":"PUBLIC",
+        # for visibility PUBLIC means it is open to the wild web
+        # FRIENDS means if we're direct friends I can see the post
+        # FRIENDS should've already been sent the post so they don't need this
+        "unlisted":False
+        # unlisted means it is public if you know the post name -- use this for images, it's so images don't show up in timelines
+    }
+    kwargs = {
+      'author_id': self.receiver.id,
+    }
+    header = {
+      'HTTP_AUTHORIZATION': f'Basic {self.token}'
+    }
+    response = self.client.post(reverse('api-author-inbox',kwargs=kwargs),payload,format='json',**header)
+    self.assertEquals(response.status_code,status.HTTP_201_CREATED)
+    self.assertEquals(len(self.receiver.my_inbox.all()),1)
+    self.assertEquals(self.receiver.my_inbox.all().first().object.type,'post')
+    self.assertEquals(self.receiver.my_inbox.all().first().object.content_object.title,'A post title about a post about web dev')
+
+  def test_comment(self):
+    payload = {
+        "type":"post",
+        # title of a post
+        "title":"A post title about a post about web dev",
+        # id of the post
+        "id":"http://127.0.0.1:5454/authors/9de17f29c12e8f97bcbbd34cc908f1baba40658e/posts/764efa883dda1e11db47671c4a3bbd9e",
+        # where did you get this post from?
+        "source":"http://lastplaceigotthisfrom.com/posts/yyyyy",
+        # where is it actually from
+        "origin":"http://whereitcamefrom.com/posts/zzzzz",
+        # a brief description of the post
+        "description":"This post discusses stuff -- brief",
+        # The content type of the post
+        # assume either
+        # text/markdown -- common mark
+        # text/plain -- UTF-8
+        # application/base64
+        # image/png;base64 # this is an embedded png -- images are POSTS. So you might have a user make 2 posts if a post includes an image!
+        # image/jpeg;base64 # this is an embedded jpeg
+        # for HTML you will want to strip tags before displaying
+        "contentType":"text/plain",
+        "content":"Þā wæs on burgum Bēowulf Scyldinga, lēof lēod-cyning, longe þrāge folcum gefrǣge (fæder ellor hwearf, aldor of earde), oð þæt him eft onwōc hēah Healfdene; hēold þenden lifde, gamol and gūð-rēow, glæde Scyldingas. Þǣm fēower bearn forð-gerīmed in worold wōcun, weoroda rǣswan, Heorogār and Hrōðgār and Hālga til; hȳrde ic, þat Elan cwēn Ongenþēowes wæs Heaðoscilfinges heals-gebedde. Þā wæs Hrōðgāre here-spēd gyfen, wīges weorð-mynd, þæt him his wine-māgas georne hȳrdon, oð þæt sēo geogoð gewēox, mago-driht micel. Him on mōd bearn, þæt heal-reced hātan wolde, medo-ærn micel men gewyrcean, þone yldo bearn ǣfre gefrūnon, and þǣr on innan eall gedǣlan geongum and ealdum, swylc him god sealde, būton folc-scare and feorum gumena. Þā ic wīde gefrægn weorc gebannan manigre mǣgðe geond þisne middan-geard, folc-stede frætwan. Him on fyrste gelomp ǣdre mid yldum, þæt hit wearð eal gearo, heal-ærna mǣst; scōp him Heort naman, sē þe his wordes geweald wīde hæfde. Hē bēot ne ālēh, bēagas dǣlde, sinc æt symle. Sele hlīfade hēah and horn-gēap: heaðo-wylma bād, lāðan līges; ne wæs hit lenge þā gēn þæt se ecg-hete āðum-swerian 85 æfter wæl-nīðe wæcnan scolde. Þā se ellen-gǣst earfoðlīce þrāge geþolode, sē þe in þȳstrum bād, þæt hē dōgora gehwām drēam gehȳrde hlūdne in healle; þǣr wæs hearpan swēg, swutol sang scopes. Sægde sē þe cūðe frum-sceaft fīra feorran reccan",
+        # the author has an ID where by authors can be disambiguated
+        "author":{
+            "type":"author",
+            "id":f"{self.actor.host}authors/{self.actor.id}",
+            "url":f"{self.actor.host}authors/{self.actor.id}",
+            "host":f"{self.actor.host}",
+            "displayName":f"{self.actor.displayName}",
+            "github": f"{self.actor.github}",
+            "profileImage": f"{self.actor.profileImage}"
+        },
+        # categories this post fits into (a list of strings
+        "categories":["web","tutorial"],
+        # comments about the post
+        # return a maximum number of comments
+        # total number of comments for this post
+        "count": 1023,
+        # the first page of comments
+        "comments":"http://127.0.0.1:5454/authors/9de17f29c12e8f97bcbbd34cc908f1baba40658e/posts/de305d54-75b4-431b-adb2-eb6b9e546013/comments",
+        # ISO 8601 TIMESTAMP
+        "published":"2015-03-09T13:07:04+00:00",
+        # visibility ["PUBLIC","FRIENDS"]
+        "visibility":"PUBLIC",
+        # for visibility PUBLIC means it is open to the wild web
+        # FRIENDS means if we're direct friends I can see the post
+        # FRIENDS should've already been sent the post so they don't need this
+        "unlisted":False
+        # unlisted means it is public if you know the post name -- use this for images, it's so images don't show up in timelines
+    }
+    kwargs = {
+      'author_id': self.receiver.id,
+    }
+    header = {
+      'HTTP_AUTHORIZATION': f'Basic {self.token}'
+    }
+    response = self.client.post(reverse('api-author-inbox',kwargs=kwargs),payload,format='json',**header)
+    self.assertEquals(response.status_code,status.HTTP_201_CREATED)
+    self.assertEquals(len(self.receiver.my_inbox.all()),1)
+    self.assertEquals(self.receiver.my_inbox.all().first().object.type,'post')
+    self.assertEquals(self.receiver.my_inbox.all().first().object.content_object.title,'A post title about a post about web dev')

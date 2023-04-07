@@ -14,7 +14,6 @@ catch{
 const spinner = document.getElementById("spinner2")
 // fetches the post when document loads.
 $(document).ready(function() {
-    // console.log('{{ csrf_token|length }}');
 
     spinner.style.display = 'block';
     var headers = {
@@ -29,7 +28,6 @@ $(document).ready(function() {
                 const types = ["PUBLIC","FRIENDS"]
                 const posts = response.items.filter(item => types.includes(item.visibility)&& !Boolean(item.unlisted));
                 $.each(posts, function(index, post) {
-                    // console.log(post)
                     const postData = {
                         uuid: extractUUID(post.id),
                         auth_token: author.auth_token,
@@ -39,7 +37,6 @@ $(document).ready(function() {
                     postData.author.id = extractUUID(post.author.id)
                     makeAjaxCallAsync('/post_card.html','POST',JSON.stringify(postData),headers,
                     function(response,status){
-                        // console.log(`<div data-sort=${postData['published']}>${response}</div>`)
                         $('#post-stream').append(`<div style="width: 100%" data-sort=${postData['published']}>${response}</div>`)
                         .children()
                         // sort the object collection based on data-sort value
@@ -60,19 +57,19 @@ $(document).ready(function() {
 
                     },
                     function (error,status){
-                        console.log(error)
+                        // console.log(error)
                     })
                 });
 
             },
             function(error,status){
-                console.log(error);
+                // console.log(error);
             })
         })
 
 
     },
     function (error,status){
-        console.log(error)
+        // console.log(error)
     });
 });

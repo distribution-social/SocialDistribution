@@ -75,5 +75,5 @@ function sharePost(post) {
 
 
     // Do something with the selected followers
-    console.log(selectedFollowers);
+    // console.log(selectedFollowers);
 }

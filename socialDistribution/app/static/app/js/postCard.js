@@ -12,7 +12,7 @@ export function getPostLikes(post){
     like_count.html(count);
   },
   function (error,status){
-    console.log(error)
+    // console.log(error)
   })
 }
 
@@ -34,7 +34,7 @@ export function getComments(post,author){
         comments_list = response.items;
       }
       catch{
-        console.log('Issue getting count');
+        // console.log('Issue getting count');
       }
 
     }
@@ -58,12 +58,12 @@ export function getComments(post,author){
         }
       },
       function (error,status){
-        console.log(error)
+        // console.log(error)
       })
     })
   },
   function (error,status){
-    console.log(error)
+    // console.log(error)
   })
 }
 
@@ -143,12 +143,8 @@ export function addCommentLikeEventListener(comment,author){
         headers: {
           Authorization: 'Basic '+comment.auth_token,
         },
-        // xhrFields: {
-        //   withCredentials: true
-        // },
         success: function (result, statusText, xhr) {
           showAndDismissAlert("info",result)
-          // console.log(result)
           if(xhr.status == 201 || xhr.status == 200){
             let value = parseInt($(`#like-count-${uuid}`).html());
             value++;
@@ -181,9 +177,7 @@ export function addCommentLikeEventListener(comment,author){
 }
 
 export function addDeletePostListener(uuid){
-    // console.log(uuid)
   $(`#delete-post-${uuid}`).on('click', function(event) {
-    // console.log("Like button clicked")
     event.preventDefault();
     const url = `delete-post/${uuid}/`
     var postId = $(this).attr('id').replace('delete-post-', '');
