@@ -25,6 +25,18 @@ function sharePost(post) {
     parsedPost.author.id = parsedPost.author.url
     parsedPost.source = current_author.url + "/posts/"  + parsedPost.uuid 
 
+    const now = new Date();
+    const year = now.getUTCFullYear();
+    const month = now.getUTCMonth() + 1; // Month is zero-indexed, so add 1
+    const day = now.getUTCDate();
+    const hours = now.getUTCHours();
+    const minutes = now.getUTCMinutes();
+    const seconds = now.getUTCSeconds();
+    const milliseconds = now.getUTCMilliseconds();
+
+    const formattedDate = `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}T${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}.${milliseconds.toString().padStart(6, '0')}Z`;
+    parsedPost.published = formattedDate; // shared date
+
     const data = {
       ...parsedPost,
 
