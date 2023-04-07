@@ -61,7 +61,7 @@ class PostSerializer(serializers.ModelSerializer):
         request = self.context.get('request')
         kwargs = self.context.get('kwargs')
         kwargs = {
-            'author_id':kwargs.get('author_id'),
+            'author_id':instance.made_by.id,
             'post_id':instance.uuid
         }
 
