@@ -164,7 +164,7 @@ function getAndSetProfileCard() {
         authorIsFollowingUrl = new URL("authors/" + author_id + "/followers/https://www.distribution.social/api/authors/" + user_id, author_host);
         // console.log("|||||||||||||||||||||", authorIsFollowingUrl);
     } else {
-        authorIsFollowingUrl = new URL("authors/" + uuidToHex(author_id) + "/followers/" + uuidToHex(user_id), author_host);
+        authorIsFollowingUrl = new URL("authors/" + uuidToHex(author_id) + "/followers/" + user_id, author_host);
     }
 
     const authorIsPendingURL = new URL("get-is-pending/" + author_id, `${window.location.protocol}//` + window.location.host);
