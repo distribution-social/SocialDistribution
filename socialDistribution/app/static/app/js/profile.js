@@ -19,13 +19,9 @@ catch{
 }
 
 $(document).ready(function() {
-    // console.log("host:"+author_host);
-    // console.log(auth_headers)
 
     getAndSetProfileCard();
     //setFollowing(serialized_followings, user_id, author_id, author_host);
-
-
 
     // get followers from server and use data to set followers and true friends
     var followersUrl;
@@ -139,19 +135,19 @@ function getAndSetProfileCard() {
 
                         },
                         function (error,status){
-                            console.log(error)
+                            // console.log(error)
                         })
                     });
 
                 },
                 function(error,status){
-                    console.log(error);
+                    // console.log(error);
                 })
             })
 
         },
         function (error,status){
-            console.log(error)
+            // console.log(error)
         });
         return;
     })
@@ -159,7 +155,6 @@ function getAndSetProfileCard() {
     let authorIsFollowingUrl;
     if (author_host.includes("p2psd")) {
         authorIsFollowingUrl = new URL("authors/" + author_id + "/followers/" + user_id + "/", author_host);
-        console.log(authorIsFollowingUrl);
     } else if (author_host.includes("bigger-yoshi")){
         authorIsFollowingUrl = new URL("authors/" + author_id + "/followers/https://www.distribution.social/api/authors/" + user_id, author_host);
         // console.log("|||||||||||||||||||||", authorIsFollowingUrl);
@@ -177,24 +172,20 @@ function getAndSetProfileCard() {
   
 
     fetch(authorIsFollowingUrl, {method: "GET", redirect: "follow", headers: auth_headers}).then((response) => {
-        // console.log(response.json().is_following);
+
         if (response.status === 200) { // OK
             let temp = response.json();
-            //console.log(temp);
             return temp;
         } else if (response.status === 404) {
-            console.log(response.status);
             return JSON.parse('{"is_following" : "false"}');
         } else {
             alert("Something went wrong: " + response.statusText);
         }
     }).then((data) => {
-        //console.log(isFollowing);
-        console.log("*****", data.approved === true);
         let is_following;
         if (data.is_following != null && String(data.is_following).toLowerCase() === "true"){
             is_following = true;
-        } 
+        }
         else if (data.accepted != null && String(data.accepted).toLowerCase() === "true"){
             is_following = true;
         }
@@ -210,7 +201,6 @@ function getAndSetProfileCard() {
         else {
             is_following = false;
         }
-        console.log("Current is_following....", is_following);
         if (is_following) {
             $("#follow_unfollow_button").attr('disabled', true).text("Following");
 
@@ -222,7 +212,6 @@ function getAndSetProfileCard() {
                 alert("Something went wrong: " + response.status);
             }
             }).then((data) => {
-                console.log("dataaaaaaaa", data);
 
                 const addToFollowingURL = new URL("add-to-following", `${window.location.protocol}//` + window.location.host);
 
@@ -305,7 +294,6 @@ function sendFollowRequestToInbox(e){
 
             var author_first_name = author_name_list[0];
 
-            console.log(user_first_name, author_first_name);
 
             follow_object.summary = `${user_first_name} wants to follow ${author_first_name}`
 
@@ -338,7 +326,7 @@ function sendFollowRequestToInbox(e){
                 redirect: "follow",
                 body: JSON.stringify(follow_object)
             }).then(response => {
-                console.log("-------------Response: ", response.status);
+                // console.log("-------------Response: ", response.status);
             })
 
             const addToSentRequestURL = new URL("add-to-sent", `${window.location.protocol}//` + window.location.host);
@@ -453,7 +441,6 @@ function setFriends(followers, author_id) {
         for (let follower of followers) {
             let hostUrl = new URL (follower.host);
             let hostname = hostUrl.hostname;
-            console.log(token_table[hostname]);
             if (token_table[hostname] != undefined) {
                 let auth_headers = new Headers({
                     'Authorization': 'Basic '+ token_table[hostname],
@@ -490,7 +477,6 @@ function setFriends(followers, author_id) {
                     }
                 }).then((data) => {
                     //console.log(isFollowing);
-                    console.log(data)
                     let is_following;
                     if (data.is_following != null && String(data.is_following).toLowerCase() === "true") is_following = true;
                     else if (data.accepted != null && String(data.accepted).toLowerCase() === "true") is_following = true;

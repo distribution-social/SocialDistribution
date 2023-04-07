@@ -60,20 +60,20 @@ $(document).ready(async function() {
 
                     },
                     function (error,status){
-                        console.log(error)
+                        // console.log(error)
                     })
                 });
 
             },
             function(error,status){
-                console.log(error);
+                // console.log(error);
             })
         })
 
 
     },
     function (error,status){
-        console.log(error)
+        // console.log(error)
     });
 });
 

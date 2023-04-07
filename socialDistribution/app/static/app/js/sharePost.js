@@ -23,7 +23,7 @@ function sharePost(post) {
     var pendingRequests = 0;
 
     parsedPost.author.id = parsedPost.author.url
-    parsedPost.source = current_author.url + "/posts/"  + parsedPost.uuid 
+    parsedPost.source = current_author.url + "/posts/"  + parsedPost.uuid
 
     const now = new Date();
     const year = now.getUTCFullYear();
@@ -104,7 +104,7 @@ function sharePost(post) {
 
 
     // Do something with the selected followers
-    console.log(selectedFollowers);
+    //console.log(selectedFollowers);
 }
 
 

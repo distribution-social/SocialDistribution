@@ -4,16 +4,17 @@ export async function fetchActivitiesJSON(username) {
   return activities;
 }
 
+//gets the gtihub username
 export function getGitHubUsername(github_url){
     let github_username;
     try {
         const url_array = github_url.split("/");
         github_username = url_array[3];
-    } 
+    }
     catch(err) {
         github_username = null;
     }
-    finally {  
+    finally {
         return github_username;
     }
 }
@@ -45,6 +46,7 @@ function formatTitle(title){
     return capitalized;
 }
 
+//create the html for each github event
 export function createHTMLCard(event, link, title, published, updated, authors) {
 
     let html_element = `

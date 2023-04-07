@@ -502,10 +502,10 @@ class InboxView(BasicAuthMixin,APIView):
 
         """Adds the given object to the author\'s {author_id} inbox.
         Objects can be of type \'post\', \'follow\', \'comment\' or \'like\'"""
-        
+
         # import pdb; pdb.set_trace()
         data = json.loads(request.body.decode('utf-8'))
-        
+
         try:
             author = Author.objects.get(id=author_id)
         except Author.DoesNotExist:
@@ -513,22 +513,17 @@ class InboxView(BasicAuthMixin,APIView):
 
         if str(data.get('type')).lower() == 'follow':
             try:
-                actor_id = data.get('actor').get('url')
-                actor = Author.objects.get(url=actor_id)
+                actor_id = parse_values(request.data.get('actor').get('id')).get('author_id')
+                actor = Author.objects.get(id=actor_id)
             except Author.DoesNotExist:
-                foreign_uuid = actor_id.split("/")[-1]
-                # actor = Author(username=uuid.UUID(
-                #     foreign_uuid), confirmed=True)
-                # # authorSerializer = AuthorSerializer(actor,data.get('actor'))
-                # # if authorSerializer.is_valid():
-                # #     authorSerializer.save()
-                actor_dict = dict(data.get('actor'))
-
-                try:
-                    actor = Author(id=uuid.UUID(foreign_uuid), host=actor_dict["host"], url=actor_dict["url"], displayName=actor_dict["displayName"],
-                                   github=actor_dict["github"], profileImage=actor_dict["profileImage"], username=uuid.UUID(foreign_uuid), confirmed=True)
-                    actor.save()
-                except:
+                foreign_uuid = actor_id
+                actor = Author(id=uuid.UUID(
+                    foreign_uuid),username=uuid.UUID(
+                    foreign_uuid), confirmed=True)
+                authorSerializer = AuthorSerializer(actor,data.get('actor'))
+                if authorSerializer.is_valid():
+                    authorSerializer.save()
+                else:
                     return Response(authorSerializer.errors,status=status.HTTP_400_BAD_REQUEST)
             except AttributeError:
                 return Response("Bad request: needs actor:url field.",status=status.HTTP_400_BAD_REQUEST)
@@ -546,17 +541,20 @@ class InboxView(BasicAuthMixin,APIView):
                 return Response({'error': str(e)},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         elif str(data.get('type')).lower() == 'post':
             try:
-                actor_id = data.get('author').get('url')
-                actor = Author.objects.get(url=actor_id)
+                actor_id = parse_values(request.data.get('author').get('id')).get('author_id')
+                actor = Author.objects.get(id=actor_id)
             except Author.DoesNotExist:
-                actor = Author(username=uuid.uuid4(),confirmed=True)
+                foreign_uuid = actor_id
+                actor = Author(id=uuid.UUID(
+                    foreign_uuid),username=uuid.UUID(
+                    foreign_uuid), confirmed=True)
                 authorSerializer = AuthorSerializer(actor,data.get('author'))
                 if authorSerializer.is_valid():
                     authorSerializer.save()
                 else:
                     return Response(authorSerializer.errors,status=status.HTTP_400_BAD_REQUEST)
             except AttributeError:
-                return Response("Bad request: needs author:url field.",status=status.HTTP_400_BAD_REQUEST)
+                return Response("Bad request: needs actor:url field.",status=status.HTTP_400_BAD_REQUEST)
 
 
             try:
@@ -584,25 +582,26 @@ class InboxView(BasicAuthMixin,APIView):
             # We add ourselves to the object's followers
 
             try:
-                # The foreign author which accepted us
-                object_url = data.get('object').get('url')
-                object = Author.objects.get(url=object_url)
-            
+                actor_id = parse_values(request.data.get('object').get('id')).get('author_id')
+                object = Author.objects.get(id=actor_id)
             except Author.DoesNotExist:
-                object = Author(username=uuid.uuid4(),confirmed=True)
-                objectSerializer = AuthorSerializer(object,data.get('object'))
-                if objectSerializer.is_valid():
-                    objectSerializer.save()
+                foreign_uuid = actor_id
+                object = Author(id=uuid.UUID(
+                    foreign_uuid),username=uuid.UUID(
+                    foreign_uuid), confirmed=True)
+                authorSerializer = AuthorSerializer(object,data.get('object'))
+                if authorSerializer.is_valid():
+                    authorSerializer.save()
                 else:
-                    return Response(objectSerializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                    return Response(authorSerializer.errors,status=status.HTTP_400_BAD_REQUEST)
             except AttributeError:
                 return Response("Bad request: needs actor:url field.",status=status.HTTP_400_BAD_REQUEST)
-            
+
             try:
                 if object not in author.following.all():
                     # Add our current author as one of the object's followers
                     object.followers.add(author)
-                    
+
                     # Add the object as one of our current author's following
                     author.following.add(object)
 
@@ -619,7 +618,7 @@ class InboxView(BasicAuthMixin,APIView):
                     # add_to_inbox(actor, author, 'accept', actor)
 
                     return Response(f"Already following {object.displayName}", status=status.HTTP_400_BAD_REQUEST)
-                
+
             except Exception as e:
                 return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -627,17 +626,20 @@ class InboxView(BasicAuthMixin,APIView):
         elif str(data.get('type')).lower() == 'comment':
 
             try:
-                actor_id = data.get('author').get('url')
-                actor = Author.objects.get(url=actor_id)
+                actor_id = parse_values(request.data.get('author').get('id')).get('author_id')
+                actor = Author.objects.get(id=actor_id)
             except Author.DoesNotExist:
-                actor = Author(username=uuid.uuid4(),confirmed=True)
+                foreign_uuid = actor_id
+                actor = Author(id=uuid.UUID(
+                    foreign_uuid),username=uuid.UUID(
+                    foreign_uuid), confirmed=True)
                 authorSerializer = AuthorSerializer(actor,data.get('author'))
                 if authorSerializer.is_valid():
                     authorSerializer.save()
                 else:
                     return Response(authorSerializer.errors,status=status.HTTP_400_BAD_REQUEST)
             except AttributeError:
-                return Response("Bad request: needs author:url field.",status=status.HTTP_400_BAD_REQUEST)
+                return Response("Bad request: needs actor:url field.",status=status.HTTP_400_BAD_REQUEST)
 
 
             try:
@@ -667,23 +669,26 @@ class InboxView(BasicAuthMixin,APIView):
         elif str(data.get('type')).lower() == 'like':
             try:
                 kwargs = parse_values(data.get('object'))
-                actor_kwargs = parse_values(data.get('author').get('url'))
+                actor_kwargs = parse_values(data.get('author').get('id'))
             except AttributeError:
                 return Response("Bad request: need object and author:url fields.",status=status.HTTP_400_BAD_REQUEST)
 
 
             try:
-                actor_id = data.get('author').get('url')
-                actor = Author.objects.get(url=actor_id)
+                actor_id = actor_kwargs.get('author_id')
+                actor = Author.objects.get(id=actor_id)
             except Author.DoesNotExist:
-                actor = Author(username=uuid.uuid4(),confirmed=True)
+                foreign_uuid = actor_id
+                actor = Author(id=uuid.UUID(
+                    foreign_uuid),username=uuid.UUID(
+                    foreign_uuid), confirmed=True)
                 authorSerializer = AuthorSerializer(actor,data.get('author'))
                 if authorSerializer.is_valid():
                     authorSerializer.save()
                 else:
                     return Response(authorSerializer.errors,status=status.HTTP_400_BAD_REQUEST)
             except AttributeError:
-                return Response("Bad request: need author:url field.",status=status.HTTP_400_BAD_REQUEST)
+                return Response("Bad request: needs actor:url field.",status=status.HTTP_400_BAD_REQUEST)
 
 
             try:
