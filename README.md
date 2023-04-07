@@ -45,10 +45,6 @@ our site.<br />
 
 Our API Document is available on https://www.distribution.social/swagger
 
-To install dependencies: `python pip install -r requirements.txt`<br />
-
-To run locally: `python manage.py runserver`<br />
-
 Test Cases
 =================
 We have test cases for API and Model testing.
