@@ -1,6 +1,14 @@
 # SocialDistribution
 
 
+Our Web Service
+=================
+
+Located at: https://www.distribution.social/<br />
+API at: https://www.distribution.social/api/<br />
+AUTHORIZATION: BASIC <br />
+username: server1<br />
+password: 123<br /><br />
 
 Web Service Coordination
 =================
@@ -32,9 +40,23 @@ Web Service API & Documentation
 =================
 Our API Document is available on https://www.distribution.social/swagger
 
+To install dependencies: `python pip install -r requirements.txt`<br />
+
+To run locally: `python manage.py runserver`<br />
+
+We have a webservice API that can be used, with the correct authentication, to<br />
+interact with our website. This API is used by other groups to send authors on<br />
+our site.<br />
+
+API Documentation is available at `{base_url}/swagger`<br /><br />
+
 Test Cases
 =================
 We have test cases for API and Model testing.
+
+To run tests: `python manage.py tests`<br />
+
+These tests check if our API and models are working properly.<br />
 
 AJAX Documentation
 =================
@@ -76,11 +98,21 @@ Deploying to Heroku
 
 6. Using GitHub
    1. Fork our repository: https://github.com/distribution-social/SocialDistribution
-   2. Search for the repository 
+   2. Search for the repository
    3. Click **Connect** beside the repository you would like to connect
 
 License/Copyright
 =================
+
+MIT License
+
+Copyright (c) 2023 Ronggang Cui, Nick Wielgus, Saadman Islam Khan, Daryna Chernyavska, Justin Monteza
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 The template posts.html and static posts.css are derived from html
 examples thus parts of these files is Copyright © 2023 bootdey.com
@@ -98,7 +130,7 @@ Refrences for views.py:
         https://stackoverflow.com/questions/4411049/how-can-i-find-the-union-of-two-django-querysets
         https://stackoverflow.com/a/4412293
         Author: Jordan Reiter https://stackoverflow.com/users/255918/jordan-reiter
-        
+
         Stackoverflow Answer
         Title: How do I do an OR filter in a Django query?
         https://stackoverflow.com/questions/739776/how-do-i-do-an-or-filter-in-a-django-query
