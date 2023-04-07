@@ -22,6 +22,8 @@ from .helpers import *
 from .API.helpers import *
 from .API.serializers import *
 from django.db.models import Q
+from django.forms.models import model_to_dict
+
 
 import aiohttp
 import asyncio
@@ -275,24 +277,30 @@ def profile_posts(request,author_id):
 
 @require_http_methods(["GET"])
 def post_details(request,node,author_id,post_id):
-    # import pdb; pdb.set_trace()
-    url = urljoin(get_node_host(node),'authors',author_id,'posts',post_id)
-    headers = {
-        'Authorization': f"Basic {get_auth_token(get_node_host(node))}",
-        'Content-Type': 'application/json'
-    }
-    try:
-        res = requests.get(url, headers=headers)
-        if res.status_code != 200:
-            return HttpResponse('Post not found.')
-    except Exception as e:
-        response = JsonResponse({'error': str(e)})
-        response.status_code = 500
-        return response
-    post = json.loads(res.text)
-    post['tag'] = node
-    post['auth_token'] = get_auth_token(get_node_host(node))
-    post['uuid'] = post['id'].split("/")[-1]
+    db_post = Post.objects.get(uuid=post_id)
+    #Shared post
+    if db_post.source != db_post.origin:
+        post = model_to_dict(db_post)
+        post['tag'] = node
+        post['auth_token'] = get_auth_token(get_node_host(node))
+    else:
+        url = urljoin(get_node_host(node),'authors',author_id,'posts',post_id)
+        headers = {
+            'Authorization': f"Basic {get_auth_token(get_node_host(node))}",
+            'Content-Type': 'application/json'
+        }
+        try:
+            res = requests.get(url, headers=headers)
+            if res.status_code != 200:
+                return HttpResponse('Post not found.')
+        except Exception as e:
+            response = JsonResponse({'error': str(e)})
+            response.status_code = 500
+            return response
+        post = json.loads(res.text)
+        post['tag'] = node
+        post['auth_token'] = get_auth_token(get_node_host(node))
+        post['uuid'] = post['id'].split("/")[-1]
    
 
     jsonFollowers = []
