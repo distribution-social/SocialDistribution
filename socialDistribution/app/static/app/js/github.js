@@ -6,14 +6,17 @@ export async function fetchActivitiesJSON(username) {
 
 //gets the gtihub username
 export function getGitHubUsername(github_url){
+    let github_username;
     try {
         const url_array = github_url.split("/");
+        github_username = url_array[3];
     }
     catch(err) {
-        // console.log("Github is null");
+        github_username = null;
     }
-    const github_username = url_array[3];
-    return github_username;
+    finally {
+        return github_username;
+    }
 }
 
 function formatEvent(event){

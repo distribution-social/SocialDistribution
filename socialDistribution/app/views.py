@@ -611,8 +611,9 @@ def received_requests(request, author_id):
         if inbox:
             return redirect(reverse("inbox", kwargs={'author_id': convert_username_to_id(user.username)}))
         elif profile:
-            return redirect(reverse("profile", kwargs={'server_name': node.nickname, 'author_id': convert_username_to_id(user.username)}))
-        return redirect(reverse("requests", kwargs={'server_name': "Local", 'author_id': convert_username_to_id(user.username)}))
+            return redirect(reverse("profile", kwargs={'server_name': "Local", 'author_id': convert_username_to_id(user.username)}))
+        else:
+            return redirect(reverse("requests", kwargs={'server_name': "Local", 'author_id': convert_username_to_id(user.username)}))
 
 
 @login_required(login_url="/login")
@@ -788,6 +789,25 @@ def add_like_post(request, post_id):
             response.content = "Already liked this post."
 
     return response
+
+
+@login_required(login_url="/login")
+@require_http_methods(["GET"])
+def get_is_pending(request, author_id):
+    
+    current_author = Author.objects.get(username=request.user.username)
+    try:
+        author_to_search = Author.objects.get(id=author_id)
+    except:
+        return JsonResponse({'is_pending': False})
+    else:
+        sent_requests = current_author.sent_requests.all()
+
+        if author_to_search in sent_requests:
+            return JsonResponse({'is_pending': True})
+        else:
+            return JsonResponse({'is_pending': False})
+
 
 
 @login_required(login_url="/login")

@@ -37,11 +37,11 @@
                                 method="post">
                                 {% csrf_token %}
 
-                                <button type="submit" name="action" value="accept_{{request.username}}"
+                                <button type="submit" name="action" value="accept_{{request.username}}_profile"
                                     data-username="{{request.username}}" class="btn btn-success"><i
                                         class="bi bi-check">&nbsp;Accept</i></button>
 
-                                <button type="submit" name="action" value="decline_{{request.username}}"
+                                <button type="submit" name="action" value="decline_{{request.username}}_profile"
                                     data-username="{{request.username}}" class="btn btn-danger"><i
                                         class="bi bi-x">&nbsp;Decline</i></button>
 

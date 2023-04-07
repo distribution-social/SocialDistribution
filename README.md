@@ -1,5 +1,36 @@
 # SocialDistribution
 
+Web Service Coordination
+=================
+
+**1. CMPUT404W23T00 (Team Yoshi)<br /><br />**
+GITHUB: https://github.com/CMPUT404-Big-Yoshi-Social-Network/yoshi-connect<br />
+API: https://yoshi-connect.herokuapp.com/<br />
+AUTHORIZATION: BASIC <br />
+username: goomba-yoshi<br />
+password: 123<br /><br />
+
+**2. CMPUT404W23T01 (Team peer2pressure)<br /><br />**
+GITHUB: https://github.com/Peer2Pressure/Peer2Pressure<br />
+API: https://p2psd.herokuapp.com/<br />
+AUTHORIZATION: BASIC<br />
+username: p2padmin<br />
+password: p2padmin<br />
+
+**3. CMPUT404W23T03 (Team BiggerYoshi)<br /><br />**
+GITHUB: https://github.com/CMPUT404W23-bigger-yoshi/CMPUT404-project-socialdistribution<br />
+API: http://bigger-yoshi.herokuapp.com/api/<br />
+AUTHORIZATION: No AUTH<br /><br />
+
+Web Service API & Documentation
+=================
+
+Test Cases
+=================
+
+AJAX Documentation
+=================
+
 Instruction
 =================
 To run: `python manage.py runserver`

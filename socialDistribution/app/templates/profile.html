@@ -52,8 +52,10 @@ var token_table = JSON.parse("{{tokenTable|escapejs}}");
                                     {% if user_id != author_id %}
                                     <form class="mt-3" action="{% url 'profile' server_name='Local' author_id=author_id %}" method="post">
                                         {% csrf_token %}
+                                            
+                                         <button id="follow_unfollow_button" type="submit" name="" value="" class="btn btn-outline-primary btn-lg"></button>
 
-                                          {% if user_is_following == "False" and user_pending_following == "False" %}
+                                          <!-- {% if user_is_following == "False" and user_pending_following == "False" %}
                                             <button id="follow_unfollow_button" type="submit" name="" value=""
                                                 class="btn btn-outline-primary btn-lg"></button>
                                             {% elif user_is_following == "False" and user_pending_following == "True" %}
@@ -63,7 +65,7 @@ var token_table = JSON.parse("{{tokenTable|escapejs}}");
                                                <button id="follow_unfollow_button" type="submit" name="" value=""
                                                 class="btn btn-outline-primary btn-lg" disabled>Following</button>
 
-                                            {% endif %}
+                                            {% endif %} -->
 
                                     {% endif %}
                                 </div>
@@ -75,7 +77,7 @@ var token_table = JSON.parse("{{tokenTable|escapejs}}");
                             {% if user_id == author_id %}
                             <div class="p-2">
                                 <a type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#edit-profile-{{author.id}}">
-                                    Edit Profile
+                                  <i class="bi bi-pen"></i> Edit Profile
                                 </a>
                             </div>
                             {% endif %}

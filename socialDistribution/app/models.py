@@ -60,7 +60,8 @@ class Author(models.Model):
         super(Author, self).save(*args, **kwargs)
 
     def __str__(self):
-        return f"Name: ({self.displayName}) ID: ({self.id}) Host: ({self.host}) URL: ({self.url})"
+        return f"{self.displayName}"
+        # return f"Name: ({self.displayName}) ID: ({self.id}) Host: ({self.host}) URL: ({self.url})"
 
 class Activity(models.Model):
     POST = 'post'

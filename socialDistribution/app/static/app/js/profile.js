@@ -66,6 +66,7 @@ function getAndSetProfileCard() {
             alert("Something went wrong: " + response.status);
         }
     }).then((data) => {
+        document.title = `Profile (${data.displayName})`;
         let profileCard = document.getElementById("profile_card");
         if (data.profileImage !== null && data.profileImage !== "") {$(profileCard).find(".profile_image").attr("src", data.profileImage);}
         $(profileCard).find(".profile_github").attr("href", data.github);
@@ -74,13 +75,19 @@ function getAndSetProfileCard() {
 
         try{
             var github_username = getGitHubUsername(data.github);
-            fetchActivitiesJSON(github_username).then(activities => {
+            if (github_username) {
+                fetchActivitiesJSON(github_username).then(activities => {
                 const target = document.getElementById("github_activity_stream");
                 for (var activity of activities) {
                 let html_element = createHTMLCard(activity.id, activity.link, activity.title, activity.published, activity.updated, activity.authors);
                 target.innerHTML += html_element;
                 }
             });
+            } else {
+                const target = document.getElementById("github_activity_stream");
+                target.innerHTML += `GitHub information for <b>${data.displayName}</b> is not available`;
+            }
+    
         }
         catch {
             console.log('Issue with github.')
@@ -149,10 +156,20 @@ function getAndSetProfileCard() {
     if (author_host.includes("p2psd")) {
         authorIsFollowingUrl = new URL("authors/" + author_id + "/followers/" + user_id + "/", author_host);
     } else if (author_host.includes("bigger-yoshi")){
-        authorIsFollowingUrl = new URL("authors/" + author_id + "/followers/https://distribution.social/authors/" + user_id, author_host);
+        authorIsFollowingUrl = new URL("authors/" + author_id + "/followers/https://www.distribution.social/api/authors/" + user_id, author_host);
+        // console.log("|||||||||||||||||||||", authorIsFollowingUrl);
     } else {
-        authorIsFollowingUrl = new URL("authors/" + uuidToHex(author_id) + "/followers/" + uuidToHex(user_id), author_host);
+        authorIsFollowingUrl = new URL("authors/" + uuidToHex(author_id) + "/followers/" + user_id, author_host);
     }
+
+    const authorIsPendingURL = new URL("get-is-pending/" + author_id, `${window.location.protocol}//` + window.location.host);
+
+    fetch(authorIsPendingURL, {method: "GET", redirect: "follow", headers: local_auth_headers}).then(response => {
+        return response.json()
+    }).then(data => {
+       var is_pending = data.is_pending;
+    //    console.log(is_pending);
+  
 
     fetch(authorIsFollowingUrl, {method: "GET", redirect: "follow", headers: auth_headers}).then((response) => {
 
@@ -173,13 +190,19 @@ function getAndSetProfileCard() {
             is_following = true;
         }
         else if (data.approved != null && data.approved === true){
+            console.log(authorIsFollowingUrl);
+            console.log("Here!!!!")
             is_following = true;
         }
+        else if (data.found != null && data.found === true){
+            is_following = true;
+        }
+
         else {
             is_following = false;
         }
         if (is_following) {
-            $("#follow_unfollow_button").attr("name", "unfollow").val(author_id).text("Unfollow");
+            $("#follow_unfollow_button").attr('disabled', true).text("Following");
 
             if (author_host.includes("bigger-yoshi")){
                 fetch(authorProfileUrl, {method: "GET", redirect: "follow", headers: auth_headers}).then((response) => {
@@ -206,11 +229,15 @@ function getAndSetProfileCard() {
             })
         }
 
+        } 
+        else if (is_pending){
+            console.log("IS_PENDING---------------")
+            $("#follow_unfollow_button").attr('disabled', true).text("Pending Follow Request");
+        }
+        
+        else {
+            $("#follow_unfollow_button").text("Request to Follow");
 
-
-
-        } else {
-            $("#follow_unfollow_button").attr("name", "follow").val(author_id).text("Request to Follow");
             const element = document.getElementById("follow_unfollow_button");
             if (element) {
                 element.addEventListener("click", sendFollowRequestToInbox);
@@ -218,6 +245,7 @@ function getAndSetProfileCard() {
 
         }
     });
+  });
 
 }
 
