@@ -22,6 +22,10 @@ GITHUB: https://github.com/CMPUT404W23-bigger-yoshi/CMPUT404-project-socialdistr
 API: http://bigger-yoshi.herokuapp.com/api/<br />
 AUTHORIZATION: No AUTH<br /><br />
 
+Demo Video
+=================
+https://drive.google.com/drive/folders/1bRVYhAcmzWWbAQxHKvU-swIsFxlX3Ggw
+
 Web Service API & Documentation
 =================
 
