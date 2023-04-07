@@ -38,17 +38,16 @@ https://drive.google.com/drive/folders/1bRVYhAcmzWWbAQxHKvU-swIsFxlX3Ggw
 
 Web Service API & Documentation
 =================
-Our API Document is available on https://www.distribution.social/swagger
-
-To install dependencies: `python pip install -r requirements.txt`<br />
-
-To run locally: `python manage.py runserver`<br />
 
 We have a webservice API that can be used, with the correct authentication, to<br />
 interact with our website. This API is used by other groups to send authors on<br />
 our site.<br />
 
-API Documentation is available at `{base_url}/swagger`<br /><br />
+Our API Document is available on https://www.distribution.social/swagger
+
+To install dependencies: `python pip install -r requirements.txt`<br />
+
+To run locally: `python manage.py runserver`<br />
 
 Test Cases
 =================
