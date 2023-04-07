@@ -1,5 +1,7 @@
 # SocialDistribution
 
+
+
 Web Service Coordination
 =================
 
@@ -24,21 +26,54 @@ AUTHORIZATION: No AUTH<br /><br />
 
 Web Service API & Documentation
 =================
+Our API Document is available on https://www.distribution.social/swagger
 
 Test Cases
 =================
+We have test cases for API and Model testing.
 
 AJAX Documentation
 =================
+We used AJAX to show local and foreign profile.
+We used AJAX when liking and commenting things.
+We used AJAX for getting posts, comments, and likes.
+We used AJAX because we wanted it on the fly and request data from foreign servers which takes some time to arrive.
+
 
 Instruction
 =================
+
+Setting up a virtual environment:
+`python -m venv venv`
+
+Activate the virtual environment:
+`source venv/bin/activate`
+
+Install the requirements:
+`pip install -r requirements.txt`
+
 To run: `python manage.py runserver`
 
 To run tests: `python manage.py tests`
 
-API Documentation is available in `/swagger`
+Deploying to Heroku
+=================
+1. Create a new app on Heroku https://dashboard.heroku.com/new-app.
 
+2. Choose an **App Name** and **Region**.
+
+3. Click the **Deploy** tab
+
+4. Clone our repository https://github.com/distribution-social/SocialDistribution.git
+
+5. Using Heroku Git
+   1.  Login to Heroku `$ heroku login`
+   2.  Add the Heroku remote `heroku git:remote -a app-name`
+
+6. Using GitHub
+   1. Fork our repository: https://github.com/distribution-social/SocialDistribution
+   2. Search for the repository 
+   3. Click **Connect** beside the repository you would like to connect
 
 License/Copyright
 =================
@@ -65,3 +100,5 @@ Refrences for views.py:
         https://stackoverflow.com/questions/739776/how-do-i-do-an-or-filter-in-a-django-query
         https://stackoverflow.com/a/739799
         Author: Alex Koshelev https://stackoverflow.com/users/19772/alex-koshelev
+
+
