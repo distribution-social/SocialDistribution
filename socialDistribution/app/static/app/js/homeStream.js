@@ -21,6 +21,11 @@ $(document).ready(function() {
     }
     makeAjaxCallAsync("/home_authors","GET",null,headers,
     function (response,status){
+        if (response.authors.length == 0){
+            $('#post-stream').append(`<p style="width: 100%">You are not following anyone.</p>`);
+            spinner.style.display = 'none';
+        }
+        spinner.style.display = 'none';
         $.each(response.authors, function(index,author){
             makeAjaxCallAsync(`${author.id}/posts`,'GET',null,{Authorization: 'Basic '+author.auth_token},
             function(response,status){

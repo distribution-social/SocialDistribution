@@ -40,15 +40,13 @@ class URL():
 async def fetch_url(url:URL):
     async with aiohttp.ClientSession() as session:
         try:
-            async with session.request(url=url.url,method=url.method,headers=url.headers,params=url.params) as response:
+            async with session.request(url=url.url,method=url.method,headers=url.headers,params=url.params,timeout=3) as response:
                 try:
                     return await response.json()
                 except aiohttp.ContentTypeError:
                     # handle invalid JSON content
-                    print(f"Invalid JSON content at URL: {url.url}")
                     return None
         except Exception as e:
-            print(f'Error getting request: {url.url} - {str(e)}')
             return None
 
 async def make_requests_async(url_list,future):
@@ -90,7 +88,7 @@ def get_authors():
             try:
                 authors.extend(response['items'])
             except KeyError:
-                print(f'Skipping an authors response since it doesnt have items. {response}')
+                pass
             except:
                 pass
     for author in authors:
@@ -117,7 +115,7 @@ def get_posts(authors):
             try:
                 posts.extend(response['items'])
             except KeyError:
-                print(f'Skipping a posts response since it doesnt have items. {response}')
+                pass
             except:
                 pass
     for post in posts:
@@ -133,13 +131,11 @@ def get_like_count(post):
                 'Authorization': f"Basic {get_auth_token(post.get('author').get('url'))}",
                 'Content-Type': 'application/json'
             }
-            res = requests.get(url,headers=headers,timeout=2)
+            res = requests.get(url,headers=headers,timeout=3)
             post['likeCount'] = len(json.loads(res.text)['items'])
         except Exception as e:
-            print(f'Error getting like of post {origin}: {e}')
             post['likeCount'] = 0
     else:
-        print(f'Has local host:',post['id'])
         post['likeCount'] = 0
     return post
 
@@ -277,12 +273,18 @@ def profile_posts(request,author_id):
 
 @require_http_methods(["GET"])
 def post_details(request,node,author_id,post_id):
-    db_post = Post.objects.get(uuid=post_id)
-    #Shared post
-    if db_post.source != db_post.origin:
-        post = model_to_dict(db_post)
-        post['tag'] = node
-        post['auth_token'] = get_auth_token(get_node_host(node))
+    host = get_node_host(node)
+    if not host or host == settings.HOST:
+
+        try:
+            db_post = Post.objects.get(uuid=post_id)
+            #Shared post
+            if db_post.source != db_post.origin:
+                post = model_to_dict(db_post)
+                post['tag'] = node
+                post['auth_token'] = get_auth_token(get_node_host(node))
+        except:
+            return HttpResponse('Post not found')
     else:
         url = urljoin(get_node_host(node),'authors',author_id,'posts',post_id)
         headers = {
@@ -301,14 +303,14 @@ def post_details(request,node,author_id,post_id):
         post['tag'] = node
         post['auth_token'] = get_auth_token(get_node_host(node))
         post['uuid'] = post['id'].split("/")[-1]
-   
+
 
     jsonFollowers = []
     try:
         current_user = Author.objects.get(username =  request.user.username)
         followers = current_user.followers.all()
 
-        
+
         for follower in followers:
             foreignNode = get_foreign_API_node(follower.host)
             # import pdb; pdb.set_trace()
