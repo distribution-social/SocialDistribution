@@ -662,7 +662,6 @@ def sent_requests(request, author_id):
 @login_required(login_url="/login")
 @require_http_methods(["GET"])
 def post_detail(request, post_id):
-
     # TODO: Check if post is on different host, if yes, then poll info from that particular hosts endpoint, and then pass that data on.
     post = Post.objects.get(uuid=post_id)
     context = {"request": request, "post": str(
