@@ -34,7 +34,7 @@ AUTHORIZATION: No AUTH<br /><br />
 
 Demo Video
 =================
-https://drive.google.com/drive/folders/1bRVYhAcmzWWbAQxHKvU-swIsFxlX3Ggw
+https://drive.google.com/file/d/1jnAPwMas3kuLM-aGLoJHvyfIPG3JrhcY/view?usp=sharing
 
 Web Service API & Documentation
 =================
